@@ -241,7 +241,7 @@ export const workspaceRouter = createTRPCRouter({
         : null;
       const updated = await ctx.db.profileLink.updateMany({
         where: { id: input.linkId, userId: ctx.session.user.id },
-        data: { passwordHash },
+        data: { passwordHash, accessVersion: { increment: 1 } },
       });
       if (!updated.count) throw new TRPCError({ code: "NOT_FOUND" });
       return { passwordProtected: Boolean(passwordHash) };

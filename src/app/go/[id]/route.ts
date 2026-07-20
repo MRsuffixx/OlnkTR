@@ -3,7 +3,6 @@ import { after, NextResponse, type NextRequest } from "next/server";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
-import { hasProAccess } from "~/server/entitlements";
 import {
   linkAccessCookieName,
   verifyLinkAccessToken,
@@ -23,10 +22,8 @@ export async function GET(
     return NextResponse.redirect(new URL("/", request.url), 302);
   }
 
-  const pro = hasProAccess(link.user.subscription);
   const now = new Date();
   const scheduledOut =
-    pro &&
     ((link.scheduledStart !== null && link.scheduledStart > now) ||
       (link.scheduledEnd !== null && link.scheduledEnd <= now));
   if (scheduledOut)
@@ -34,9 +31,9 @@ export async function GET(
       new URL(`/${link.user.username ?? ""}`, request.url),
       302,
     );
-  if (pro && link.passwordHash) {
+  if (link.passwordHash) {
     const token = request.cookies.get(linkAccessCookieName(id))?.value;
-    if (!verifyLinkAccessToken(id, token))
+    if (!verifyLinkAccessToken(id, link.accessVersion, token))
       return NextResponse.redirect(new URL(`/unlock/${id}`, request.url), 302);
   }
 

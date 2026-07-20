@@ -158,9 +158,8 @@ export default async function PublicProfilePage({
   const now = new Date();
   const links = profile.links.filter(
     (link) =>
-      !pro ||
-      ((!link.scheduledStart || link.scheduledStart <= now) &&
-        (!link.scheduledEnd || link.scheduledEnd > now)),
+      (!link.scheduledStart || link.scheduledStart <= now) &&
+      (!link.scheduledEnd || link.scheduledEnd > now),
   );
   const requestHeaders = await headers();
   const ip =
@@ -341,7 +340,7 @@ export default async function PublicProfilePage({
                   .parse(link.customization)
               : linkCustomizationSchema.parse({});
             const embed =
-              pro && link.embedType !== "LINK"
+              pro && !link.passwordHash && link.embedType !== "LINK"
                 ? embedUrl(link.embedType, link.url)
                 : null;
             return (
@@ -366,11 +365,9 @@ export default async function PublicProfilePage({
                 )}
                 <a
                   href={
-                    pro && link.passwordHash
-                      ? `/unlock/${link.id}`
-                      : `/go/${link.id}`
+                    link.passwordHash ? `/unlock/${link.id}` : `/go/${link.id}`
                   }
-                  target={pro && link.passwordHash ? undefined : "_blank"}
+                  target={link.passwordHash ? undefined : "_blank"}
                   rel="noopener noreferrer"
                   className="group flex w-full items-center gap-3 px-4 text-left font-black transition duration-200"
                   style={linkStyle(appearance, custom)}
@@ -389,7 +386,7 @@ export default async function PublicProfilePage({
                     </span>
                   )}
                   <span className="flex-1">{link.title}</span>
-                  {pro && link.passwordHash ? (
+                  {link.passwordHash ? (
                     <LockKeyhole className="size-4" />
                   ) : (
                     <ArrowUpRight className="size-4 shrink-0 transition-transform group-hover:rotate-12" />
