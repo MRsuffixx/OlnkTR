@@ -118,3 +118,45 @@ SET
 ALTER TABLE "UploadedAsset" ALTER COLUMN "purpose" SET NOT NULL;
 CREATE INDEX "UploadedAsset_status_nextDeletionAt_idx"
 ON "UploadedAsset"("status", "nextDeletionAt");
+
+ALTER TABLE "CustomDomain"
+ADD COLUMN "claimExpiresAt" TIMESTAMP(3),
+ADD COLUMN "nextRevalidationAt" TIMESTAMP(3),
+ADD COLUMN "failureCount" INTEGER NOT NULL DEFAULT 0;
+
+UPDATE "CustomDomain"
+SET
+  "claimExpiresAt" = CASE
+    WHEN "status" = 'VERIFIED' THEN CURRENT_TIMESTAMP + INTERVAL '100 years'
+    ELSE "createdAt" + INTERVAL '24 hours'
+  END,
+  "nextRevalidationAt" = CASE
+    WHEN "status" = 'VERIFIED' THEN CURRENT_TIMESTAMP
+    ELSE NULL
+  END;
+
+ALTER TABLE "CustomDomain" ALTER COLUMN "claimExpiresAt" SET NOT NULL;
+CREATE INDEX "CustomDomain_status_claimExpiresAt_idx"
+ON "CustomDomain"("status", "claimExpiresAt");
+CREATE INDEX "CustomDomain_status_nextRevalidationAt_idx"
+ON "CustomDomain"("status", "nextRevalidationAt");
+
+CREATE TABLE "DomainReclaimChallenge" (
+  "id" TEXT NOT NULL,
+  "userId" TEXT NOT NULL,
+  "domainNormalized" VARCHAR(253) NOT NULL,
+  "verificationToken" VARCHAR(64) NOT NULL,
+  "expiresAt" TIMESTAMP(3) NOT NULL,
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL,
+  CONSTRAINT "DomainReclaimChallenge_pkey" PRIMARY KEY ("id")
+);
+CREATE UNIQUE INDEX "DomainReclaimChallenge_verificationToken_key"
+ON "DomainReclaimChallenge"("verificationToken");
+CREATE UNIQUE INDEX "DomainReclaimChallenge_userId_domainNormalized_key"
+ON "DomainReclaimChallenge"("userId", "domainNormalized");
+CREATE INDEX "DomainReclaimChallenge_expiresAt_idx"
+ON "DomainReclaimChallenge"("expiresAt");
+ALTER TABLE "DomainReclaimChallenge"
+ADD CONSTRAINT "DomainReclaimChallenge_userId_fkey"
+FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

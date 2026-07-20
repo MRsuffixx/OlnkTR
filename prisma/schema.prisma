@@ -145,6 +145,7 @@ model User {
   billingInvoices BillingInvoice[]
   profileViews   ProfileViewEvent[]
   customDomains  CustomDomain[]
+  domainReclaimChallenges DomainReclaimChallenge[]
   assets         UploadedAsset[]
 
   @@index([usernameNormalized])
@@ -356,12 +357,32 @@ model CustomDomain {
   status             DomainStatus @default(PENDING)
   verifiedAt         DateTime?
   lastCheckedAt      DateTime?
+  claimExpiresAt     DateTime
+  nextRevalidationAt DateTime?
+  failureCount       Int          @default(0)
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, status])
+  @@index([status, claimExpiresAt])
+  @@index([status, nextRevalidationAt])
+}
+
+model DomainReclaimChallenge {
+  id               String   @id @default(cuid())
+  userId           String
+  domainNormalized String   @db.VarChar(253)
+  verificationToken String  @unique @db.VarChar(64)
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, domainNormalized])
+  @@index([expiresAt])
 }
 
 model UploadedAsset {
