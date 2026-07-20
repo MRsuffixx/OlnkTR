@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { hasProAccess } from "~/server/entitlements";
+import { canUseFeature, hasProAccess } from "~/server/entitlements";
 
 export const analyticsRouter = createTRPCRouter({
   overview: protectedProcedure
@@ -46,7 +46,7 @@ export const analyticsRouter = createTRPCRouter({
 
       const periodClicks = dailyCounts.reduce((sum, day) => sum + day.clicks, 0);
       let advanced: null | { views: number; uniqueVisitors: number; countries: Array<{ label: string; count: number }>; devices: Array<{ label: string; count: number }>; sources: Array<{ label: string; count: number }> } = null;
-      if (pro) {
+      if (canUseFeature(pro, "analytics.profileViews")) {
         const [views, visitors, countries, devices, referrers] = await Promise.all([
           ctx.db.profileViewEvent.count({ where: { userId: ctx.session.user.id, createdAt: { gte: since } } }),
           ctx.db.profileViewEvent.findMany({ where: { userId: ctx.session.user.id, createdAt: { gte: since }, visitorHash: { not: null } }, distinct: ["visitorHash"], select: { visitorHash: true } }),

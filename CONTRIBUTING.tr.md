@@ -128,6 +128,10 @@ Etkilenen akışı dar mobil yerleşimler ve ilgili hata durumlarıyla birlikte 
 
 Etkin olmayan, kapsam dışı, güvenli olmayan veya yerini başka çalışma almış bir çekme isteği kapatılabilir. Bakımcılar kararın nedenini açıklamaya çalışacaktır.
 
+## Katkıların lisanslanması
+
+Bir katkı göndererek bu katkıyı sağlama hakkınız bulunduğunu doğrular ve gelir amaçlı kullanımda atıf koşulu dâhil olmak üzere katkınızı projenin güncel [olnk.tr Gelir Amaçlı Kullanımda Atıf Lisansı 1.0](LICENSE.tr) kapsamında lisanslamayı kabul edersiniz. Katkınızın telif hakkı sizde kalır. Bakımcıların yazılı onayı olmadan uyumsuz koşullara tabi çalışmalar göndermeyin veya ayrı koşullar eklemeyin.
+
 ## Hata bildirme
 
 Yararlı bir hata bildirimi şunları içerir:

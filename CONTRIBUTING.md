@@ -128,6 +128,10 @@ Also exercise the affected flow manually, including narrow mobile layouts and re
 
 A pull request may be closed when it is inactive, out of scope, unsafe, or superseded. Maintainers will aim to explain the decision.
 
+## Contribution licensing
+
+By submitting a contribution, you confirm that you have the right to provide it and agree to license it under the project's current [olnk.tr Monetized Attribution License 1.0](LICENSE), including its monetized-use attribution condition. You retain copyright in your contribution. Do not submit work governed by incompatible terms or add separate conditions without written maintainer approval.
+
 ## Reporting bugs
 
 A useful bug report includes:

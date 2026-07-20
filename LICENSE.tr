@@ -1,0 +1,84 @@
+olnk.tr Gelir Amaçlı Kullanımda Atıf Lisansı
+Sürüm 1.0, Temmuz 2026
+
+Telif hakkı (c) 2026 MRsuffixx ve olnk.tr katkıda bulunanları
+
+Bu, özel bir kaynak kodu erişilebilir lisansıdır. OSI onaylı bir açık kaynak lisansı değildir.
+
+1. Tanımlar
+
+"Yazılım", ayrı bir lisansa tabi olduğu belirtilen üçüncü taraf bileşenler hariç olmak üzere, Özgün Depo üzerinden sunulan olnk.tr yazılımını ve ilgili belgeleri ifade eder.
+
+"Özgün Depo" şu adrestir:
+https://github.com/MRsuffixx/OlnkTR
+
+"Siz", bu Lisans ile verilen izinleri kullanan gerçek veya tüzel kişiyi ifade eder.
+
+"Gelir Amaçlı Kullanım", Yazılımın veya Yazılımı temel alan bir çalışmanın doğrudan ya da dolaylı gelir veya önemli bir ticari yarar sağlayan ya da sağlaması amaçlanan biçimde kullanılması, çalıştırılması, barındırılması, dağıtılması, lisanslanması, satılması veya hizmet olarak sunulması anlamına gelir. Gelir Amaçlı Kullanım; ücretli erişim, abonelikler, satışlar, lisans ücretleri, reklamlar, sponsorluklar, ücretli uygulama veya özelleştirme hizmetleri ve gelir sağlayan barındırılmış hizmetleri bunlarla sınırlı olmaksızın kapsar.
+
+2. İzin verilmesi
+
+Bu Lisansın koşullarına tabi olmak üzere, Yazılımın bir kopyasını edinen herkese; Gelir Amaçlı Kullanım dâhil herhangi bir amaçla Yazılımı ücretsiz olarak kullanma, kopyalama, değiştirme, birleştirme, yayımlama, dağıtma, çatallama, alt lisanslama, Yazılımın kopyalarını satma ve Yazılımı temel alan hizmetler sunma izni verilir.
+
+Yaptığınız değişiklikleri özel tutabilir ve özgün eklemelerinizi farklı koşullarla lisanslayabilirsiniz. Ancak Yazılımın bu Lisans kapsamındaki bölümleri bu Lisansa tabi olmaya devam eder.
+
+3. Tüm kopya ve dağıtımlar için koşullar
+
+Yukarıdaki telif hakkı bildirimi ve bu Lisans, dağıttığınız Yazılımın tüm kopyalarına veya önemli bölümlerine eklenmelidir. Kaynak kodu dağıtımında LICENSE dosyasını ve mevcut telif hakkı bildirimlerini koruyarak bu koşulu yerine getirebilirsiniz.
+
+Alıcıların Yazılımın kaynağını ve geçerli koşullarını anlamasını engelleyecek biçimde, kaynak kodundaki veya beraberindeki belgelerdeki Özgün Depoyu ya da bu Lisansı belirten bildirimleri kaldıramaz veya değiştiremezsiniz.
+
+4. Gelir Amaçlı Kullanımda atıf
+
+Gelir Amaçlı Kullanım gerçekleştiriyorsanız Özgün Depoya açık, makul ölçüde belirgin ve kolayca erişilebilir biçimde atıfta bulunmalısınız.
+
+Atıf şunları karşılamalıdır:
+
+(a) ürünün, hizmetin veya çalışmanın olnk.tr'yi temel aldığını ya da ondan türetildiğini belirtmek;
+
+(b) özgün kaynak kodunu şu tam adresle göstermek:
+https://github.com/MRsuffixx/OlnkTR; ve
+
+(c) kullanılan ortam bağlantıları destekliyorsa bu adresi çalışan bir bağlantı hâline getirmek.
+
+Atıf; kullanıcıların veya müşterilerin makul biçimde bulabileceği Hakkında, Katkıda Bulunanlar, Yasal, Belgeler ya da uygulama alt bilgisi sayfası gibi en az bir kalıcı yerde bulunmalıdır. Komut satırı araçları, kitaplıklar, yalnızca sunucuda çalışan yazılımlar veya kullanıcı arayüzü olmayan dağıtımlarda atıf, temel belgelerde ya da müşterilere veya kullanıcılara sunulan diğer materyallerde yer almalıdır.
+
+İfade çevrilebilir veya çevresindeki dile uyarlanabilir; ancak olnk.tr ile olan ilişkiyi doğru biçimde aktarmalı ve telif hakkı sahiplerinin onay verdiği izlenimini oluşturmamalıdır.
+
+Yazılımın atfın makul biçimde sunulabileceği hiçbir kullanıcısı, müşterisi, arayüzü, belgesi veya dağıtılmış materyali bulunmadığı durumlar dışında, yalnızca kaynak kodundaki atıf Gelir Amaçlı Kullanım için bu bölümün koşullarını karşılamaz.
+
+5. Gelir paylaşımı veya kaynak kodunu açıklama zorunluluğunun bulunmaması
+
+Bu Lisans; gelir, kâr, ücret, öz sermaye, bağış veya başka herhangi bir mali yararı telif hakkı sahipleriyle ya da katkıda bulunanlarla paylaşmanızı gerektirmez.
+
+Bu Lisans, değişikliklerinizin veya özgün eklemelerinizin kaynak kodunu yayımlamanızı, açıklamanızı ya da dağıtmanızı gerektirmez. Gelir Amaçlı Kullanımın doğurduğu tek ek koşul, 4. Bölümde belirtilen atıftır.
+
+6. Yeniden dağıtım ve sonraki alıcılar
+
+Yazılımın değiştirilmiş veya değiştirilmemiş kopyalarını dağıtabilir ve bunlar için dilediğiniz ücreti alabilirsiniz. Her dağıtım, Yazılımın kapsadığı bölümler için bu Lisansı korumalıdır. Sonraki bir alıcının bu bölümler bakımından Lisansla verilen izinleri kullanmasını engelleyen koşullar veya teknik önlemler uygulayamazsınız.
+
+7. Markalar ve onay
+
+Bu Lisans, zorunlu olgusal atfı sunmak için gereken kullanım dışında olnk.tr'nin veya katkıda bulunanların adlarını, logolarını, alan adlarını ya da markalarını kullanma izni vermez. Ürününüzün, hizmetinizin veya değişikliğinizin özgün proje ya da katkıda bulunanlar tarafından onaylandığını, belgelendirildiğini veya işletildiğini belirtemez ya da ima edemezsiniz.
+
+8. Sona erme ve hakların yeniden kazanılması
+
+Bu Lisansın koşullarına uymazsanız Lisans kapsamındaki haklarınız kendiliğinden sona erer. İhlali öğrendikten sonra 30 gün içinde tüm ihlalleri düzeltirseniz haklarınız, ihlalin giderildiği tarihten itibaren kendiliğinden yeniden yürürlüğe girer. Yinelenen veya kasıtlı ihlaller, telif hakkı sahiplerinin açık yazılı onayını gerektirebilir.
+
+Sona erme, Yazılımı sizden bu Lisansa uygun biçimde alan kişilerin haklarını etkilemez.
+
+9. Garanti verilmemesi
+
+YAZILIM; TİCARİ ELVERİŞLİLİK, BELİRLİ BİR AMACA UYGUNLUK, MÜLKİYET VE İHLAL ETMEME GARANTİLERİ DÂHİL ANCAK BUNLARLA SINIRLI OLMAMAK ÜZERE, AÇIK VEYA ZIMNİ HİÇBİR GARANTİ OLMAKSIZIN "OLDUĞU GİBİ" SUNULUR. TELİF HAKKI SAHİPLERİ VE KATKIDA BULUNANLAR, YAZILIMIN GÜVENLİ, HATASIZ VEYA KESİNTİSİZ KULLANILABİLİR OLACAĞINI GARANTİ ETMEZ.
+
+10. Sorumluluğun sınırlandırılması
+
+GEÇERLİ YASALARIN İZİN VERDİĞİ EN GENİŞ ÖLÇÜDE; TELİF HAKKI SAHİPLERİ VEYA KATKIDA BULUNANLAR, SÖZLEŞME, HAKSIZ FİİL YA DA BAŞKA BİR NEDENE DAYANIP DAYANMADIĞINA BAKILMAKSIZIN YAZILIMDAN, YAZILIMIN KULLANIMINDAN VEYA YAZILIMLA İLGİLİ DİĞER İŞLEMLERDEN KAYNAKLANAN HİÇBİR TALEP, ZARAR YA DA DİĞER SORUMLULUKTAN SORUMLU DEĞİLDİR.
+
+11. Bölünebilirlik
+
+Bu Lisansın herhangi bir hükmünün uygulanamaz olduğuna karar verilirse söz konusu hüküm yalnızca uygulanabilir olması için gereken en az ölçüde yeniden düzenlenir ve kalan hükümler yürürlükte kalır.
+
+12. Dil
+
+Türkçe LICENSE.tr dosyası kolaylık sağlamak amacıyla çeviri olarak sunulmuştur. İngilizce ve Türkçe metinler arasında çelişki olması durumunda İngilizce metin geçerlidir.

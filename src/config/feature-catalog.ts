@@ -16,7 +16,7 @@ export const FEATURE_CATALOG = {
   "background.mediaUrl": { label: "Görsel veya video", tier: "pro", fallback: "" },
   "background.overlayColor": { label: "Medya kaplaması", tier: "pro", fallback: "#17211B" },
   "background.overlayOpacity": { label: "Kaplama yoğunluğu", tier: "pro", fallback: 18 },
-  "background.preset": { label: "Arka plan paketi", tier: "free", fallback: "sunrise", proValues: ["aurora", "midnight", "mesh", "confetti"] },
+  "background.preset": { label: "Arka plan paketi", tier: "free", fallback: "sunrise", proValues: ["aurora", "midnight", "mesh", "confetti", "custom"] },
   "buttons.shape": { label: "Düğme şekli", tier: "free", fallback: "rounded", proValues: ["custom"] },
   "buttons.radius": { label: "Özel köşe yarıçapı", tier: "pro", fallback: 18 },
   "buttons.fill": { label: "Düğme dolgusu", tier: "free", fallback: "shadow", proValues: ["glass", "threeD"] },
@@ -65,3 +65,23 @@ export const FEATURE_GROUPS = [
   { id: "effects", label: "Etkileşim", paths: Object.keys(FEATURE_CATALOG).filter((key) => key.startsWith("effects.")) },
   { id: "advanced", label: "Gelişmiş", paths: Object.keys(FEATURE_CATALOG).filter((key) => key.startsWith("advanced.")) },
 ] as const;
+
+export const CAPABILITY_CATALOG = {
+  "links.buttonColor": { label: "Bağlantıya özel düğme rengi", tier: "pro" },
+  "links.textColor": { label: "Bağlantıya özel metin rengi", tier: "pro" },
+  "links.fontFamily": { label: "Bağlantıya özel yazı tipi", tier: "pro" },
+  "links.iconStyle": { label: "Bağlantıya özel ikon stili", tier: "pro" },
+  "links.scheduledStart": { label: "Planlı yayın başlangıcı", tier: "pro" },
+  "links.scheduledEnd": { label: "Planlı yayın bitişi", tier: "pro" },
+  "links.password": { label: "Tıklama parolası", tier: "pro" },
+  "links.embedType": { label: "YouTube ve Spotify gömmeleri", tier: "pro" },
+  "analytics.profileViews": { label: "Profil görüntülemeleri", tier: "pro" },
+  "analytics.referrers": { label: "Yönlendiren kaynaklar", tier: "pro" },
+  "analytics.geography": { label: "Coğrafi analiz", tier: "pro" },
+  "analytics.devices": { label: "Cihaz analizi", tier: "pro" },
+  "domains.custom": { label: "Özel alan adı", tier: "pro" },
+  "assets.avatarUpload": { label: "Avatar yükleme", tier: "free" },
+  "assets.backgroundUpload": { label: "Arka plan görseli veya videosu", tier: "pro" },
+} as const satisfies Record<string, { label: string; tier: ProductTier }>;
+
+export type CapabilityKey = keyof typeof CAPABILITY_CATALOG;

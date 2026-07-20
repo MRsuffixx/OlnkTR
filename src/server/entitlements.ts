@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { Subscription } from "../../generated/prisma/client";
-import { FEATURE_CATALOG, type AppearanceFeature, type AppearanceFeaturePath } from "~/config/feature-catalog";
+import { CAPABILITY_CATALOG, FEATURE_CATALOG, type AppearanceFeature, type AppearanceFeaturePath, type CapabilityKey } from "~/config/feature-catalog";
 import { DEFAULT_APPEARANCE, parseAppearance, type AppearanceSettings } from "~/lib/appearance";
 import { db } from "~/server/db";
 
@@ -16,6 +16,10 @@ export async function getUserEntitlements(userId: string) {
   const subscription = await db.subscription.findUnique({ where: { userId } });
   const pro = hasProAccess(subscription);
   return { plan: pro ? "pro" as const : "free" as const, pro, subscription };
+}
+
+export function canUseFeature(pro: boolean, feature: CapabilityKey) {
+  return CAPABILITY_CATALOG[feature].tier === "free" || pro;
 }
 
 function getAtPath(value: AppearanceSettings, path: AppearanceFeaturePath): unknown {

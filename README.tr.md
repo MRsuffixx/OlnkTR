@@ -4,6 +4,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-veritabanı-4169E1?logo=postgresql&logoColor=white)
 ![pnpm](https://img.shields.io/badge/pnpm-11-F69220?logo=pnpm&logoColor=white)
+[![Lisans](https://img.shields.io/badge/lisans-OMAL--1.0-5C4EE5)](LICENSE.tr)
 ![Katkılara açık](https://img.shields.io/badge/katkılara-açık-brightgreen.svg)
 
 Öncelikle Türkçe konuşan içerik üreticileri, profesyoneller ve küçük işletmeler için geliştirilen mobil öncelikli bir biyografi bağlantısı platformudur. Her kullanıcı, bağlantılarını yayımlayabileceği, profilini kişiselleştirebileceği, QR kodunu paylaşabileceği ve ziyaretçi etkileşimlerini inceleyebileceği `olnk.tr/[kullanici-adi]` adresine sahip olur.
@@ -143,4 +144,6 @@ Güvenlik açıklarını herkese açık bir konuda paylaşmak yerine [SECURITY.t
 
 ## Lisans
 
-Henüz bir proje lisansı seçilmemiş veya yayımlanmamıştır. Proje sahibi karar verdikten sonra lisans bilgileri eklenecektir.
+olnk.tr, özel [olnk.tr Gelir Amaçlı Kullanımda Atıf Lisansı 1.0](LICENSE.tr) kapsamında sunulur. Projeyi kullanabilir, değiştirebilir, çatallayabilir, yeniden dağıtabilir, satabilir veya barındırabilirsiniz. Gelir amaçlı kullanımda çalışmanın olnk.tr'yi temel aldığı açıkça belirtilmeli ve [özgün depoya](https://github.com/MRsuffixx/OlnkTR) bağlantı verilmelidir.
+
+Lisans, kâr paylaşımını veya değiştirilmiş kaynak kodunun açıklanmasını gerektirmez. Bu bir kaynak kodu erişilebilir lisansıdır; OSI onaylı bir açık kaynak lisansı değildir. Metinler arasında farklılık olması durumunda [İngilizce lisans](LICENSE) geçerlidir.

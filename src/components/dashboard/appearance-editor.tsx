@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { AssetUpload } from "~/components/dashboard/asset-upload";
 import { FEATURE_CATALOG, type AppearanceFeature, type AppearanceFeaturePath } from "~/config/feature-catalog";
-import type { AppearanceSettings } from "~/lib/appearance";
+import { BACKGROUND_PRESETS, type AppearanceSettings } from "~/lib/appearance";
 
 type Category = "background" | "buttons" | "typography" | "layout" | "effects" | "advanced";
 const categories: Array<{ id: Category; label: string }> = [{ id: "background", label: "Arka plan" }, { id: "buttons", label: "Düğmeler" }, { id: "typography", label: "Yazı" }, { id: "layout", label: "Düzen" }, { id: "effects", label: "Efektler" }, { id: "advanced", label: "Gelişmiş" }];
@@ -32,7 +32,14 @@ export function AppearanceEditor({ appearance, customCss, hasPro, onChange, onCs
   const [category, setCategory] = useState<Category>("background");
   function update(path: AppearanceFeaturePath, value: unknown) {
     if (!hasPro && needsPro(path, value)) return onUpgrade();
-    onChange(write(appearance, path, value));
+    if (path === "background.preset" && typeof value === "string" && value in BACKGROUND_PRESETS) {
+      const preset = BACKGROUND_PRESETS[value as keyof typeof BACKGROUND_PRESETS];
+      onChange({ ...appearance, background: { ...appearance.background, mode: preset.mode, preset: value as keyof typeof BACKGROUND_PRESETS, ...(preset.mode === "solid" && "color" in preset ? { solidColor: preset.color } : {}) } });
+      return;
+    }
+    const next = write(appearance, path, value);
+    if (path.startsWith("background.gradient.")) next.background.preset = "custom";
+    onChange(next);
   }
   const value = <T,>(path: AppearanceFeaturePath) => read(appearance, path) as T;
 

@@ -1,0 +1,84 @@
+olnk.tr Monetized Attribution License
+Version 1.0, July 2026
+
+Copyright (c) 2026 MRsuffixx and olnk.tr contributors
+
+This is a custom source-available license. It is not an OSI-approved open-source license.
+
+1. Definitions
+
+"Software" means the olnk.tr software and associated documentation made available from the Original Repository, excluding any third-party component that is identified as being governed by a separate license.
+
+"Original Repository" means:
+https://github.com/MRsuffixx/OlnkTR
+
+"You" means any individual or legal entity exercising permissions granted by this License.
+
+"Monetized Use" means using, operating, hosting, distributing, licensing, selling, or providing the Software or a work based on the Software in a way that generates, or is intended to generate, direct or indirect revenue or material commercial benefit. Monetized Use includes, without limitation, paid access, subscriptions, sales, licensing fees, advertising, sponsorships, paid implementation or customization services, and revenue-generating hosted services.
+
+2. Grant of permission
+
+Subject to the terms of this License, permission is granted, free of charge, to any person obtaining a copy of the Software to use, copy, modify, merge, publish, distribute, fork, sublicense, sell copies of, and provide services based on the Software for any purpose, including Monetized Use.
+
+You may keep Your modifications private and may license Your original additions under different terms, provided that the portions of the Software covered by this License remain subject to this License.
+
+3. Conditions for all copies and distributions
+
+The above copyright notice and this License must be included in all copies or substantial portions of the Software that You distribute. You may satisfy this requirement in a source-code distribution by retaining the LICENSE file and existing copyright notices.
+
+You may not remove or alter notices that identify the Original Repository or this License in the source code or accompanying documentation in a way that prevents recipients from understanding the origin and applicable terms of the Software.
+
+4. Monetized Use attribution
+
+If You engage in Monetized Use, You must provide clear, reasonably prominent, and readily accessible attribution to the Original Repository.
+
+The attribution must:
+
+(a) state that the product, service, or work is based on or derived from olnk.tr;
+
+(b) identify the original source code using the full address:
+https://github.com/MRsuffixx/OlnkTR; and
+
+(c) make that address a working hyperlink when the medium supports hyperlinks.
+
+The attribution must appear in at least one persistent location that users or customers can reasonably find, such as an About, Credits, Legal, Documentation, or application footer page. For command-line tools, libraries, server-only software, or distributions without a user interface, the attribution must appear in the primary documentation or other materials delivered to customers or users.
+
+The wording may be translated or adapted to the surrounding language, but it must accurately communicate the relationship to olnk.tr and must not imply endorsement by the copyright holders.
+
+Attribution in source code alone does not satisfy this section for Monetized Use unless the Software has no users, customers, interface, documentation, or distributed materials through which attribution can reasonably be provided.
+
+5. No revenue sharing or source-disclosure requirement
+
+This License does not require You to share revenue, profits, fees, equity, donations, or any other financial benefit with the copyright holders or contributors.
+
+This License does not require You to publish, disclose, or distribute the source code of Your modifications or original additions. The only additional condition triggered by Monetized Use is the attribution required by Section 4.
+
+6. Redistribution and downstream recipients
+
+You may distribute modified or unmodified copies of the Software and may charge any price for them. Any distribution must preserve this License for the portions of the Software it covers. You must not apply terms or technical measures that prevent a downstream recipient from exercising the permissions granted by this License for those portions.
+
+7. Trademarks and endorsement
+
+This License does not grant permission to use the names, logos, domain names, or trademarks of olnk.tr or its contributors except as necessary to provide the factual attribution required by this License. You may not state or imply that Your product, service, or modification is endorsed, certified, or operated by the original project or its contributors.
+
+8. Termination and reinstatement
+
+Your rights under this License terminate automatically if You fail to comply with its terms. If You correct every violation within 30 days after becoming aware of it, Your rights are automatically reinstated from the date the violation is cured. Repeated or intentional violations may require express written reinstatement from the copyright holders.
+
+Termination does not affect the rights of recipients who received the Software from You in compliance with this License.
+
+9. No warranty
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT. THE COPYRIGHT HOLDERS AND CONTRIBUTORS DO NOT WARRANT THAT THE SOFTWARE WILL BE SECURE, ERROR-FREE, OR AVAILABLE WITHOUT INTERRUPTION.
+
+10. Limitation of liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+11. Severability
+
+If any provision of this License is held unenforceable, that provision will be reformed only to the minimum extent necessary to make it enforceable, and the remaining provisions will continue in effect.
+
+12. Language
+
+The Turkish file LICENSE.tr is provided as a translation for convenience. If the English and Turkish texts conflict, this English text controls.

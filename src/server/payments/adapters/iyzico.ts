@@ -29,7 +29,7 @@ function stringValue(value: unknown) {
 
 function verifySignature(rawBody: Buffer, headers: Headers, payload: Record<string, unknown>) {
   const received = headers.get("x-iyz-signature-v3");
-  const secret = env.IYZICO_WEBHOOK_SECRET ?? env.IYZICO_SECRET_KEY;
+  const secret = env.IYZICO_SECRET_KEY;
   if (!received || !secret) return false;
   const eventType = stringValue(payload.iyziEventType) ?? stringValue(payload.eventType) ?? "";
   const data = payload.data && typeof payload.data === "object" ? payload.data as Record<string, unknown> : payload;

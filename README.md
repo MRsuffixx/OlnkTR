@@ -4,6 +4,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-database-4169E1?logo=postgresql&logoColor=white)
 ![pnpm](https://img.shields.io/badge/pnpm-11-F69220?logo=pnpm&logoColor=white)
+[![License](https://img.shields.io/badge/license-OMAL--1.0-5C4EE5)](LICENSE)
 ![Pull requests welcome](https://img.shields.io/badge/pull%20requests-welcome-brightgreen.svg)
 
 A mobile-first link-in-bio platform for creators, professionals, and small businesses, built primarily for Turkish-speaking users. Each user receives a public page at `olnk.tr/[username]` where they can publish links, personalize their profile, share a QR code, and understand audience engagement.
@@ -143,4 +144,6 @@ Security vulnerabilities must be reported privately according to [SECURITY.md](S
 
 ## License
 
-A project license has not yet been selected or published. License information will be added after the project owner makes that decision.
+olnk.tr is available under the custom [olnk.tr Monetized Attribution License 1.0](LICENSE). You may use, modify, fork, redistribute, sell, or host the project. Monetized use must clearly identify olnk.tr as the basis of the work and link to the [original repository](https://github.com/MRsuffixx/OlnkTR).
+
+The license requires neither profit sharing nor disclosure of modified source code. It is a source-available license, not an OSI-approved open-source license. A [Turkish translation](LICENSE.tr) is provided for convenience; the English license controls if the texts differ.

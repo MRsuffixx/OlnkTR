@@ -4,7 +4,7 @@ import type { Prisma } from "../../../../generated/prisma/client";
 import { linkCustomizationSchema, setLinkPasswordInput, workspaceInput } from "~/lib/schemas";
 import { DEFAULT_THEME, faviconForUrl } from "~/lib/theme";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { hasProAccess, mergePermittedAppearance, resolveAppearanceForPlan } from "~/server/entitlements";
+import { canUseFeature, hasProAccess, mergePermittedAppearance, resolveAppearanceForPlan } from "~/server/entitlements";
 import { sanitizeCustomCss } from "~/server/security/custom-css";
 import { hashLinkPassword } from "~/server/security/link-password";
 
@@ -83,6 +83,7 @@ export const workspaceRouter = createTRPCRouter({
     if (!current) throw new TRPCError({ code: "NOT_FOUND" });
     const pro = hasProAccess(current.subscription);
     const appearance = mergePermittedAppearance(input.appearance, current.theme?.settings, pro);
+    const advancedLinksAllowed = canUseFeature(pro, "links.scheduledStart");
     let customCss = current.theme?.customCss ?? "";
     if (pro) {
       try {
@@ -94,7 +95,7 @@ export const workspaceRouter = createTRPCRouter({
     const storedLinks = new Map(current.links.map((link) => [link.id, link]));
 
     for (const link of input.links) {
-      if (pro && !validEmbedUrl(link.embedType, link.url)) {
+      if (canUseFeature(pro, "links.embedType") && !validEmbedUrl(link.embedType, link.url)) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "Gömme türü ile bağlantı adresi eşleşmiyor." });
       }
     }
@@ -115,7 +116,7 @@ export const workspaceRouter = createTRPCRouter({
 
         await Promise.all(input.links.map((link, position) => {
           const stored = storedLinks.get(link.id);
-          const advanced = pro ? {
+          const advanced = advancedLinksAllowed ? {
             customization: link.customization as Prisma.InputJsonValue,
             scheduledStart: dateOrNull(link.scheduledStart),
             scheduledEnd: dateOrNull(link.scheduledEnd),
@@ -142,7 +143,7 @@ export const workspaceRouter = createTRPCRouter({
 
   setLinkPassword: protectedProcedure.input(setLinkPasswordInput).mutation(async ({ ctx, input }) => {
     const subscription = await ctx.db.subscription.findUnique({ where: { userId: ctx.session.user.id } });
-    if (!hasProAccess(subscription)) throw new TRPCError({ code: "FORBIDDEN", message: "Bu özellik Pro planında kullanılabilir." });
+    if (!canUseFeature(hasProAccess(subscription), "links.password")) throw new TRPCError({ code: "FORBIDDEN", message: "Bu özellik Pro planında kullanılabilir." });
     const passwordHash = input.password ? await hashLinkPassword(input.password) : null;
     const updated = await ctx.db.profileLink.updateMany({ where: { id: input.linkId, userId: ctx.session.user.id }, data: { passwordHash } });
     if (!updated.count) throw new TRPCError({ code: "NOT_FOUND" });
