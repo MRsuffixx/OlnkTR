@@ -290,7 +290,7 @@ export function BillingSettings({
           </span>
           <h2 className="mt-5 text-3xl font-black">Temel ve güçlü.</h2>
           <p className="text-ink/55 mt-2">
-            Sınırsız bağlantı, temel temalar, QR kod ve tıklama analitiği.
+            50 bağlantı, temel temalar, QR kod ve tıklama analitiği.
           </p>
           <div className="mt-8 inline-flex items-center gap-2 font-black">
             <Check className="text-mint size-5" /> Şu anki planın

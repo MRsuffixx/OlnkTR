@@ -39,7 +39,7 @@ import { useEffect, useRef, useState } from "react";
 import { AppearanceEditor } from "~/components/dashboard/appearance-editor";
 import { AssetUpload } from "~/components/dashboard/asset-upload";
 import { ProfilePreview } from "~/components/dashboard/profile-preview";
-import type { WorkspaceInput } from "~/lib/schemas";
+import { workspaceInput, type WorkspaceInput } from "~/lib/schemas";
 import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
 
@@ -66,7 +66,10 @@ const NEW_LINK: Omit<DraftLink, "id"> = {
 };
 
 function localDate(value: string | null) {
-  return value ? new Date(value).toISOString().slice(0, 16) : "";
+  if (!value) return "";
+  const date = new Date(value);
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return local.toISOString().slice(0, 16);
 }
 function isoDate(value: string) {
   return value ? new Date(value).toISOString() : null;
@@ -371,12 +374,14 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
   const [status, setStatus] = useState<SaveStatus>("saved");
-  const [retryTick, setRetryTick] = useState(0);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [upgrade, setUpgrade] = useState(false);
   const draftRef = useRef(draft);
   const revisionRef = useRef(initial.revision);
   const savedHashRef = useRef(JSON.stringify(draft));
   const inFlightRef = useRef(false);
+  const statusRef = useRef<SaveStatus>("saved");
+  const drainRef = useRef<() => Promise<void>>(async () => undefined);
   const saveMutation = api.workspace.save.useMutation();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -388,42 +393,95 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
     }),
   );
   draftRef.current = draft;
+  statusRef.current = status;
+
+  drainRef.current = async () => {
+    if (inFlightRef.current || statusRef.current === "conflict") return;
+    inFlightRef.current = true;
+    try {
+      while (true) {
+        const payload = draftRef.current;
+        const payloadHash = JSON.stringify(payload);
+        if (payloadHash === savedHashRef.current) {
+          setStatus("saved");
+          setSaveError(null);
+          return;
+        }
+        const validated = workspaceInput.safeParse({
+          ...payload,
+          revision: revisionRef.current,
+        });
+        if (!validated.success) {
+          setStatus("error");
+          setSaveError(
+            validated.error.issues[0]?.message ??
+              "Kaydetmeden önce işaretli alanları düzeltin.",
+          );
+          return;
+        }
+
+        setStatus("saving");
+        setSaveError(null);
+        try {
+          const result = await saveMutation.mutateAsync(validated.data);
+          revisionRef.current = result.revision;
+          savedHashRef.current = payloadHash;
+        } catch (reason) {
+          const error = reason as {
+            message?: string;
+            data?: { code?: string };
+          };
+          if (error.data?.code === "CONFLICT") {
+            setStatus("conflict");
+            setSaveError(
+              "Profil başka bir sekmede değiştirildi. Sayfayı yenileyin.",
+            );
+          } else {
+            setStatus("error");
+            setSaveError(
+              error.message ??
+                "Ağ hatası nedeniyle kaydedilemedi. Yeniden deneyin.",
+            );
+          }
+          return;
+        }
+        if (JSON.stringify(draftRef.current) === payloadHash) {
+          setStatus("saved");
+          return;
+        }
+        setStatus("waiting");
+      }
+    } finally {
+      inFlightRef.current = false;
+    }
+  };
 
   useEffect(() => {
     const hash = JSON.stringify(draft);
-    if (
-      hash === savedHashRef.current ||
-      status === "conflict" ||
-      status === "error"
-    )
-      return;
+    if (hash === savedHashRef.current || statusRef.current === "conflict") return;
     setStatus("waiting");
+    setSaveError(null);
     const timer = window.setTimeout(() => {
-      if (inFlightRef.current) return;
-      const payload = draftRef.current;
-      const payloadHash = JSON.stringify(payload);
-      inFlightRef.current = true;
-      setStatus("saving");
-      void saveMutation
-        .mutateAsync({ ...payload, revision: revisionRef.current })
-        .then((result) => {
-          revisionRef.current = result.revision;
-          savedHashRef.current = payloadHash;
-          setStatus(
-            JSON.stringify(draftRef.current) === payloadHash
-              ? "saved"
-              : "waiting",
-          );
-        })
-        .catch((reason: { data?: { code?: string } }) =>
-          setStatus(reason.data?.code === "CONFLICT" ? "conflict" : "error"),
-        )
-        .finally(() => {
-          inFlightRef.current = false;
-        });
+      void drainRef.current();
     }, 700);
     return () => window.clearTimeout(timer);
-  }, [draft, retryTick, saveMutation, status]);
+  }, [draft]);
+
+  useEffect(() => {
+    const flushWhenHidden = () => {
+      if (document.visibilityState === "hidden") void drainRef.current();
+    };
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (JSON.stringify(draftRef.current) === savedHashRef.current) return;
+      event.preventDefault();
+    };
+    document.addEventListener("visibilitychange", flushWhenHidden);
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => {
+      document.removeEventListener("visibilitychange", flushWhenHidden);
+      window.removeEventListener("beforeunload", warnBeforeUnload);
+    };
+  }, []);
 
   function updateLink(id: string, patch: Partial<DraftLink>) {
     setDraft((current) => ({
@@ -434,6 +492,11 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
     }));
   }
   function addLink() {
+    if (draftRef.current.links.length >= 50) {
+      setStatus("error");
+      setSaveError("Bir profilde en fazla 50 bağlantı bulunabilir.");
+      return;
+    }
     const id = crypto.randomUUID();
     setDraft((current) => ({
       ...current,
@@ -467,9 +530,9 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
     }));
   }
   function retry() {
-    if (status !== "error") return;
+    if (status !== "error" && status !== "waiting") return;
     setStatus("waiting");
-    setRetryTick((value) => value + 1);
+    void drainRef.current();
   }
   const label =
     status === "saved"
@@ -540,6 +603,11 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                 korumak için sayfayı yenileyip tekrar uygula.
               </div>
             )}
+            {status === "error" && saveError && (
+              <div className="mb-5 rounded-2xl border border-red-300 bg-red-50 p-4 text-sm font-semibold text-red-800">
+                {saveError}
+              </div>
+            )}
             <section className="border-ink/10 rounded-3xl border bg-[#F8F7F1] p-4 sm:p-5">
               <h2 className="text-sm font-black">Profil bilgileri</h2>
               <div className="mt-4 space-y-4">
@@ -578,7 +646,9 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                 <AssetUpload
                   purpose="avatar"
                   accept="image/jpeg,image/png,image/webp,image/gif"
-                  onUploaded={(image) => setDraft({ ...draft, image })}
+                  onUploaded={(image) =>
+                    setDraft((current) => ({ ...current, image }))
+                  }
                 />
               </div>
             </section>
@@ -593,7 +663,8 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                 <button
                   type="button"
                   onClick={addLink}
-                  className="bg-orange inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-black text-white shadow-[3px_3px_0_#17211b]"
+                  disabled={draft.links.length >= 50}
+                  className="bg-orange inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-black text-white shadow-[3px_3px_0_#17211b] disabled:opacity-40"
                 >
                   <Plus className="size-4" /> Ekle
                 </button>
@@ -650,8 +721,24 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
               appearance={draft.appearance}
               customCss={draft.customCss}
               hasPro={initial.hasPro}
-              onChange={(appearance) => setDraft({ ...draft, appearance })}
-              onCssChange={(customCss) => setDraft({ ...draft, customCss })}
+              onChange={(appearance) =>
+                setDraft((current) => ({ ...current, appearance }))
+              }
+              onMediaUploaded={(mediaUrl) =>
+                setDraft((current) => ({
+                  ...current,
+                  appearance: {
+                    ...current.appearance,
+                    background: {
+                      ...current.appearance.background,
+                      mediaUrl,
+                    },
+                  },
+                }))
+              }
+              onCssChange={(customCss) =>
+                setDraft((current) => ({ ...current, customCss }))
+              }
               onUpgrade={() => setUpgrade(true)}
             />
           </div>

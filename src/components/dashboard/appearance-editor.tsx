@@ -62,6 +62,7 @@ export function AppearanceEditor({
   customCss,
   hasPro,
   onChange,
+  onMediaUploaded,
   onCssChange,
   onUpgrade,
 }: {
@@ -69,6 +70,7 @@ export function AppearanceEditor({
   customCss: string;
   hasPro: boolean;
   onChange: (appearance: AppearanceSettings) => void;
+  onMediaUploaded: (url: string) => void;
   onCssChange: (value: string) => void;
   onUpgrade: () => void;
 }) {
@@ -228,7 +230,7 @@ export function AppearanceEditor({
                       : "image/jpeg,image/png,image/webp,image/gif"
                   }
                   disabled={!hasPro}
-                  onUploaded={(url) => update("background.mediaUrl", url)}
+                  onUploaded={onMediaUploaded}
                 />
               </>
             )}
