@@ -1,0 +1,23 @@
+import { redirect } from "next/navigation";
+
+import { Brand } from "~/components/brand";
+import { DashboardNav } from "~/components/dashboard/dashboard-nav";
+import { auth } from "~/server/auth";
+
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth();
+  if (!session) redirect("/giris");
+  if (!session.user.username) redirect("/onboarding");
+
+  return (
+    <div className="min-h-screen bg-[#F8F7F1] pb-24 md:pb-0">
+      <header className="sticky top-0 z-40 border-b border-ink/10 bg-paper/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-4 sm:px-6">
+          <Brand />
+          <DashboardNav username={session.user.username} />
+        </div>
+      </header>
+      {children}
+    </div>
+  );
+}
