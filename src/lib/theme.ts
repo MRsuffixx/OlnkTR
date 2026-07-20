@@ -14,6 +14,7 @@ export const DEFAULT_THEME: WorkspaceInput["theme"] = {
 
 export function getBackgroundStyle(theme: WorkspaceInput["theme"]) {
   if (theme.backgroundType === "IMAGE") {
+    if (!theme.backgroundValue) return { backgroundColor: "#F5F0DE" };
     return {
       backgroundColor: "#F5F0DE",
       backgroundImage: `linear-gradient(rgba(16, 25, 20, .18), rgba(16, 25, 20, .18)), url("${theme.backgroundValue.replace(/["\\]/g, "")}")`,

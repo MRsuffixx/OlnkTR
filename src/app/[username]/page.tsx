@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { ArrowUpRight, Download, QrCode } from "lucide-react";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 
 import { Brand } from "~/components/brand";
 import { ShareButton } from "~/components/profile/share-button";
@@ -12,7 +13,7 @@ import { db } from "~/server/db";
 
 type PublicTheme = WorkspaceInput["theme"];
 
-async function getProfile(username: string) {
+const getProfile = cache(async (username: string) => {
   return db.user.findUnique({
     where: { usernameNormalized: normalizeUsername(username) },
     include: {
@@ -20,7 +21,7 @@ async function getProfile(username: string) {
       links: { where: { enabled: true, url: { not: "" } }, orderBy: { position: "asc" } },
     },
   });
-}
+});
 
 function toTheme(profile: NonNullable<Awaited<ReturnType<typeof getProfile>>>): PublicTheme {
   return profile.theme

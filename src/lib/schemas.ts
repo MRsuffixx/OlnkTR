@@ -21,7 +21,7 @@ export const usernameInput = z.object({
 
 export const themeInput = z.object({
   backgroundType: z.enum(["SOLID", "GRADIENT", "IMAGE"]),
-  backgroundValue: z.string().trim().min(1).max(2048),
+  backgroundValue: z.string().trim().max(2048),
   buttonStyle: z.enum(["SOLID", "OUTLINE", "GLASS", "SHADOW"]),
   buttonShape: z.enum(["ROUNDED", "PILL", "SQUARE"]),
   buttonColor: hexColor,
@@ -29,6 +29,16 @@ export const themeInput = z.object({
   accentColor: hexColor,
   fontFamily: z.enum(["MODERN", "FRIENDLY", "EDITORIAL", "MONO"]),
   showBranding: z.boolean(),
+}).superRefine((theme, context) => {
+  if (theme.backgroundType === "SOLID" && !hexColor.safeParse(theme.backgroundValue).success) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["backgroundValue"], message: "Geçerli bir arka plan rengi seçin." });
+  }
+  if (theme.backgroundType === "IMAGE" && theme.backgroundValue && !optionalWebUrl.safeParse(theme.backgroundValue).success) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["backgroundValue"], message: "Geçerli bir görsel adresi girin." });
+  }
+  if (theme.backgroundType === "GRADIENT" && !/^linear-gradient\([#a-zA-Z0-9,.%()\s-]+\)$/.test(theme.backgroundValue)) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["backgroundValue"], message: "Geçerli bir renk geçişi seçin." });
+  }
 });
 
 export const workspaceLinkInput = z.object({

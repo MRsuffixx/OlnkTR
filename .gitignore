@@ -25,9 +25,8 @@ vite.config.ts.timestamp-*
 /cache/
 .parcel-cache/
 
-# Gatsby (Eğer statik public klasörünüz yoksa)
+# Gatsby
 /.cache/
-/public/
 
 # VuePress / VitePress
 /.vuepress/dist/

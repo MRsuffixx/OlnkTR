@@ -10,7 +10,7 @@ export const analyticsRouter = createTRPCRouter({
       since.setUTCHours(0, 0, 0, 0);
       since.setUTCDate(since.getUTCDate() - input.days + 1);
 
-      const [links, events] = await Promise.all([
+      const [links, dailyCounts] = await Promise.all([
         ctx.db.profileLink.findMany({
           where: { userId: ctx.session.user.id },
           orderBy: { position: "asc" },
@@ -21,12 +21,13 @@ export const analyticsRouter = createTRPCRouter({
             _count: { select: { clicks: true } },
           },
         }),
-        ctx.db.clickEvent.findMany({
-          where: { userId: ctx.session.user.id, createdAt: { gte: since } },
-          orderBy: { createdAt: "asc" },
-          select: { createdAt: true, linkId: true },
-          take: 50_000,
-        }),
+        ctx.db.$queryRaw<Array<{ date: Date; clicks: number }>>`
+          SELECT DATE_TRUNC('day', "createdAt") AS "date", COUNT(*)::int AS "clicks"
+          FROM "ClickEvent"
+          WHERE "userId" = ${ctx.session.user.id} AND "createdAt" >= ${since}
+          GROUP BY DATE_TRUNC('day', "createdAt")
+          ORDER BY "date" ASC
+        `,
       ]);
 
       const byDay = new Map<string, number>();
@@ -35,16 +36,16 @@ export const analyticsRouter = createTRPCRouter({
         date.setUTCDate(since.getUTCDate() + offset);
         byDay.set(date.toISOString().slice(0, 10), 0);
       }
-      for (const event of events) {
-        const key = event.createdAt.toISOString().slice(0, 10);
-        byDay.set(key, (byDay.get(key) ?? 0) + 1);
+      for (const day of dailyCounts) {
+        const key = day.date.toISOString().slice(0, 10);
+        byDay.set(key, day.clicks);
       }
 
-      const uniqueActiveDays = [...byDay.values()].filter((count) => count > 0).length;
+      const periodClicks = dailyCounts.reduce((sum, day) => sum + day.clicks, 0);
       return {
         totalClicks: links.reduce((sum, link) => sum + link._count.clicks, 0),
-        periodClicks: events.length,
-        activeDays: uniqueActiveDays,
+        periodClicks,
+        activeDays: dailyCounts.length,
         series: [...byDay].map(([date, clicks]) => ({ date, clicks })),
         links: links.map((link) => ({
           id: link.id,
