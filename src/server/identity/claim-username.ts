@@ -72,8 +72,7 @@ export async function claimUsername(input: {
               : {}),
           },
         });
-        if (intentId)
-          await tx.authIntent.delete({ where: { id: intentId } });
+        if (intentId) await tx.authIntent.delete({ where: { id: intentId } });
         return { username: validation.username };
       },
       { isolationLevel: "Serializable" },

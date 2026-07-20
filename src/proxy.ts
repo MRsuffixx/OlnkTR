@@ -42,11 +42,7 @@ export async function proxy(request: NextRequest) {
   });
   if (!domain) return controlledResponse(404);
   const entitled = hasProAccess(domain.user.subscription);
-  if (
-    domain.status !== "VERIFIED" ||
-    !domain.user.username ||
-    !entitled
-  )
+  if (domain.status !== "VERIFIED" || !domain.user.username || !entitled)
     return controlledResponse(410);
   if (request.nextUrl.pathname !== "/") return controlledResponse(404);
 

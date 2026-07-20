@@ -23,8 +23,8 @@ export async function GET(
 
   const now = new Date();
   const scheduledOut =
-    ((link.scheduledStart !== null && link.scheduledStart > now) ||
-      (link.scheduledEnd !== null && link.scheduledEnd <= now));
+    (link.scheduledStart !== null && link.scheduledStart > now) ||
+    (link.scheduledEnd !== null && link.scheduledEnd <= now);
   if (scheduledOut)
     return NextResponse.redirect(
       new URL(`/${link.user.username ?? ""}`, request.url),

@@ -5,9 +5,9 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
 
-# Never mutate node_modules as a side effect of `pnpm start` or another script.
-# Developers receive a warning and can run an explicit, reviewable install.
-verifyDepsBeforeRun: warn
+# Never mutate or delay `pnpm start` (or another script) with an implicit install.
+# CI uses a frozen lockfile; developers run an explicit, reviewable install.
+verifyDepsBeforeRun: false
 
 # Auth.js v5 currently declares Nodemailer 7 even though these exact releases
 # only use the createTransport/sendMail API retained by the patched v9 line.

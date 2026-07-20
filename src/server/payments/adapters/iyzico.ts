@@ -72,9 +72,7 @@ export function createIyzicoWebhookSignature(
     (stringValue(data.subscriptionReferenceCode) ?? "") +
     (stringValue(data.orderReferenceCode) ?? "") +
     (stringValue(data.customerReferenceCode) ?? "");
-  return createHmac("sha256", secret)
-    .update(concatenated)
-    .digest("hex");
+  return createHmac("sha256", secret).update(concatenated).digest("hex");
 }
 
 function verifySignature(headers: Headers, payload: Record<string, unknown>) {

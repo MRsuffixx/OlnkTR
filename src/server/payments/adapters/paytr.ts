@@ -67,10 +67,7 @@ export function createPaytrCallbackHash(input: {
   merchantKey: string;
 }) {
   return hmacBase64(
-    input.merchantOid +
-      input.merchantSalt +
-      input.status +
-      input.totalAmount,
+    input.merchantOid + input.merchantSalt + input.status + input.totalAmount,
     input.merchantKey,
   );
 }

@@ -48,12 +48,12 @@ describe("shared profile rendering", () => {
         "SPOTIFY",
         "https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC",
       ),
-    ).toBe(
-      "https://open.spotify.com/embed/track/4uLU6hMCjMI75M1A2tKUQC",
-    );
-    expect(profileEmbedUrl("SPOTIFY", "https://spotify.link/abc123")).toBeNull();
+    ).toBe("https://open.spotify.com/embed/track/4uLU6hMCjMI75M1A2tKUQC");
     expect(
-      profileEmbedUrl("YOUTUBE", "https://youtu.be/dQw4w9WgXcQ"),
-    ).toBe("https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
+      profileEmbedUrl("SPOTIFY", "https://spotify.link/abc123"),
+    ).toBeNull();
+    expect(profileEmbedUrl("YOUTUBE", "https://youtu.be/dQw4w9WgXcQ")).toBe(
+      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ",
+    );
   });
 });

@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 
 for (const path of ["/", "/login", "/register"] as const) {
   test(`${path} has no serious accessibility violations`, async ({ page }) => {
-    await page.goto(path);
+    await page.goto(path, { waitUntil: "domcontentloaded" });
     await expect(page.locator("main")).toBeVisible();
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
@@ -19,7 +19,9 @@ for (const path of ["/", "/login", "/register"] as const) {
 test("private billing route redirects unauthenticated visitors", async ({
   page,
 }) => {
-  await page.goto("/dashboard/billing?checkout=return&intent=untrusted");
+  await page.goto("/dashboard/billing?checkout=return&intent=untrusted", {
+    waitUntil: "domcontentloaded",
+  });
   await expect(page).toHaveURL(/\/login$/);
 });
 

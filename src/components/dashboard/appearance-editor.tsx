@@ -729,14 +729,14 @@ function ColorField({
         </button>
       ) : (
         <label className="border-ink/15 flex h-11 w-full items-center gap-2 rounded-xl border bg-white px-2">
-        <input
-          type="color"
-          value={value}
-          onChange={(event) => onChange(path, event.target.value)}
-          className="size-8 cursor-pointer rounded-lg border-0"
-          aria-label={label}
-        />
-        <span className="text-xs font-black">{value}</span>
+          <input
+            type="color"
+            value={value}
+            onChange={(event) => onChange(path, event.target.value)}
+            className="size-8 cursor-pointer rounded-lg border-0"
+            aria-label={label}
+          />
+          <span className="text-xs font-black">{value}</span>
         </label>
       )}
     </div>

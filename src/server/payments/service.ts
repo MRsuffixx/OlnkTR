@@ -88,7 +88,10 @@ export async function processBillingEvent(
     provider_externalEventId: { provider, externalEventId: event.id },
   };
   const existing = await db.webhookEvent.findUnique({ where: eventKey });
-  if (existing?.payloadHash !== undefined && existing.payloadHash !== payloadHash)
+  if (
+    existing?.payloadHash !== undefined &&
+    existing.payloadHash !== payloadHash
+  )
     throw new Error("A webhook event ID was reused with a different payload.");
   if (existing?.status === "PROCESSED") return { replay: true };
   if (!existing) {
@@ -121,7 +124,9 @@ export async function processBillingEvent(
             })
           : null;
         if (event.intentId && !intent)
-          throw new Error("Webhook payment intent was not found for its provider.");
+          throw new Error(
+            "Webhook payment intent was not found for its provider.",
+          );
         if (intent) assertEventMatchesIntent(intent, event);
 
         let matchedSubscription = event.providerSubscriptionId
@@ -143,16 +148,22 @@ export async function processBillingEvent(
           matchedSubscription?.userId,
         ].filter((value): value is string => Boolean(value));
         if (new Set(identities).size > 1)
-          throw new Error("Webhook user identity does not match local billing data.");
+          throw new Error(
+            "Webhook user identity does not match local billing data.",
+          );
         const userId = identities[0];
         if (!userId)
-          throw new Error("Webhook could not be matched to a user or payment intent.");
+          throw new Error(
+            "Webhook could not be matched to a user or payment intent.",
+          );
 
         const current =
           matchedSubscription ??
           (await tx.subscription.findUnique({ where: { userId } }));
         const paid = PAID_EVENTS.has(event.type);
-        const switchingProvider = Boolean(current && current.provider !== provider);
+        const switchingProvider = Boolean(
+          current && current.provider !== provider,
+        );
         if (
           switchingProvider &&
           (!paid ||
@@ -166,8 +177,8 @@ export async function processBillingEvent(
 
         const isStale = Boolean(
           current?.provider === provider &&
-            current.lastProviderEventAt &&
-            event.occurredAt < current.lastProviderEventAt,
+          current.lastProviderEventAt &&
+          event.occurredAt < current.lastProviderEventAt,
         );
 
         const nextIntentStatus = intentStatusForEvent(event);
@@ -198,8 +209,11 @@ export async function processBillingEvent(
               });
           } else if (paid) {
             if (!intent && !current)
-              throw new Error("A successful initial payment requires an intent.");
-            const interval = intent?.billingInterval ?? current!.billingInterval;
+              throw new Error(
+                "A successful initial payment requires an intent.",
+              );
+            const interval =
+              intent?.billingInterval ?? current!.billingInterval;
             const canonicalAmount = switchingProvider
               ? intent!.amountMinor
               : (current?.amountMinor ?? intent!.amountMinor);

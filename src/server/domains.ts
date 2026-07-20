@@ -43,9 +43,7 @@ export async function revalidateDueDomains(limit = 50) {
             ? new Date(now.getTime() + 24 * 60 * 60 * 1000)
             : domain.claimExpiresAt,
         nextRevalidationAt:
-          failures >= 3
-            ? null
-            : new Date(now.getTime() + 24 * 60 * 60 * 1000),
+          failures >= 3 ? null : new Date(now.getTime() + 24 * 60 * 60 * 1000),
       },
     });
   }

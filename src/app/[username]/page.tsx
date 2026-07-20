@@ -10,9 +10,7 @@ import { Brand } from "~/components/brand";
 import { ProfileEffects } from "~/components/profile/profile-effects";
 import { ProfileBackgroundVideo } from "~/components/profile/profile-background-video";
 import { ShareButton } from "~/components/profile/share-button";
-import {
-  appearanceBackground,
-} from "~/lib/appearance";
+import { appearanceBackground } from "~/lib/appearance";
 import { linkCustomizationSchema } from "~/lib/schemas";
 import { getAppOrigin } from "~/lib/app-url";
 import { normalizeUsername } from "~/lib/username";
@@ -189,9 +187,7 @@ export default async function PublicProfilePage({
             style={{
               width: appearance.layout.avatarSize,
               height: appearance.layout.avatarSize,
-              borderRadius: profileAvatarRadius(
-                appearance.layout.avatarShape,
-              ),
+              borderRadius: profileAvatarRadius(appearance.layout.avatarShape),
               border: `${appearance.layout.avatarBorderWidth}px solid ${appearance.layout.avatarBorderColor}`,
               clipPath:
                 appearance.layout.avatarShape === "hexagon"
@@ -221,9 +217,7 @@ export default async function PublicProfilePage({
             className="font-black"
             style={{
               marginTop: density.profileGap,
-              fontFamily: profileFontFamily(
-                appearance.typography.headingFont,
-              ),
+              fontFamily: profileFontFamily(appearance.typography.headingFont),
               fontSize: appearance.typography.headingSize,
               letterSpacing: appearance.typography.letterSpacing,
             }}

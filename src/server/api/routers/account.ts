@@ -37,9 +37,8 @@ export const accountRouter = createTRPCRouter({
             message:
               "Profil başka bir sekmede değiştirildi. Sayfayı yenileyin.",
           });
-        const background = parseAppearance(
-          user.theme?.settings,
-        ).background.mediaUrl;
+        const background = parseAppearance(user.theme?.settings).background
+          .mediaUrl;
         const referenced = [input.image, background].filter(
           (value): value is string => Boolean(value),
         );
@@ -47,9 +46,7 @@ export const accountRouter = createTRPCRouter({
           where: {
             userId: user.id,
             status: "READY",
-            ...(referenced.length
-              ? { publicUrl: { notIn: referenced } }
-              : {}),
+            ...(referenced.length ? { publicUrl: { notIn: referenced } } : {}),
           },
           data: { status: "DELETE_PENDING", nextDeletionAt: new Date() },
         });

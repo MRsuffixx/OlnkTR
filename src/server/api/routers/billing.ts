@@ -19,7 +19,10 @@ const billingDetails = z.object({
   address: z.string().trim().min(8).max(240),
   city: z.string().trim().min(2).max(60),
   district: z.string().trim().min(2).max(60),
-  zipCode: z.string().trim().regex(/^\d{5}$/),
+  zipCode: z
+    .string()
+    .trim()
+    .regex(/^\d{5}$/),
 });
 
 const checkoutInput = z.object({
@@ -100,7 +103,10 @@ export const billingRouter = createTRPCRouter({
         }),
       ]);
       if (!intent)
-        throw new TRPCError({ code: "NOT_FOUND", message: "Ödeme bulunamadı." });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Ödeme bulunamadı.",
+        });
       return {
         intent,
         hasPro: hasProAccess(subscription),
@@ -207,8 +213,12 @@ export const billingRouter = createTRPCRouter({
         };
 
       const { user, intent } = prepared;
-      const forwarded = ctx.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-      const ipAddress = forwarded ?? ctx.headers.get("x-real-ip") ?? "127.0.0.1";
+      const forwarded = ctx.headers
+        .get("x-forwarded-for")
+        ?.split(",")[0]
+        ?.trim();
+      const ipAddress =
+        forwarded ?? ctx.headers.get("x-real-ip") ?? "127.0.0.1";
       let presentation;
       try {
         presentation = await adapter.createCheckoutSession({

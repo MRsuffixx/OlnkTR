@@ -15,31 +15,33 @@ export const analyticsRouter = createTRPCRouter({
       since.setUTCHours(0, 0, 0, 0);
       since.setUTCDate(since.getUTCDate() - input.days + 1);
 
-      const [links, dailyCounts, clickTotals, subscription] = await Promise.all([
-        ctx.db.profileLink.findMany({
-          where: { userId: ctx.session.user.id, deletedAt: null },
-          orderBy: { position: "asc" },
-          select: { id: true, title: true, enabled: true },
-        }),
-        ctx.db.analyticsDailyBucket.groupBy({
-          by: ["date"],
-          where: {
-            userId: ctx.session.user.id,
-            eventType: "CLICK",
-            date: { gte: since },
-          },
-          _sum: { count: true },
-          orderBy: { date: "asc" },
-        }),
-        ctx.db.analyticsDailyBucket.groupBy({
-          by: ["targetKey"],
-          where: { userId: ctx.session.user.id, eventType: "CLICK" },
-          _sum: { count: true },
-        }),
-        ctx.db.subscription.findUnique({
-          where: { userId: ctx.session.user.id },
-        }),
-      ]);
+      const [links, dailyCounts, clickTotals, subscription] = await Promise.all(
+        [
+          ctx.db.profileLink.findMany({
+            where: { userId: ctx.session.user.id, deletedAt: null },
+            orderBy: { position: "asc" },
+            select: { id: true, title: true, enabled: true },
+          }),
+          ctx.db.analyticsDailyBucket.groupBy({
+            by: ["date"],
+            where: {
+              userId: ctx.session.user.id,
+              eventType: "CLICK",
+              date: { gte: since },
+            },
+            _sum: { count: true },
+            orderBy: { date: "asc" },
+          }),
+          ctx.db.analyticsDailyBucket.groupBy({
+            by: ["targetKey"],
+            where: { userId: ctx.session.user.id, eventType: "CLICK" },
+            _sum: { count: true },
+          }),
+          ctx.db.subscription.findUnique({
+            where: { userId: ctx.session.user.id },
+          }),
+        ],
+      );
       const pro = hasProAccess(subscription);
       const totalByLink = new Map(
         clickTotals.map((row) => [row.targetKey, row._sum.count ?? 0]),

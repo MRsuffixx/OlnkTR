@@ -72,7 +72,8 @@ async function adyenPost(
     throw new AdyenApiError(
       stringValue(result.message) ?? `Adyen API error (${response.status}).`,
       response.status,
-      response.status >= 500 || response.headers.get("transient-error") === "true",
+      response.status >= 500 ||
+        response.headers.get("transient-error") === "true",
     );
   return result;
 }

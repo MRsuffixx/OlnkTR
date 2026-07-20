@@ -29,7 +29,9 @@ export async function verifyLinkPassword(password: string, encoded: string) {
   try {
     const expected = Buffer.from(digest, "hex");
     const actual = (await scrypt(password, salt, expected.length)) as Buffer;
-    return actual.length === expected.length && timingSafeEqual(actual, expected);
+    return (
+      actual.length === expected.length && timingSafeEqual(actual, expected)
+    );
   } finally {
     activeVerifications -= 1;
   }

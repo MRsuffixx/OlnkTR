@@ -22,7 +22,8 @@ export function ProfileEffects({
     ).matches;
     if (!enabled) return;
     const profile = cursor.current?.closest("[data-olnk-profile]");
-    if (effects.cursor !== "default") profile?.classList.add("olnk-hide-cursor");
+    if (effects.cursor !== "default")
+      profile?.classList.add("olnk-hide-cursor");
 
     const trail =
       effects.trail === "none"

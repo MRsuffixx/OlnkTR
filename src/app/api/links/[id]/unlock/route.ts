@@ -78,7 +78,10 @@ export async function POST(
     throw error;
   }
 
-  const response = NextResponse.redirect(new URL(`/go/${id}`, request.url), 303);
+  const response = NextResponse.redirect(
+    new URL(`/go/${id}`, request.url),
+    303,
+  );
   response.cookies.set(
     linkAccessCookieName(id),
     createLinkAccessToken(id, link.accessVersion),

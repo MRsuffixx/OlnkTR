@@ -461,7 +461,8 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
 
   useEffect(() => {
     const hash = JSON.stringify(draft);
-    if (hash === savedHashRef.current || statusRef.current === "conflict") return;
+    if (hash === savedHashRef.current || statusRef.current === "conflict")
+      return;
     setStatus("waiting");
     setSaveError(null);
     const timer = window.setTimeout(() => {

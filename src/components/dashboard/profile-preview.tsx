@@ -179,51 +179,51 @@ export function ProfilePreview({
               ? profileEmbedUrl(link.embedType, link.url)
               : null;
           return (
-          <div key={link.id}>
-            {embed && (
-              <iframe
-                src={embed}
-                title={link.title}
-                className="mb-2 aspect-video w-full rounded-2xl border-0"
-                sandbox="allow-scripts allow-same-origin allow-presentation"
-              />
-            )}
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                onSelect(link.id);
-              }}
-              className={`olnk-link flex w-full items-center gap-3 px-4 text-left font-bold transition ${link.enabled ? "" : "opacity-45"} ${selectedId === link.id ? "ring-4 ring-white/80 ring-offset-2 ring-offset-transparent" : ""}`}
-              data-hover={appearance.buttons.hover}
-              data-press={appearance.buttons.press}
-              data-entrance={appearance.effects.entrance}
-              style={{
-                ...profileButtonStyle(appearance, link.customization),
-                animationDelay: `${index * appearance.effects.staggerMs}ms`,
-              }}
-            >
-            {link.customization.iconStyle !== "hidden" && (
-              <span className="text-ink grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-white/90 text-xs">
-                {link.iconUrl ? (
-                  <img
-                    src={link.iconUrl}
-                    alt=""
-                    className={`size-5 ${link.customization.iconStyle === "mono" ? "grayscale" : ""}`}
-                  />
-                ) : (
-                  link.title.slice(0, 1).toUpperCase()
+            <div key={link.id}>
+              {embed && (
+                <iframe
+                  src={embed}
+                  title={link.title}
+                  className="mb-2 aspect-video w-full rounded-2xl border-0"
+                  sandbox="allow-scripts allow-same-origin allow-presentation"
+                />
+              )}
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onSelect(link.id);
+                }}
+                className={`olnk-link flex w-full items-center gap-3 px-4 text-left font-bold transition ${link.enabled ? "" : "opacity-45"} ${selectedId === link.id ? "ring-4 ring-white/80 ring-offset-2 ring-offset-transparent" : ""}`}
+                data-hover={appearance.buttons.hover}
+                data-press={appearance.buttons.press}
+                data-entrance={appearance.effects.entrance}
+                style={{
+                  ...profileButtonStyle(appearance, link.customization),
+                  animationDelay: `${index * appearance.effects.staggerMs}ms`,
+                }}
+              >
+                {link.customization.iconStyle !== "hidden" && (
+                  <span className="text-ink grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-white/90 text-xs">
+                    {link.iconUrl ? (
+                      <img
+                        src={link.iconUrl}
+                        alt=""
+                        className={`size-5 ${link.customization.iconStyle === "mono" ? "grayscale" : ""}`}
+                      />
+                    ) : (
+                      link.title.slice(0, 1).toUpperCase()
+                    )}
+                  </span>
                 )}
-              </span>
-            )}
-            <span className="flex-1 truncate">{link.title}</span>
-            {link.passwordProtected ? (
-              <LockKeyhole className="size-3.5" />
-            ) : (
-              <ArrowUpRight className="size-4 shrink-0" />
-            )}
-            </button>
-          </div>
+                <span className="flex-1 truncate">{link.title}</span>
+                {link.passwordProtected ? (
+                  <LockKeyhole className="size-3.5" />
+                ) : (
+                  <ArrowUpRight className="size-4 shrink-0" />
+                )}
+              </button>
+            </div>
           );
         })}
       </div>

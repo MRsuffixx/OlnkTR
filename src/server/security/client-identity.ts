@@ -27,6 +27,8 @@ export function getTrustedCountry(headers: Pick<Headers, "get">) {
   if (env.TRUSTED_IP_HEADER === "cf-connecting-ip")
     return headers.get("cf-ipcountry")?.toUpperCase().slice(0, 2) ?? null;
   if (env.TRUSTED_IP_HEADER === "x-vercel-forwarded-for")
-    return headers.get("x-vercel-ip-country")?.toUpperCase().slice(0, 2) ?? null;
+    return (
+      headers.get("x-vercel-ip-country")?.toUpperCase().slice(0, 2) ?? null
+    );
   return null;
 }

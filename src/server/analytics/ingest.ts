@@ -29,7 +29,9 @@ function referrerData(headers: Pick<Headers, "get">) {
   try {
     return {
       referrer,
-      referrerHost: new URL(referrer).hostname.toLowerCase().replace(/^www\./, ""),
+      referrerHost: new URL(referrer).hostname
+        .toLowerCase()
+        .replace(/^www\./, ""),
     };
   } catch {
     return { referrer, referrerHost: "other" };
