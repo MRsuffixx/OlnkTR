@@ -48,3 +48,6 @@ CREATE TABLE "RateLimitBucket" (
 
 CREATE INDEX "RateLimitBucket_updatedAt_idx" ON "RateLimitBucket"("updatedAt");
 CREATE INDEX "RateLimitBucket_blockedUntil_idx" ON "RateLimitBucket"("blockedUntil");
+
+ALTER TABLE "ProfileLink"
+ADD COLUMN "accessVersion" INTEGER NOT NULL DEFAULT 0;

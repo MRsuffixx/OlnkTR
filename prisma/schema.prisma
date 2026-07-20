@@ -165,6 +165,7 @@ model ProfileLink {
   scheduledStart DateTime?
   scheduledEnd   DateTime?
   passwordHash   String?  @db.VarChar(256)
+  accessVersion  Int      @default(0)
   embedType      EmbedType @default(LINK)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
