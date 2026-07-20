@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { USERNAME_UNAVAILABLE_MESSAGE } from "~/config/username-policy";
 import { registerIntentInput } from "~/lib/schemas";

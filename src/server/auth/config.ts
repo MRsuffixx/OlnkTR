@@ -1,5 +1,5 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import type { Adapter } from "next-auth/adapters";
+import type { Adapter, AdapterUser } from "next-auth/adapters";
 import type { DefaultSession, NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import Nodemailer from "next-auth/providers/nodemailer";
@@ -83,28 +83,49 @@ async function claimSignupIntent(userId: string, email: string | null) {
 }
 
 const baseAdapter = PrismaAdapter(db);
+
+function toAdapterUser(user: {
+  id: string;
+  name: string | null;
+  email: string | null;
+  emailVerified: Date | null;
+  image: string | null;
+}): AdapterUser {
+  if (!user.email) throw new Error("Auth user is missing an email address.");
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    emailVerified: user.emailVerified,
+    image: user.image,
+  };
+}
+
 const adapter = {
   ...baseAdapter,
   async createUser(user) {
     const email = normalizeEmail(user.email);
-    return db.user.create({
+    const created = await db.user.create({
       data: { ...user, email, emailNormalized: email },
     });
+    return toAdapterUser(created);
   },
   async getUserByEmail(email) {
-    return db.user.findUnique({
+    const user = await db.user.findUnique({
       where: { emailNormalized: normalizeEmail(email) },
     });
+    return user ? toAdapterUser(user) : null;
   },
   async updateUser({ id, ...user }) {
     const email = user.email ? normalizeEmail(user.email) : undefined;
-    return db.user.update({
+    const updated = await db.user.update({
       where: { id },
       data: {
         ...user,
         ...(email ? { email, emailNormalized: email } : {}),
       },
     });
+    return toAdapterUser(updated);
   },
   async createVerificationToken(token) {
     return db.verificationToken.create({

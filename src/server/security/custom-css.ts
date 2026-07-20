@@ -117,7 +117,9 @@ export function sanitizeCustomCss(input: string) {
     throw new Error("Özel CSS desteklenmeyen bir karakter içeriyor.");
 
   const root = postcss.parse(source);
-  root.walkComments((comment) => comment.remove());
+  root.walkComments((comment) => {
+    comment.remove();
+  });
   root.walkAtRules(removeUnsafeAtRule);
   root.walkDecls((declaration) => {
     const property = declaration.prop.toLowerCase();

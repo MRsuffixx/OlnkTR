@@ -132,6 +132,7 @@ export const billingRouter = createTRPCRouter({
                 code: "BAD_REQUEST",
                 message: "Ödeme için doğrulanmış e-posta adresi gerekli.",
               });
+            const email = user.email;
             if (hasProAccess(user.subscription))
               throw new TRPCError({
                 code: "CONFLICT",
@@ -155,7 +156,7 @@ export const billingRouter = createTRPCRouter({
                 presentation.success
               )
                 return {
-                  user,
+                  user: { ...user, email },
                   intent: existing,
                   presentation: presentation.data,
                 };
@@ -177,7 +178,7 @@ export const billingRouter = createTRPCRouter({
                 expiresAt: new Date(now.getTime() + 30 * 60 * 1000),
               },
             });
-            return { user, intent, presentation: null };
+            return { user: { ...user, email }, intent, presentation: null };
           },
           { isolationLevel: "Serializable" },
         );
@@ -249,7 +250,7 @@ export const billingRouter = createTRPCRouter({
           data: {
             status: "CHECKOUT_CREATED",
             externalSessionId: presentation.externalSessionId,
-            checkoutPresentation: presentation as Prisma.InputJsonValue,
+            checkoutPresentation: presentation,
           },
         });
       } catch {

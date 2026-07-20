@@ -1,6 +1,4 @@
 /* eslint-disable @next/next/no-img-element -- Public avatars and favicons can come from user-configured HTTPS hosts. */
-import { createHash } from "node:crypto";
-
 import { after } from "next/server";
 import { headers } from "next/headers";
 import type { Metadata } from "next";
@@ -19,8 +17,8 @@ import { linkCustomizationSchema } from "~/lib/schemas";
 import { getAppOrigin } from "~/lib/app-url";
 import { normalizeUsername } from "~/lib/username";
 import { db } from "~/server/db";
+import { recordProfileView } from "~/server/analytics/ingest";
 import { hasProAccess, resolveAppearanceForPlan } from "~/server/entitlements";
-import { env } from "~/env";
 
 const getProfile = cache((username: string) =>
   db.user.findUnique({
@@ -162,38 +160,8 @@ export default async function PublicProfilePage({
       (!link.scheduledEnd || link.scheduledEnd > now),
   );
   const requestHeaders = await headers();
-  const ip =
-    requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    requestHeaders.get("x-real-ip");
-  const agent = requestHeaders.get("user-agent") ?? "";
-  const deviceType = /tablet|ipad/i.test(agent)
-    ? "tablet"
-    : /mobile|iphone|android/i.test(agent)
-      ? "mobile"
-      : "desktop";
-  const visitorHash = ip
-    ? createHash("sha256")
-        .update(
-          `${ip}:${new Date().toISOString().slice(0, 10)}:${env.AUTH_SECRET ?? "local"}`,
-        )
-        .digest("hex")
-    : null;
   after(() =>
-    db.profileViewEvent
-      .create({
-        data: {
-          userId: profile.id,
-          referrer: requestHeaders.get("referer")?.slice(0, 512) ?? null,
-          userAgent: agent.slice(0, 512) || null,
-          country:
-            requestHeaders.get("cf-ipcountry")?.slice(0, 2) ??
-            requestHeaders.get("x-vercel-ip-country")?.slice(0, 2) ??
-            null,
-          deviceType,
-          visitorHash,
-        },
-      })
-      .catch(() => undefined),
+    recordProfileView(profile.id, requestHeaders).catch(() => undefined),
   );
   const initial = (profile.name ?? profile.username)
     .slice(0, 1)

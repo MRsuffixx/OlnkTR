@@ -101,6 +101,24 @@ enum DomainStatus {
   FAILED
 }
 
+enum AnalyticsEventType {
+  CLICK
+  VIEW
+}
+
+enum AssetPurpose {
+  AVATAR
+  BACKGROUND
+}
+
+enum AssetStatus {
+  PENDING
+  READY
+  DELETE_PENDING
+  DELETED
+  FAILED
+}
+
 model User {
   id                 String    @id @default(cuid())
   name               String?
@@ -185,15 +203,19 @@ model ClickEvent {
   userId      String
   createdAt   DateTime @default(now())
   referrer    String?  @db.VarChar(512)
+  referrerHost String? @db.VarChar(253)
   userAgent   String?  @db.VarChar(512)
   country     String?  @db.VarChar(2)
   visitorHash String?  @db.VarChar(64)
+  dedupeKey   String?  @unique @db.VarChar(64)
 
   link ProfileLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
   user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([linkId, createdAt])
   @@index([userId, createdAt])
+  @@index([userId, visitorHash, createdAt])
+  @@index([userId, referrerHost, createdAt])
   @@index([createdAt])
 }
 
@@ -202,16 +224,34 @@ model ProfileViewEvent {
   userId      String
   createdAt   DateTime @default(now())
   referrer    String?  @db.VarChar(512)
+  referrerHost String? @db.VarChar(253)
   userAgent   String?  @db.VarChar(512)
   country     String?  @db.VarChar(2)
   deviceType String?   @db.VarChar(24)
   visitorHash String?  @db.VarChar(64)
+  dedupeKey   String?  @unique @db.VarChar(64)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@index([userId, visitorHash, createdAt])
+  @@index([userId, referrerHost, createdAt])
   @@index([userId, country, createdAt])
   @@index([userId, deviceType, createdAt])
+}
+
+model AnalyticsDailyBucket {
+  id         String             @id @default(cuid())
+  eventType  AnalyticsEventType
+  userId     String
+  targetKey  String             @db.VarChar(191)
+  date       DateTime           @db.Date
+  count      Int                @default(0)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  @@unique([eventType, userId, targetKey, date])
+  @@index([userId, eventType, date])
 }
 
 model Subscription {
@@ -331,11 +371,20 @@ model UploadedAsset {
   publicUrl String   @db.VarChar(2048)
   mimeType  String   @db.VarChar(128)
   sizeBytes Int
+  actualSizeBytes Int?
+  purpose   AssetPurpose
+  status    AssetStatus @default(PENDING)
+  finalizedAt DateTime?
+  deletionAttempts Int @default(0)
+  nextDeletionAt DateTime?
+  lastError String? @db.VarChar(512)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@index([status, nextDeletionAt])
 }
 
 model AuthIntent {
