@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element -- Previewed avatar and favicon hosts are user-defined. */
+
 import { ArrowUpRight, ImageIcon } from "lucide-react";
 
 import type { WorkspaceInput } from "~/lib/schemas";

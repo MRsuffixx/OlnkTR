@@ -53,7 +53,7 @@ export const workspaceRouter = createTRPCRouter({
           data: {
             name: input.name,
             bio: input.bio,
-            image: input.image || null,
+            image: input.image && input.image.length > 0 ? input.image : null,
             editorRevision: { increment: 1 },
           },
         });
@@ -75,7 +75,7 @@ export const workspaceRouter = createTRPCRouter({
             const data = {
               title: link.title,
               url: link.url,
-              iconUrl: link.iconUrl || faviconForUrl(link.url),
+              iconUrl: link.iconUrl ?? faviconForUrl(link.url),
               enabled: Boolean(link.enabled && link.url),
               position,
             };

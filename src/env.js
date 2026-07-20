@@ -10,12 +10,13 @@ export const env = createEnv({
     AUTH_GOOGLE_ID: z.string().optional(),
     AUTH_GOOGLE_SECRET: z.string().optional(),
     EMAIL_SERVER: z.string().optional(),
-    EMAIL_FROM: z.string().email().optional(),
+    EMAIL_FROM: z.string().min(3).optional(),
     DATABASE_URL: z.string().url(),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  },
+  client: {
     NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   },
-  client: {},
   runtimeEnv: {
     AUTH_SECRET: process.env.AUTH_SECRET,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,

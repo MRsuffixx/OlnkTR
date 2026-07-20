@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- Public avatars and favicons can come from arbitrary user-configured hosts. */
 import type { Metadata } from "next";
 import { ArrowUpRight, Download, QrCode } from "lucide-react";
 import { notFound } from "next/navigation";

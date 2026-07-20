@@ -117,9 +117,11 @@ export const authConfig = {
   },
   events: {
     createUser: async ({ user }) => {
+      if (!user.id) return;
       await ensureTheme(user.id);
     },
     signIn: async ({ user }) => {
+      if (!user.id) return;
       await ensureTheme(user.id);
       await claimSignupIntent(user.id, user.email ?? null);
     },

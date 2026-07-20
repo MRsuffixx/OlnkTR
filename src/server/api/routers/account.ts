@@ -12,7 +12,7 @@ export const accountRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       await ctx.db.user.update({
         where: { id: ctx.session.user.id },
-        data: { ...input, image: input.image || null },
+        data: { ...input, image: input.image && input.image.length > 0 ? input.image : null },
       });
       return { ok: true };
     }),

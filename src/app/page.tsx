@@ -60,7 +60,7 @@ export default function Home() {
                 <h2 className="mt-5 text-2xl font-black">Ece Yılmaz</h2>
                 <p className="mt-2 text-sm leading-6 text-ink/70">Tasarım, şehir ve güzel fikirler üzerine ✦</p>
                 <div className="mt-7 space-y-3">
-                  {demoLinks.map((label, index) => (
+                  {demoLinks.map((label) => (
                     <div key={label} className="flex items-center rounded-2xl bg-ink px-4 py-4 text-left text-sm font-bold text-paper shadow-[4px_5px_0_rgba(240,100,50,.75)]">
                       <GripVertical className="mr-2 size-4 text-paper/45" />
                       <span className="flex-1">{label}</span>

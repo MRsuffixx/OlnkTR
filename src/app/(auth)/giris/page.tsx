@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 import { AuthForm } from "~/components/auth/auth-form";
 import { auth } from "~/server/auth";
@@ -17,7 +18,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <h1 className="display-serif mt-3 text-5xl font-bold">Sayfan seni bekliyor.</h1>
       <p className="mb-8 mt-4 leading-7 text-ink/60">Şifre yok. E-postana güvenli bir giriş bağlantısı göndeririz.</p>
       <AuthForm mode="login" {...authMethods} emailSent={durum === "eposta-gonderildi"} />
-      <p className="mt-7 text-center text-sm text-ink/60">Henüz hesabın yok mu? <a href="/kayit" className="font-black text-ink underline decoration-2 underline-offset-4">Ücretsiz aç</a></p>
+      <p className="mt-7 text-center text-sm text-ink/60">Henüz hesabın yok mu? <Link href="/kayit" className="font-black text-ink underline decoration-2 underline-offset-4">Ücretsiz aç</Link></p>
     </>
   );
 }

@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element -- Avatar URLs are user-controlled and cannot be safely allowlisted for next/image. */
+
 import { Check, LoaderCircle, Save, Trash2 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -30,8 +32,8 @@ export function SettingsForm({ initial }: { initial: RouterOutputs["workspace"][
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
       <div className="space-y-6">
-        {(message || error) && <div role="status" className={`rounded-2xl p-4 text-sm font-bold ${error ? "bg-orange/10 text-orange" : "bg-mint text-ink"}`}>{error ?? message}</div>}
-        <form onSubmit={(event) => { event.preventDefault(); resetNotices(); profile.mutate({ name, bio, image: image || null }); }} className="rounded-3xl border border-ink/10 bg-paper p-5 sm:p-7">
+        {(message !== null || error !== null) && <div role="status" className={`rounded-2xl p-4 text-sm font-bold ${error ? "bg-orange/10 text-orange" : "bg-mint text-ink"}`}>{error ?? message}</div>}
+        <form onSubmit={(event) => { event.preventDefault(); resetNotices(); profile.mutate({ name, bio, image: image.length > 0 ? image : null }); }} className="rounded-3xl border border-ink/10 bg-paper p-5 sm:p-7">
           <h2 className="text-xl font-black">Profil bilgileri</h2><p className="mt-1 text-sm text-ink/45">Ziyaretçilerinin gördüğü temel bilgiler.</p>
           <div className="mt-6 space-y-4">
             <label className="block"><span className="mb-1.5 block text-sm font-bold">Görünen ad</span><input value={name} maxLength={60} onChange={(event) => setName(event.target.value)} className="h-12 w-full rounded-xl border border-ink/15 bg-white px-3 outline-none focus:border-ink" /></label>

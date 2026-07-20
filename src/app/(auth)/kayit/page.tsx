@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 import { AuthForm } from "~/components/auth/auth-form";
 import { auth } from "~/server/auth";
@@ -16,7 +17,7 @@ export default async function RegisterPage() {
       <h1 className="display-serif mt-3 text-5xl font-bold">Adresini seç, kendini anlat.</h1>
       <p className="mb-8 mt-4 leading-7 text-ink/60">Kullanıcı adın herkese açık profil adresin olacak. Sonradan ayarlardan değiştirebilirsin.</p>
       <AuthForm mode="register" {...authMethods} />
-      <p className="mt-7 text-center text-sm text-ink/60">Zaten hesabın var mı? <a href="/giris" className="font-black text-ink underline decoration-2 underline-offset-4">Giriş yap</a></p>
+      <p className="mt-7 text-center text-sm text-ink/60">Zaten hesabın var mı? <Link href="/giris" className="font-black text-ink underline decoration-2 underline-offset-4">Giriş yap</Link></p>
     </>
   );
 }
