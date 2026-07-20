@@ -1,6 +1,7 @@
 ALTER TABLE "User"
 ADD COLUMN "emailNormalized" VARCHAR(254),
-ADD COLUMN "usernameChangedAt" TIMESTAMP(3);
+ADD COLUMN "usernameChangedAt" TIMESTAMP(3),
+ADD COLUMN "deletionRequestedAt" TIMESTAMP(3);
 
 UPDATE "User"
 SET "emailNormalized" = LOWER(BTRIM("email"))
@@ -160,3 +161,21 @@ ON "DomainReclaimChallenge"("expiresAt");
 ALTER TABLE "DomainReclaimChallenge"
 ADD CONSTRAINT "DomainReclaimChallenge_userId_fkey"
 FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+CREATE TYPE "AccountDeletionStatus" AS ENUM ('PENDING', 'PROCESSING', 'RETRY_PENDING', 'COMPLETED');
+CREATE TABLE "AccountDeletionJob" (
+  "id" TEXT NOT NULL,
+  "userId" TEXT NOT NULL,
+  "emailNormalized" VARCHAR(254),
+  "status" "AccountDeletionStatus" NOT NULL DEFAULT 'PENDING',
+  "attempts" INTEGER NOT NULL DEFAULT 0,
+  "nextAttemptAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "lastError" VARCHAR(1024),
+  "completedAt" TIMESTAMP(3),
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" TIMESTAMP(3) NOT NULL,
+  CONSTRAINT "AccountDeletionJob_pkey" PRIMARY KEY ("id")
+);
+CREATE UNIQUE INDEX "AccountDeletionJob_userId_key" ON "AccountDeletionJob"("userId");
+CREATE INDEX "AccountDeletionJob_status_nextAttemptAt_idx"
+ON "AccountDeletionJob"("status", "nextAttemptAt");

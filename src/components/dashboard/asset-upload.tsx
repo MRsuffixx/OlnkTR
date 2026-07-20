@@ -19,13 +19,13 @@ export function AssetUpload({
   const input = useRef<HTMLInputElement>(null);
   const status = api.customization.uploadStatus.useQuery();
   const createUpload = api.customization.createUpload.useMutation();
+  const finalizeUpload = api.customization.finalizeUpload.useMutation();
   const [error, setError] = useState<string | null>(null);
   async function upload(file: File) {
     setError(null);
     try {
       const signed = await createUpload.mutateAsync({
         purpose,
-        fileName: file.name,
         mimeType: file.type as
           | "image/jpeg"
           | "image/png"
@@ -41,7 +41,10 @@ export function AssetUpload({
         body: file,
       });
       if (!response.ok) throw new Error("Dosya depolama alanına aktarılamadı.");
-      onUploaded(signed.publicUrl);
+      const finalized = await finalizeUpload.mutateAsync({
+        assetId: signed.assetId,
+      });
+      onUploaded(finalized.publicUrl);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Dosya yüklenemedi.");
     }
@@ -67,11 +70,16 @@ export function AssetUpload({
       />
       <button
         type="button"
-        disabled={disabled || createUpload.isPending || status.isLoading}
+        disabled={
+          disabled ||
+          createUpload.isPending ||
+          finalizeUpload.isPending ||
+          status.isLoading
+        }
         onClick={() => input.current?.click()}
         className="border-ink/15 inline-flex h-10 items-center gap-2 rounded-full border bg-white px-4 text-xs font-black disabled:cursor-pointer disabled:opacity-45"
       >
-        {createUpload.isPending ? (
+        {createUpload.isPending || finalizeUpload.isPending ? (
           <LoaderCircle className="size-4 animate-spin" />
         ) : (
           <ImageUp className="size-4" />

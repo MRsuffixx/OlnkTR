@@ -209,6 +209,20 @@ export const workspaceRouter = createTRPCRouter({
                 : {}),
             },
           });
+          const referencedAssets = [
+            input.image,
+            appearance.background.mediaUrl,
+          ].filter((value): value is string => Boolean(value));
+          await tx.uploadedAsset.updateMany({
+            where: {
+              userId,
+              status: "READY",
+              ...(referencedAssets.length
+                ? { publicUrl: { notIn: referencedAssets } }
+                : {}),
+            },
+            data: { status: "DELETE_PENDING", nextDeletionAt: new Date() },
+          });
           return input.revision + 1;
         });
         return {
