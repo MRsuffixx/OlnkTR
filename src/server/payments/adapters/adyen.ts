@@ -75,7 +75,7 @@ export const adyenAdapter: PaymentProviderAdapter = {
     }
     const wrappers = Array.isArray(payload.notificationItems) ? payload.notificationItems : [];
     const items = wrappers.map((wrapper) => object(object(wrapper).NotificationRequestItem));
-    if (!headerSignature && (!items.length || !items.every((item) => validator.validateHMAC(item as Parameters<typeof validator.validateHMAC>[0], hmacKey)))) throw new WebhookVerificationError("Adyen webhook HMAC doğrulaması başarısız.");
+    if (!headerSignature && (!items.length || !items.every((item) => validator.validateHMAC(item as unknown as Parameters<typeof validator.validateHMAC>[0], hmacKey)))) throw new WebhookVerificationError("Adyen webhook HMAC doğrulaması başarısız.");
 
     return items.flatMap<NormalizedBillingEvent>((item) => {
       const code = stringValue(item.eventCode) ?? "";

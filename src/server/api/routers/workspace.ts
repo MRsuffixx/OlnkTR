@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 
-import type { Prisma } from "../../../../../generated/prisma/client";
+import type { Prisma } from "../../../../generated/prisma/client";
 import { parseAppearance } from "~/lib/appearance";
 import { linkCustomizationSchema, setLinkPasswordInput, workspaceInput } from "~/lib/schemas";
 import { DEFAULT_THEME, faviconForUrl } from "~/lib/theme";

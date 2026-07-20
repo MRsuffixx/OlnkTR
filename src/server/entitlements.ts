@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { Subscription } from "../../generated/prisma/client";
-import { FEATURE_CATALOG, type AppearanceFeaturePath } from "~/config/feature-catalog";
+import { FEATURE_CATALOG, type AppearanceFeature, type AppearanceFeaturePath } from "~/config/feature-catalog";
 import { DEFAULT_APPEARANCE, parseAppearance, type AppearanceSettings } from "~/lib/appearance";
 import { db } from "~/server/db";
 
@@ -35,7 +35,7 @@ export function isAppearanceValueAllowed(path: AppearanceFeaturePath, value: unk
   if (pro) return true;
   const feature = FEATURE_CATALOG[path];
   if (feature.tier === "pro") return false;
-  return !feature.proValues?.some((candidate) => candidate === value);
+  return !(feature as AppearanceFeature).proValues?.some((candidate: unknown) => candidate === value);
 }
 
 export function resolveAppearanceForPlan(raw: unknown, pro: boolean) {
@@ -59,7 +59,8 @@ export function mergePermittedAppearance(incoming: unknown, stored: unknown, pro
   const previous = parseAppearance(stored ?? DEFAULT_APPEARANCE);
   for (const path of Object.keys(FEATURE_CATALOG) as AppearanceFeaturePath[]) {
     const value = getAtPath(next, path);
-    if (!isAppearanceValueAllowed(path, value, false)) setAtPath(next, path, getAtPath(previous, path));
+    const previousValue = getAtPath(previous, path);
+    if (!isAppearanceValueAllowed(path, value, false) || !isAppearanceValueAllowed(path, previousValue, false)) setAtPath(next, path, previousValue);
   }
   return next;
 }

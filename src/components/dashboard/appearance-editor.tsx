@@ -4,7 +4,7 @@ import { Crown, LockKeyhole, Palette, Sparkles } from "lucide-react";
 import { useState } from "react";
 
 import { AssetUpload } from "~/components/dashboard/asset-upload";
-import { FEATURE_CATALOG, type AppearanceFeaturePath } from "~/config/feature-catalog";
+import { FEATURE_CATALOG, type AppearanceFeature, type AppearanceFeaturePath } from "~/config/feature-catalog";
 import type { AppearanceSettings } from "~/lib/appearance";
 
 type Category = "background" | "buttons" | "typography" | "layout" | "effects" | "advanced";
@@ -25,7 +25,7 @@ function write(settings: AppearanceSettings, path: AppearanceFeaturePath, value:
 
 function needsPro(path: AppearanceFeaturePath, value?: unknown) {
   const feature = FEATURE_CATALOG[path];
-  return feature.tier === "pro" || feature.proValues?.includes(value as never) === true;
+  return feature.tier === "pro" || (feature as AppearanceFeature).proValues?.includes(value) === true;
 }
 
 export function AppearanceEditor({ appearance, customCss, hasPro, onChange, onCssChange, onUpgrade }: { appearance: AppearanceSettings; customCss: string; hasPro: boolean; onChange: (appearance: AppearanceSettings) => void; onCssChange: (value: string) => void; onUpgrade: () => void }) {

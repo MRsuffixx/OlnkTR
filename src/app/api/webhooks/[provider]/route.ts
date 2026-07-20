@@ -1,4 +1,4 @@
-import type { BillingProvider } from "../../../../../../generated/prisma/client";
+import type { BillingProvider } from "../../../../../generated/prisma/client";
 import { handleProviderWebhook } from "~/server/payments/service";
 import { WebhookVerificationError } from "~/server/payments/types";
 
