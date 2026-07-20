@@ -2,12 +2,16 @@ import { TRPCError } from "@trpc/server";
 
 import { USERNAME_UNAVAILABLE_MESSAGE } from "~/config/username-policy";
 import { usernameInput } from "~/lib/schemas";
-import { isUsernameAvailable, validateUsernamePolicy } from "~/lib/username";
+import { isUsernameAvailable } from "~/lib/username";
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import {
+  claimUsername,
+  UsernameUnavailableError,
+} from "~/server/identity/claim-username";
 
 export const usernameRouter = createTRPCRouter({
   check: publicProcedure.input(usernameInput).query(async ({ input }) => {
@@ -28,35 +32,14 @@ export const usernameRouter = createTRPCRouter({
   claim: protectedProcedure
     .input(usernameInput)
     .mutation(async ({ ctx, input }) => {
-      const validation = await validateUsernamePolicy(input.username);
-      if (!validation.ok) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: USERNAME_UNAVAILABLE_MESSAGE,
-        });
-      }
-
       try {
-        await ctx.db.user.update({
-          where: { id: ctx.session.user.id },
-          data: {
-            username: validation.username,
-            usernameNormalized: validation.normalized,
-            onboardedAt: new Date(),
-          },
+        return await claimUsername({
+          userId: ctx.session.user.id,
+          email: ctx.session.user.email,
+          username: input.username,
         });
-        await ctx.db.authIntent.deleteMany({
-          where: {
-            OR: [
-              { usernameNormalized: validation.normalized },
-              ...(ctx.session.user.email
-                ? [{ email: ctx.session.user.email.toLocaleLowerCase("tr-TR") }]
-                : []),
-            ],
-          },
-        });
-        return { username: validation.username };
-      } catch {
+      } catch (error) {
+        if (!(error instanceof UsernameUnavailableError)) throw error;
         throw new TRPCError({
           code: "CONFLICT",
           message: USERNAME_UNAVAILABLE_MESSAGE,
