@@ -162,7 +162,10 @@ CREATE INDEX "RateLimitBucket_updatedAt_idx" ON "RateLimitBucket"("updatedAt");
 CREATE INDEX "RateLimitBucket_blockedUntil_idx" ON "RateLimitBucket"("blockedUntil");
 
 ALTER TABLE "ProfileLink"
-ADD COLUMN "accessVersion" INTEGER NOT NULL DEFAULT 0;
+ADD COLUMN "accessVersion" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN "deletedAt" TIMESTAMP(3);
+CREATE INDEX "ProfileLink_userId_deletedAt_position_idx"
+ON "ProfileLink"("userId", "deletedAt", "position");
 
 CREATE TYPE "AnalyticsEventType" AS ENUM ('CLICK', 'VIEW');
 

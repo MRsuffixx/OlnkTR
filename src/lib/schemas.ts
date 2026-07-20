@@ -52,6 +52,8 @@ export const linkCustomizationSchema = z.object({
   iconStyle: z.enum(["favicon", "mono", "hidden"]).default("favicon"),
 });
 
+export type LinkCustomization = z.infer<typeof linkCustomizationSchema>;
+
 export const workspaceLinkInput = z
   .object({
     id: z.uuid(),
@@ -79,16 +81,35 @@ export const workspaceLinkInput = z
     }
   });
 
-export const workspaceInput = z.object({
-  revision: z.number().int().nonnegative(),
-  name: z.string().trim().min(1, "Görünen ad gerekli.").max(60),
-  bio: z.string().trim().max(160),
-  image: optionalWebUrl.nullable(),
-  theme: themeInput,
-  appearance: appearanceSchema,
-  customCss: z.string().max(12_000),
-  links: z.array(workspaceLinkInput).max(50),
-});
+export const workspaceInput = z
+  .object({
+    revision: z.number().int().nonnegative(),
+    name: z.string().trim().min(1, "Görünen ad gerekli.").max(60),
+    bio: z.string().trim().max(160),
+    image: optionalWebUrl.nullable(),
+    theme: themeInput,
+    appearance: appearanceSchema,
+    customCss: z.string().max(12_000),
+    links: z.array(workspaceLinkInput).max(50),
+  })
+  .superRefine((workspace, context) => {
+    const ids = new Set<string>();
+    workspace.links.forEach((link, index) => {
+      if (ids.has(link.id))
+        context.addIssue({
+          code: "custom",
+          path: ["links", index, "id"],
+          message: "Bağlantı kimlikleri benzersiz olmalıdır.",
+        });
+      ids.add(link.id);
+    });
+    if (JSON.stringify(workspace.appearance).length > 32_000)
+      context.addIssue({
+        code: "custom",
+        path: ["appearance"],
+        message: "Görünüm ayarları çok büyük.",
+      });
+  });
 
 export type WorkspaceInput = z.infer<typeof workspaceInput>;
 

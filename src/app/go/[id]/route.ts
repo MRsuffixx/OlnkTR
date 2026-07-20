@@ -13,7 +13,7 @@ export async function GET(
 ) {
   const { id } = await params;
   const link = await db.profileLink.findFirst({
-    where: { id, enabled: true, url: { not: "" } },
+    where: { id, enabled: true, deletedAt: null, url: { not: "" } },
     include: { user: { select: { username: true } } },
   });
 

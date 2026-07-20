@@ -23,7 +23,7 @@ export default async function UnlockPage({
     where: { id },
     include: { user: { select: { username: true } } },
   });
-  if (!link?.passwordHash || !link.enabled) notFound();
+  if (!link?.passwordHash || !link.enabled || link.deletedAt) notFound();
   return (
     <main className="noise-grid bg-cream grid min-h-dvh place-items-center p-4">
       <div className="border-ink/10 bg-paper w-full max-w-md rounded-[2rem] border p-7 shadow-[8px_8px_0_#F8C95C]">

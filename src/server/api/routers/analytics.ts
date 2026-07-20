@@ -17,7 +17,7 @@ export const analyticsRouter = createTRPCRouter({
 
       const [links, dailyCounts, clickTotals, subscription] = await Promise.all([
         ctx.db.profileLink.findMany({
-          where: { userId: ctx.session.user.id },
+          where: { userId: ctx.session.user.id, deletedAt: null },
           orderBy: { position: "asc" },
           select: { id: true, title: true, enabled: true },
         }),

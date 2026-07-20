@@ -67,7 +67,8 @@ export async function POST(
     return rejected(request, id);
 
   const link = await db.profileLink.findUnique({ where: { id } });
-  if (!link?.passwordHash || !link.enabled) return rejected(request, id);
+  if (!link?.passwordHash || !link.enabled || link.deletedAt)
+    return rejected(request, id);
   try {
     if (!(await verifyLinkPassword(password, link.passwordHash)))
       return rejected(request, id);

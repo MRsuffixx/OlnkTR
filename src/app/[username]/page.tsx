@@ -11,11 +11,17 @@ import { ProfileEffects } from "~/components/profile/profile-effects";
 import { ShareButton } from "~/components/profile/share-button";
 import {
   appearanceBackground,
-  type AppearanceSettings,
 } from "~/lib/appearance";
 import { linkCustomizationSchema } from "~/lib/schemas";
 import { getAppOrigin } from "~/lib/app-url";
 import { normalizeUsername } from "~/lib/username";
+import {
+  profileAvatarRadius,
+  profileButtonStyle,
+  profileDensity,
+  profileEmbedUrl,
+  profileFontFamily,
+} from "~/lib/profile-rendering";
 import { db } from "~/server/db";
 import { recordProfileView } from "~/server/analytics/ingest";
 import { hasProAccess, resolveAppearanceForPlan } from "~/server/entitlements";
@@ -27,94 +33,12 @@ const getProfile = cache((username: string) =>
       theme: true,
       subscription: true,
       links: {
-        where: { enabled: true, url: { not: "" } },
+        where: { enabled: true, deletedAt: null, url: { not: "" } },
         orderBy: { position: "asc" },
       },
     },
   }),
 );
-
-function radius(settings: AppearanceSettings) {
-  return settings.buttons.shape === "pill"
-    ? 999
-    : settings.buttons.shape === "square"
-      ? 5
-      : settings.buttons.shape === "custom"
-        ? settings.buttons.radius
-        : 18;
-}
-function linkStyle(
-  settings: AppearanceSettings,
-  custom: ReturnType<typeof linkCustomizationSchema.parse>,
-): React.CSSProperties {
-  const button = settings.buttons;
-  const color = custom.buttonColor ?? button.color;
-  const text = custom.textColor ?? button.textColor;
-  const style: React.CSSProperties = {
-    minHeight: button.height,
-    borderRadius: radius(settings),
-    color: text,
-    background: color,
-    fontFamily:
-      custom.fontFamily === "inherit"
-        ? settings.typography.bodyFont
-        : custom.fontFamily,
-  };
-  if (button.fill === "outline")
-    return {
-      ...style,
-      background: "transparent",
-      color,
-      border: `2px solid ${button.borderColor}`,
-    };
-  if (button.fill === "glass")
-    return {
-      ...style,
-      background: "rgba(255,255,255,.48)",
-      border: "1px solid rgba(255,255,255,.65)",
-      backdropFilter: "blur(14px)",
-    };
-  if (button.fill === "shadow")
-    return { ...style, boxShadow: `4px 5px 0 ${button.shadowColor}` };
-  if (button.fill === "threeD")
-    return {
-      ...style,
-      boxShadow: `inset 0 -5px 0 rgba(0,0,0,.24), 0 6px 0 ${button.shadowColor}`,
-    };
-  return style;
-}
-
-function avatarRadius(shape: AppearanceSettings["layout"]["avatarShape"]) {
-  return shape === "circle"
-    ? "50%"
-    : shape === "square"
-      ? "4px"
-      : shape === "squircle"
-        ? "32%"
-        : shape === "hexagon"
-          ? "0"
-          : "22%";
-}
-function embedUrl(type: "YOUTUBE" | "SPOTIFY", value: string) {
-  try {
-    const url = new URL(value);
-    if (type === "YOUTUBE") {
-      const id = url.hostname.includes("youtu.be")
-        ? url.pathname.slice(1)
-        : (url.searchParams.get("v") ??
-          url.pathname.split("/").filter(Boolean).at(-1));
-      return id && /^[\w-]{6,20}$/.test(id)
-        ? `https://www.youtube-nocookie.com/embed/${id}`
-        : null;
-    }
-    const parts = url.pathname.split("/").filter(Boolean);
-    return parts.length >= 2
-      ? `https://open.spotify.com/embed/${parts.slice(-2).join("/")}`
-      : null;
-  } catch {
-    return null;
-  }
-}
 
 export async function generateMetadata({
   params,
@@ -184,6 +108,7 @@ export default async function PublicProfilePage({
       ? "text-left items-start"
       : "text-center items-center";
   const background = appearanceBackground(appearance);
+  const density = profileDensity(appearance.layout.density);
 
   return (
     <main
@@ -192,8 +117,9 @@ export default async function PublicProfilePage({
       style={{
         ...background,
         color: appearance.typography.color,
-        fontFamily: appearance.typography.bodyFont,
+        fontFamily: profileFontFamily(appearance.typography.bodyFont),
         fontSize: appearance.typography.bodySize,
+        fontWeight: appearance.typography.weight,
       }}
     >
       <script
@@ -256,7 +182,9 @@ export default async function PublicProfilePage({
             style={{
               width: appearance.layout.avatarSize,
               height: appearance.layout.avatarSize,
-              borderRadius: avatarRadius(appearance.layout.avatarShape),
+              borderRadius: profileAvatarRadius(
+                appearance.layout.avatarShape,
+              ),
               border: `${appearance.layout.avatarBorderWidth}px solid ${appearance.layout.avatarBorderColor}`,
               clipPath:
                 appearance.layout.avatarShape === "hexagon"
@@ -280,7 +208,9 @@ export default async function PublicProfilePage({
           <h1
             className="mt-5 font-black"
             style={{
-              fontFamily: appearance.typography.headingFont,
+              fontFamily: profileFontFamily(
+                appearance.typography.headingFont,
+              ),
               fontSize: appearance.typography.headingSize,
               letterSpacing: appearance.typography.letterSpacing,
             }}
@@ -292,8 +222,11 @@ export default async function PublicProfilePage({
           )}
         </section>
         <nav
-          className="mt-8 grid"
-          style={{ gap: appearance.buttons.spacing }}
+          className="grid"
+          style={{
+            gap: appearance.buttons.spacing,
+            marginTop: density.linksTop,
+          }}
           aria-label={`${profile.name ?? profile.username} bağlantıları`}
         >
           {links.map((link, index) => {
@@ -309,7 +242,7 @@ export default async function PublicProfilePage({
               : linkCustomizationSchema.parse({});
             const embed =
               pro && !link.passwordHash && link.embedType !== "LINK"
-                ? embedUrl(link.embedType, link.url)
+                ? profileEmbedUrl(link.embedType, link.url)
                 : null;
             return (
               <div
@@ -338,7 +271,7 @@ export default async function PublicProfilePage({
                   target={link.passwordHash ? undefined : "_blank"}
                   rel="noopener noreferrer"
                   className="group flex w-full items-center gap-3 px-4 text-left font-black transition duration-200"
-                  style={linkStyle(appearance, custom)}
+                  style={profileButtonStyle(appearance, custom)}
                 >
                   {custom.iconStyle !== "hidden" && (
                     <span className="text-ink grid size-9 shrink-0 place-items-center overflow-hidden rounded-full bg-white/90 text-xs">

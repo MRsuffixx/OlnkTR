@@ -26,10 +26,18 @@ function dateOrNull(value: string | null) {
 function validEmbedUrl(type: "LINK" | "YOUTUBE" | "SPOTIFY", value: string) {
   if (type === "LINK" || !value) return true;
   try {
-    const host = new URL(value).hostname.toLowerCase().replace(/^www\./, "");
-    return type === "YOUTUBE"
-      ? ["youtube.com", "youtu.be", "music.youtube.com"].includes(host)
-      : ["open.spotify.com", "spotify.link"].includes(host);
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase().replace(/^www\./, "");
+    if (url.protocol !== "https:") return false;
+    if (type === "YOUTUBE")
+      return ["youtube.com", "youtu.be", "music.youtube.com"].includes(host);
+    const parts = url.pathname.split("/").filter(Boolean);
+    return (
+      host === "open.spotify.com" &&
+      parts.length === 2 &&
+      ["track", "album", "playlist", "episode", "show"].includes(parts[0]!) &&
+      /^[A-Za-z0-9]+$/.test(parts[1]!)
+    );
   } catch {
     return false;
   }
@@ -42,7 +50,10 @@ export const workspaceRouter = createTRPCRouter({
       include: {
         theme: true,
         subscription: true,
-        links: { orderBy: { position: "asc" } },
+        links: {
+          where: { deletedAt: null },
+          orderBy: { position: "asc" },
+        },
       },
     });
     if (!user) throw new TRPCError({ code: "NOT_FOUND" });
@@ -97,7 +108,11 @@ export const workspaceRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const current = await ctx.db.user.findUnique({
         where: { id: userId },
-        include: { theme: true, subscription: true, links: true },
+        include: {
+          theme: true,
+          subscription: true,
+          links: { where: { deletedAt: null } },
+        },
       });
       if (!current) throw new TRPCError({ code: "NOT_FOUND" });
       const pro = hasProAccess(current.subscription);
@@ -191,6 +206,7 @@ export const workspaceRouter = createTRPCRouter({
                 iconUrl: link.iconUrl ?? faviconForUrl(link.url),
                 enabled: Boolean(link.enabled && link.url),
                 position,
+                deletedAt: null,
                 ...advanced,
               };
               return tx.profileLink.upsert({
@@ -201,13 +217,15 @@ export const workspaceRouter = createTRPCRouter({
             }),
           );
 
-          await tx.profileLink.deleteMany({
+          await tx.profileLink.updateMany({
             where: {
               userId,
+              deletedAt: null,
               ...(input.links.length
                 ? { id: { notIn: input.links.map((link) => link.id) } }
                 : {}),
             },
+            data: { enabled: false, deletedAt: new Date() },
           });
           const referencedAssets = [
             input.image,
@@ -254,7 +272,11 @@ export const workspaceRouter = createTRPCRouter({
         ? await hashLinkPassword(input.password)
         : null;
       const updated = await ctx.db.profileLink.updateMany({
-        where: { id: input.linkId, userId: ctx.session.user.id },
+        where: {
+          id: input.linkId,
+          userId: ctx.session.user.id,
+          deletedAt: null,
+        },
         data: { passwordHash, accessVersion: { increment: 1 } },
       });
       if (!updated.count) throw new TRPCError({ code: "NOT_FOUND" });

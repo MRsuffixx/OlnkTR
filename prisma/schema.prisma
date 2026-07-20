@@ -193,6 +193,7 @@ model ProfileLink {
   scheduledEnd   DateTime?
   passwordHash   String?  @db.VarChar(256)
   accessVersion  Int      @default(0)
+  deletedAt      DateTime?
   embedType      EmbedType @default(LINK)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -202,6 +203,7 @@ model ProfileLink {
 
   @@unique([id, userId])
   @@index([userId, position])
+  @@index([userId, deletedAt, position])
   @@index([userId, enabled])
   @@index([userId, scheduledStart, scheduledEnd])
 }
