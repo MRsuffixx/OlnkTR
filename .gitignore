@@ -189,6 +189,7 @@ http-client.private.env.json
 *.iml
 *.ipr
 out/
+errors.md
 
 # Vim
 *.swp
