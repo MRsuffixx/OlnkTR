@@ -1,6 +1,7 @@
 "use client";
 
 import { RotateCcw, TriangleAlert } from "lucide-react";
+import Link from "next/link";
 
 export default function RootError({
   error,
@@ -35,12 +36,12 @@ export default function RootError({
           >
             <RotateCcw className="size-4" aria-hidden="true" /> Yeniden dene
           </button>
-          <a
+          <Link
             href="/"
             className="border-ink inline-flex h-11 items-center rounded-full border-2 px-5 text-sm font-black"
           >
             Ana sayfa
-          </a>
+          </Link>
         </div>
       </section>
     </main>
