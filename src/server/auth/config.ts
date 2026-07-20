@@ -1,56 +1,127 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { type DefaultSession, type NextAuthConfig } from "next-auth";
-import DiscordProvider from "next-auth/providers/discord";
+import type { DefaultSession, NextAuthConfig } from "next-auth";
+import Google from "next-auth/providers/google";
+import Nodemailer from "next-auth/providers/nodemailer";
+import { cookies } from "next/headers";
 
+import { env } from "~/env";
+import { validateUsernamePolicy } from "~/lib/username";
 import { db } from "~/server/db";
 
-/**
- * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
- * object and keep type safety.
- *
- * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
- */
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      username: string | null;
     } & DefaultSession["user"];
   }
-
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
 }
 
-/**
- * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
- *
- * @see https://next-auth.js.org/configuration/options
- */
-export const authConfig = {
-  providers: [
-    DiscordProvider,
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
-  ],
-  adapter: PrismaAdapter(db),
-  callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
+const googleEnabled = Boolean(env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET);
+const emailEnabled = Boolean(env.EMAIL_SERVER && env.EMAIL_FROM);
+
+export const authMethods = { googleEnabled, emailEnabled };
+
+const providers: NextAuthConfig["providers"] = [];
+
+if (googleEnabled) {
+  providers.push(
+    Google({
+      clientId: env.AUTH_GOOGLE_ID,
+      clientSecret: env.AUTH_GOOGLE_SECRET,
+      allowDangerousEmailAccountLinking: false,
     }),
+  );
+}
+
+if (emailEnabled) {
+  providers.push(
+    Nodemailer({
+      server: env.EMAIL_SERVER,
+      from: env.EMAIL_FROM,
+      maxAge: 10 * 60,
+    }),
+  );
+}
+
+async function ensureTheme(userId: string) {
+  await db.theme.upsert({
+    where: { userId },
+    create: { userId },
+    update: {},
+  });
+}
+
+async function claimSignupIntent(userId: string, email: string | null) {
+  if (!email) return;
+
+  const cookieStore = await cookies();
+  const token = cookieStore.get("olnk-signup-intent")?.value;
+  if (!token) return;
+
+  const intent = await db.authIntent.findUnique({ where: { token } });
+  if (
+    !intent ||
+    intent.expiresAt <= new Date() ||
+    intent.email !== email.toLocaleLowerCase("tr-TR")
+  ) {
+    return;
+  }
+
+  const validation = await validateUsernamePolicy(intent.username);
+  if (!validation.ok) return;
+
+  try {
+    await db.$transaction([
+      db.user.update({
+        where: { id: userId },
+        data: {
+          username: validation.username,
+          usernameNormalized: validation.normalized,
+          onboardedAt: new Date(),
+        },
+      }),
+      db.authIntent.delete({ where: { id: intent.id } }),
+    ]);
+    cookieStore.delete("olnk-signup-intent");
+  } catch {
+    // A unique constraint is the final authority. The user is sent to onboarding
+    // to choose another name if this reservation lost a race.
+  }
+}
+
+export const authConfig = {
+  providers,
+  adapter: PrismaAdapter(db),
+  pages: {
+    signIn: "/giris",
+    verifyRequest: "/giris?durum=eposta-gonderildi",
+    error: "/giris",
+  },
+  session: { strategy: "database" },
+  callbacks: {
+    session: async ({ session, user }) => {
+      const account = await db.user.findUnique({
+        where: { id: user.id },
+        select: { username: true },
+      });
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+          username: account?.username ?? null,
+        },
+      };
+    },
+  },
+  events: {
+    createUser: async ({ user }) => {
+      await ensureTheme(user.id);
+    },
+    signIn: async ({ user }) => {
+      await ensureTheme(user.id);
+      await claimSignupIntent(user.id, user.email ?? null);
+    },
   },
 } satisfies NextAuthConfig;
