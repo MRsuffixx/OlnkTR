@@ -52,6 +52,7 @@ vite.config.ts.timestamp-*
 /openapi.json
 /prisma/generated/
 /generated
+/generated/*
 
 # Tailwind CSS Önbelleği
 /tailwindcss-cache.mjs
