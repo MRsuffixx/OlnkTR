@@ -5,9 +5,19 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
 
+# Never mutate node_modules as a side effect of `pnpm start` or another script.
+# Developers receive a warning and can run an explicit, reviewable install.
+verifyDepsBeforeRun: warn
+
 # Auth.js v5 currently declares Nodemailer 7 even though these exact releases
 # only use the createTransport/sendMail API retained by the patched v9 line.
 peerDependencyRules:
   allowedVersions:
     '@auth/core@0.41.2>nodemailer': '9.0.3'
     'next-auth@5.0.0-beta.31>nodemailer': '9.0.3'
+
+overrides:
+  '@hono/node-server': '1.19.13'
+  'postman-request>qs': '6.15.3'
+  'postman-request>uuid': '11.1.1'
+  'next>postcss': '8.5.20'
