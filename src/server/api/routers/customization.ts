@@ -70,10 +70,7 @@ export const customizationRouter = createTRPCRouter({
             const count = await tx.customDomain.count({
               where: {
                 userId: ctx.session.user.id,
-                OR: [
-                  { status: "VERIFIED" },
-                  { claimExpiresAt: { gt: now } },
-                ],
+                OR: [{ status: "VERIFIED" }, { claimExpiresAt: { gt: now } }],
               },
             });
             if (count >= 3)
@@ -212,6 +209,17 @@ export const customizationRouter = createTRPCRouter({
         await tx.customDomain.deleteMany({
           where: { domainNormalized: challenge.domainNormalized },
         });
+        const activeDomainCount = await tx.customDomain.count({
+          where: {
+            userId: ctx.session.user.id,
+            OR: [{ status: "VERIFIED" }, { claimExpiresAt: { gt: now } }],
+          },
+        });
+        if (activeDomainCount >= 3)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "En fazla üç alan adı ekleyebilirsiniz.",
+          });
         const domain = await tx.customDomain.create({
           data: {
             userId: ctx.session.user.id,
@@ -255,7 +263,11 @@ export const customizationRouter = createTRPCRouter({
           "video/mp4",
           "video/webm",
         ]),
-        sizeBytes: z.number().int().positive().max(25 * 1024 * 1024),
+        sizeBytes: z
+          .number()
+          .int()
+          .positive()
+          .max(25 * 1024 * 1024),
       }),
     )
     .mutation(async ({ ctx, input }) => {

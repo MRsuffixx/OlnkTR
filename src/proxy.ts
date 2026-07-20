@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { getAppOrigin } from "~/lib/app-url";
 import { db } from "~/server/db";
+import { hasProAccess } from "~/server/entitlements";
 
 function controlledResponse(status: 404 | 410) {
   return new NextResponse(
@@ -40,15 +41,7 @@ export async function proxy(request: NextRequest) {
     include: { user: { select: { username: true, subscription: true } } },
   });
   if (!domain) return controlledResponse(404);
-  const subscription = domain.user.subscription;
-  const entitled = Boolean(
-    subscription?.plan === "PRO" &&
-      ["ACTIVE", "TRIALING", "PAST_DUE", "CANCELED"].includes(
-        subscription.status,
-      ) &&
-      subscription.currentPeriodEnd &&
-      subscription.currentPeriodEnd > new Date(),
-  );
+  const entitled = hasProAccess(domain.user.subscription);
   if (
     domain.status !== "VERIFIED" ||
     !domain.user.username ||

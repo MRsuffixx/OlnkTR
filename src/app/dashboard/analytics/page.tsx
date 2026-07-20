@@ -12,10 +12,12 @@ import {
 import Link from "next/link";
 
 import { api } from "~/trpc/server";
+import { requireDashboardSession } from "~/server/auth/require-dashboard-session";
 
 export const metadata = { title: "Analitik" };
 
 export default async function AnalyticsPage() {
+  await requireDashboardSession();
   const data = await api.analytics.overview({ days: 30 });
   const max = Math.max(...data.series.map((point) => point.clicks), 1);
   const top = [...data.links].sort((a, b) => b.clicks - a.clicks);
