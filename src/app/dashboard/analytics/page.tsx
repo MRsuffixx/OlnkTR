@@ -1,4 +1,5 @@
-import { BarChart3, CalendarDays, MousePointerClick, TrendingUp } from "lucide-react";
+import { BarChart3, CalendarDays, Crown, Eye, Globe2, MousePointerClick, Smartphone, TrendingUp, Users } from "lucide-react";
+import Link from "next/link";
 
 import { api } from "~/trpc/server";
 
@@ -45,6 +46,11 @@ export default async function AnalyticsPage() {
           {top.length === 0 && <div className="py-12 text-center text-sm text-ink/45">Bağlantı eklediğinde performansı burada göreceksin.</div>}
         </div>
       </section>
+
+      {data.advanced ? <section className="mt-5 rounded-3xl border border-ink/10 bg-ink p-5 text-paper sm:p-7"><div className="flex items-center justify-between"><div><span className="rounded-full bg-yellow px-2.5 py-1 text-[10px] font-black text-ink">PRO ANALİTİK</span><h2 className="mt-3 text-2xl font-black">Ziyaretçini daha iyi tanı.</h2></div><Globe2 className="size-8 text-mint" /></div><div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><Metric icon={Eye} label="Profil görüntüleme" value={data.advanced.views} /><Metric icon={Users} label="Tekil ziyaretçi" value={data.advanced.uniqueVisitors} /><Breakdown icon={Smartphone} label="Cihazlar" rows={data.advanced.devices} /><Breakdown icon={Globe2} label="Ülkeler" rows={data.advanced.countries} /></div><div className="mt-3 rounded-2xl bg-white/8 p-4"><h3 className="text-xs font-bold text-paper/55">En güçlü kaynaklar</h3><div className="mt-3 flex flex-wrap gap-2">{data.advanced.sources.map((source) => <span key={source.label} className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold">{source.label} · {source.count}</span>)}</div></div></section> : <section className="mt-5 flex flex-col items-start rounded-3xl border border-yellow bg-yellow/20 p-6 sm:flex-row sm:items-center sm:justify-between"><div className="flex gap-3"><span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-yellow"><Crown className="size-5" /></span><div><h2 className="font-black">Profil görüntüleme, kaynak, ülke ve cihaz analizi</h2><p className="mt-1 text-sm text-ink/50">Ham ziyaret olayları hazır; ayrıntılı rapor Pro ile açılır.</p></div></div><Link href="/dashboard/billing" className="mt-4 rounded-full bg-ink px-5 py-2.5 text-sm font-black text-paper sm:mt-0">Pro'yu incele</Link></section>}
     </main>
   );
 }
+
+function Metric({ icon: Icon, label, value }: { icon: typeof Eye; label: string; value: number }) { return <div className="rounded-2xl bg-white/8 p-4"><Icon className="size-4 text-mint" /><div className="mt-3 text-3xl font-black">{value.toLocaleString("tr-TR")}</div><p className="mt-1 text-xs text-paper/55">{label}</p></div>; }
+function Breakdown({ icon: Icon, label, rows }: { icon: typeof Eye; label: string; rows: Array<{ label: string; count: number }> }) { return <div className="rounded-2xl bg-white/8 p-4"><div className="flex items-center gap-2"><Icon className="size-4 text-mint" /><span className="text-xs text-paper/55">{label}</span></div><div className="mt-3 space-y-1">{rows.slice(0, 3).map((row) => <div key={row.label} className="flex justify-between text-xs font-bold"><span className="truncate">{row.label}</span><span>{row.count}</span></div>)}{!rows.length && <span className="text-xs text-paper/40">Henüz veri yok</span>}</div></div>; }

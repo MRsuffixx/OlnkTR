@@ -94,9 +94,9 @@ export const authConfig = {
   providers,
   adapter: PrismaAdapter(db),
   pages: {
-    signIn: "/giris",
-    verifyRequest: "/giris?durum=eposta-gonderildi",
-    error: "/giris",
+    signIn: "/login",
+    verifyRequest: "/login?status=email-sent",
+    error: "/login",
   },
   session: { strategy: "database" },
   callbacks: {

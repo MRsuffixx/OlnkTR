@@ -1,21 +1,32 @@
 import { createHash } from "node:crypto";
-import { after, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
+import { hasProAccess } from "~/server/entitlements";
+import { linkAccessCookieName, verifyLinkAccessToken } from "~/server/security/link-access";
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const link = await db.profileLink.findFirst({
     where: { id, enabled: true, url: { not: "" } },
-    select: { id: true, userId: true, url: true },
+    include: { user: { select: { username: true, subscription: true } } },
   });
 
   if (!link) {
     return NextResponse.redirect(new URL("/", request.url), 302);
+  }
+
+  const pro = hasProAccess(link.user.subscription);
+  const now = new Date();
+  const scheduledOut = pro && ((link.scheduledStart && link.scheduledStart > now) || (link.scheduledEnd && link.scheduledEnd <= now));
+  if (scheduledOut) return NextResponse.redirect(new URL(`/${link.user.username ?? ""}`, request.url), 302);
+  if (pro && link.passwordHash) {
+    const token = request.cookies.get(linkAccessCookieName(id))?.value;
+    if (!verifyLinkAccessToken(id, token)) return NextResponse.redirect(new URL(`/unlock/${id}`, request.url), 302);
   }
 
   const headers = request.headers;

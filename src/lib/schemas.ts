@@ -1,52 +1,54 @@
 import { z } from "zod";
 
-const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Geçerli bir renk seçin.");
-const optionalWebUrl = z
-  .string()
-  .trim()
-  .max(2048)
-  .refine((value) => {
-    if (!value) return true;
-    try {
-      const url = new URL(value);
-      return url.protocol === "http:" || url.protocol === "https:";
-    } catch {
-      return false;
-    }
-  }, "Bağlantı http:// veya https:// ile başlamalı.");
+import { appearanceSchema, hexColor } from "~/lib/appearance";
 
-export const usernameInput = z.object({
-  username: z.string().min(1).max(64),
-});
+const optionalWebUrl = z.string().trim().max(2048).refine((value) => {
+  if (!value) return true;
+  try {
+    return ["http:", "https:"].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}, "Bağlantı http:// veya https:// ile başlamalı.");
+
+const optionalDateTime = z.union([z.literal(""), z.iso.datetime({ offset: true })]).nullable();
+
+export const usernameInput = z.object({ username: z.string().min(1).max(64) });
 
 export const themeInput = z.object({
-  backgroundType: z.enum(["SOLID", "GRADIENT", "IMAGE"]),
+  backgroundType: z.enum(["SOLID", "GRADIENT", "IMAGE", "VIDEO", "ANIMATED"]),
   backgroundValue: z.string().trim().max(2048),
-  buttonStyle: z.enum(["SOLID", "OUTLINE", "GLASS", "SHADOW"]),
+  buttonStyle: z.enum(["SOLID", "OUTLINE", "GLASS", "SHADOW", "THREE_D"]),
   buttonShape: z.enum(["ROUNDED", "PILL", "SQUARE"]),
   buttonColor: hexColor,
   textColor: hexColor,
   accentColor: hexColor,
   fontFamily: z.enum(["MODERN", "FRIENDLY", "EDITORIAL", "MONO"]),
   showBranding: z.boolean(),
-}).superRefine((theme, context) => {
-  if (theme.backgroundType === "SOLID" && !hexColor.safeParse(theme.backgroundValue).success) {
-    context.addIssue({ code: z.ZodIssueCode.custom, path: ["backgroundValue"], message: "Geçerli bir arka plan rengi seçin." });
-  }
-  if (theme.backgroundType === "IMAGE" && theme.backgroundValue && !optionalWebUrl.safeParse(theme.backgroundValue).success) {
-    context.addIssue({ code: z.ZodIssueCode.custom, path: ["backgroundValue"], message: "Geçerli bir görsel adresi girin." });
-  }
-  if (theme.backgroundType === "GRADIENT" && !/^linear-gradient\([#a-zA-Z0-9,.%()\s-]+\)$/.test(theme.backgroundValue)) {
-    context.addIssue({ code: z.ZodIssueCode.custom, path: ["backgroundValue"], message: "Geçerli bir renk geçişi seçin." });
-  }
+});
+
+export const linkCustomizationSchema = z.object({
+  buttonColor: hexColor.nullable().default(null),
+  textColor: hexColor.nullable().default(null),
+  fontFamily: z.enum(["inherit", "Manrope", "Fraunces", "Inter", "Montserrat", "Lora", "Roboto Mono"]).default("inherit"),
+  iconStyle: z.enum(["favicon", "mono", "hidden"]).default("favicon"),
 });
 
 export const workspaceLinkInput = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   title: z.string().trim().min(1, "Başlık gerekli.").max(80),
   url: optionalWebUrl,
   iconUrl: optionalWebUrl.nullable(),
   enabled: z.boolean(),
+  customization: linkCustomizationSchema,
+  scheduledStart: optionalDateTime,
+  scheduledEnd: optionalDateTime,
+  passwordProtected: z.boolean(),
+  embedType: z.enum(["LINK", "YOUTUBE", "SPOTIFY"]),
+}).superRefine((link, context) => {
+  if (link.scheduledStart && link.scheduledEnd && new Date(link.scheduledStart) >= new Date(link.scheduledEnd)) {
+    context.addIssue({ code: "custom", path: ["scheduledEnd"], message: "Bitiş zamanı başlangıçtan sonra olmalı." });
+  }
 });
 
 export const workspaceInput = z.object({
@@ -55,13 +57,15 @@ export const workspaceInput = z.object({
   bio: z.string().trim().max(160),
   image: optionalWebUrl.nullable(),
   theme: themeInput,
+  appearance: appearanceSchema,
+  customCss: z.string().max(12_000),
   links: z.array(workspaceLinkInput).max(50),
 });
 
 export type WorkspaceInput = z.infer<typeof workspaceInput>;
 
 export const registerIntentInput = z.object({
-  email: z.string().trim().toLowerCase().email().max(254),
+  email: z.email().trim().toLowerCase().max(254),
   username: z.string().min(1).max(64),
 });
 
@@ -69,4 +73,9 @@ export const accountProfileInput = z.object({
   name: z.string().trim().min(1).max(60),
   bio: z.string().trim().max(160),
   image: optionalWebUrl.nullable(),
+});
+
+export const setLinkPasswordInput = z.object({
+  linkId: z.uuid(),
+  password: z.string().min(6, "Parola en az 6 karakter olmalı.").max(72).nullable(),
 });

@@ -85,7 +85,7 @@ export function AuthForm({ mode, googleEnabled, emailEnabled, emailSent }: AuthF
         <div className="grid size-11 place-items-center rounded-full bg-ink text-paper"><Check className="size-5" /></div>
         <h2 className="mt-5 text-xl font-black">E-postanı kontrol et</h2>
         <p className="mt-2 leading-7 text-ink/70">Güvenli giriş bağlantını gönderdik. Bağlantı 10 dakika boyunca geçerli.</p>
-        <Link href="/giris" className="mt-5 inline-flex font-bold underline decoration-2 underline-offset-4">Başka bir adres dene</Link>
+        <Link href="/login" className="mt-5 inline-flex font-bold underline decoration-2 underline-offset-4">Başka bir adres dene</Link>
       </div>
     );
   }

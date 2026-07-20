@@ -1,17 +1,18 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
   output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum BackgroundType {
   SOLID
   GRADIENT
   IMAGE
+  VIDEO
+  ANIMATED
 }
 
 enum ButtonStyle {
@@ -19,6 +20,7 @@ enum ButtonStyle {
   OUTLINE
   GLASS
   SHADOW
+  THREE_D
 }
 
 enum ButtonShape {
@@ -32,6 +34,70 @@ enum FontFamily {
   FRIENDLY
   EDITORIAL
   MONO
+}
+
+enum Plan {
+  FREE
+  PRO
+}
+
+enum SubscriptionStatus {
+  INCOMPLETE
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  UNPAID
+  CANCELED
+  EXPIRED
+  REFUNDED
+}
+
+enum BillingProvider {
+  STRIPE
+  IYZICO
+  PAYTR
+  ADYEN
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum PaymentIntentStatus {
+  PENDING
+  CHECKOUT_CREATED
+  SUCCEEDED
+  FAILED
+  CANCELED
+  REFUNDED
+  DISPUTED
+}
+
+enum InvoiceStatus {
+  OPEN
+  PAID
+  VOID
+  FAILED
+  REFUNDED
+}
+
+enum WebhookProcessStatus {
+  RECEIVED
+  PROCESSED
+  FAILED
+}
+
+enum EmbedType {
+  LINK
+  YOUTUBE
+  SPOTIFY
+}
+
+enum DomainStatus {
+  PENDING
+  VERIFIED
+  FAILED
 }
 
 model User {
@@ -53,6 +119,12 @@ model User {
   theme    Theme?
   links    ProfileLink[]
   clicks   ClickEvent[]
+  subscription   Subscription?
+  paymentIntents PaymentIntent[]
+  billingInvoices BillingInvoice[]
+  profileViews   ProfileViewEvent[]
+  customDomains  CustomDomain[]
+  assets         UploadedAsset[]
 
   @@index([usernameNormalized])
 }
@@ -69,6 +141,9 @@ model Theme {
   accentColor     String         @default("#F06432")
   fontFamily      FontFamily     @default(FRIENDLY)
   showBranding    Boolean        @default(true)
+  settings        Json           @default("{}")
+  settingsVersion Int            @default(1)
+  customCss       String?        @db.Text
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
@@ -83,6 +158,11 @@ model ProfileLink {
   iconUrl   String?  @db.VarChar(2048)
   position  Int
   enabled   Boolean  @default(true)
+  customization Json @default("{}")
+  scheduledStart DateTime?
+  scheduledEnd   DateTime?
+  passwordHash   String?  @db.VarChar(256)
+  embedType      EmbedType @default(LINK)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -92,6 +172,7 @@ model ProfileLink {
   @@unique([id, userId])
   @@index([userId, position])
   @@index([userId, enabled])
+  @@index([userId, scheduledStart, scheduledEnd])
 }
 
 model ClickEvent {
@@ -110,6 +191,141 @@ model ClickEvent {
   @@index([linkId, createdAt])
   @@index([userId, createdAt])
   @@index([createdAt])
+}
+
+model ProfileViewEvent {
+  id          String   @id @default(cuid())
+  userId      String
+  createdAt   DateTime @default(now())
+  referrer    String?  @db.VarChar(512)
+  userAgent   String?  @db.VarChar(512)
+  country     String?  @db.VarChar(2)
+  deviceType String?   @db.VarChar(24)
+  visitorHash String?  @db.VarChar(64)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, country, createdAt])
+  @@index([userId, deviceType, createdAt])
+}
+
+model Subscription {
+  id                      String             @id @default(cuid())
+  userId                  String             @unique
+  plan                    Plan               @default(PRO)
+  provider                BillingProvider
+  status                  SubscriptionStatus @default(INCOMPLETE)
+  billingInterval         BillingInterval
+  amountMinor             Int
+  currency                String             @db.VarChar(3)
+  providerCustomerId      String?            @db.VarChar(191)
+  providerSubscriptionId  String?            @db.VarChar(191)
+  providerPaymentMethodId String?            @db.VarChar(191)
+  currentPeriodStart      DateTime?
+  currentPeriodEnd        DateTime?
+  cancelAtPeriodEnd       Boolean            @default(false)
+  canceledAt              DateTime?
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerSubscriptionId])
+  @@index([status, currentPeriodEnd])
+  @@index([provider, status])
+}
+
+model PaymentIntent {
+  id                     String              @id @default(cuid())
+  userId                 String
+  provider               BillingProvider
+  billingInterval        BillingInterval
+  amountMinor            Int
+  currency               String              @db.VarChar(3)
+  status                 PaymentIntentStatus @default(PENDING)
+  externalSessionId      String?             @db.VarChar(191)
+  externalSubscriptionId String?             @db.VarChar(191)
+  renewalKey             String?             @unique @db.VarChar(191)
+  failureCode            String?             @db.VarChar(64)
+  failureMessage         String?             @db.VarChar(512)
+  expiresAt              DateTime?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, externalSessionId])
+  @@index([userId, createdAt])
+  @@index([provider, status, createdAt])
+}
+
+model BillingInvoice {
+  id                String          @id @default(cuid())
+  userId            String
+  provider          BillingProvider
+  providerInvoiceId String?         @db.VarChar(191)
+  status            InvoiceStatus
+  amountMinor       Int
+  currency          String          @db.VarChar(3)
+  periodStart       DateTime?
+  periodEnd         DateTime?
+  invoiceUrl        String?         @db.VarChar(2048)
+  paidAt            DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerInvoiceId])
+  @@index([userId, createdAt])
+}
+
+model WebhookEvent {
+  id              String               @id @default(cuid())
+  provider        BillingProvider
+  externalEventId String               @db.VarChar(191)
+  payloadHash     String               @db.VarChar(64)
+  status          WebhookProcessStatus @default(RECEIVED)
+  attempts        Int                  @default(1)
+  lastError       String?              @db.VarChar(1024)
+  processedAt     DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@unique([provider, externalEventId])
+  @@index([status, createdAt])
+}
+
+model CustomDomain {
+  id                String       @id @default(cuid())
+  userId            String
+  domain             String       @db.VarChar(253)
+  domainNormalized   String       @unique @db.VarChar(253)
+  verificationToken String       @unique @db.VarChar(64)
+  status             DomainStatus @default(PENDING)
+  verifiedAt         DateTime?
+  lastCheckedAt      DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+}
+
+model UploadedAsset {
+  id        String   @id @default(cuid())
+  userId    String
+  objectKey String   @unique @db.VarChar(512)
+  publicUrl String   @db.VarChar(2048)
+  mimeType  String   @db.VarChar(128)
+  sizeBytes Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model AuthIntent {

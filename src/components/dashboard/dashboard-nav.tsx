@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, ExternalLink, LayoutDashboard, LogOut, Settings } from "lucide-react";
+import { BarChart3, CreditCard, ExternalLink, LayoutDashboard, LogOut, Settings } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 const items = [
   { href: "/dashboard", label: "Sayfam", icon: LayoutDashboard },
   { href: "/dashboard/analytics", label: "Analitik", icon: BarChart3 },
+  { href: "/dashboard/billing", label: "Plan", icon: CreditCard },
   { href: "/dashboard/settings", label: "Ayarlar", icon: Settings },
 ];
 

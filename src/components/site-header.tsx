@@ -15,7 +15,7 @@ export async function SiteHeader() {
             Özellikler
           </Link>
           <Link
-            href={session ? "/dashboard" : "/giris"}
+            href={session ? "/dashboard" : "/login"}
             className="rounded-full border-2 border-ink bg-paper px-4 py-2 text-sm font-bold shadow-[3px_3px_0_#17211b] transition hover:-translate-y-0.5"
           >
             {session ? "Panele git" : "Giriş yap"}

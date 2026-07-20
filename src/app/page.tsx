@@ -32,7 +32,7 @@ export default function Home() {
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
-                href="/kayit"
+                href="/register"
                 className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-ink px-7 text-base font-bold text-paper shadow-[5px_5px_0_#F06432] transition hover:-translate-y-1"
               >
                 Ücretsiz sayfanı aç
@@ -104,7 +104,7 @@ export default function Home() {
         <div className="mx-auto flex max-w-5xl flex-col items-center text-center">
           <span className="rounded-full bg-ink px-3 py-1.5 text-xs font-black tracking-widest text-paper uppercase">olnk.tr/senin-adın</span>
           <h2 className="display-serif mt-7 max-w-4xl text-5xl leading-[.95] font-bold sm:text-7xl">İnsanları doğru yere götüren adresin hazır.</h2>
-          <Link href="/kayit" className="mt-9 inline-flex min-h-14 items-center gap-2 rounded-full bg-paper px-7 font-black text-ink shadow-[5px_5px_0_#17211b] transition hover:-translate-y-1">
+          <Link href="/register" className="mt-9 inline-flex min-h-14 items-center gap-2 rounded-full bg-paper px-7 font-black text-ink shadow-[5px_5px_0_#17211b] transition hover:-translate-y-1">
             Adını kap <ArrowUpRight className="size-5" />
           </Link>
         </div>
@@ -114,8 +114,8 @@ export default function Home() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 sm:flex-row">
           <Brand />
           <div className="flex gap-5 text-sm font-semibold text-ink/60">
-            <Link href="/gizlilik">Gizlilik</Link>
-            <Link href="/kosullar">Koşullar</Link>
+            <Link href="/privacy">Gizlilik</Link>
+            <Link href="/terms">Koşullar</Link>
             <a href="mailto:merhaba@olnk.tr">İletişim</a>
           </div>
           <p className="text-sm text-ink/50">© {new Date().getFullYear()} olnk</p>

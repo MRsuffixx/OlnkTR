@@ -8,7 +8,7 @@ export const metadata = { title: "Profil adresini seç" };
 
 export default async function OnboardingPage() {
   const session = await auth();
-  if (!session) redirect("/giris");
+  if (!session) redirect("/login");
   if (session.user.username) redirect("/dashboard");
 
   return (

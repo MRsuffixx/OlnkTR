@@ -6,7 +6,7 @@ import { auth } from "~/server/auth";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-  if (!session) redirect("/giris");
+  if (!session) redirect("/login");
   if (!session.user.username) redirect("/onboarding");
 
   return (

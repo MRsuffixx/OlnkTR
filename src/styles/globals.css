@@ -80,6 +80,72 @@ a {
   scrollbar-color: rgba(23, 33, 27, 0.25) transparent;
 }
 
+.input {
+  height: 2.75rem;
+  width: 100%;
+  border: 1px solid rgb(23 33 27 / 15%);
+  border-radius: 0.75rem;
+  background: white;
+  padding-inline: 0.75rem;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--ink);
+}
+
+.olnk-link[data-hover="lift"]:hover { transform: translateY(-4px); }
+.olnk-link[data-hover="grow"]:hover { transform: scale(1.025); }
+.olnk-link[data-hover="tilt"]:hover { transform: rotate(-1deg) scale(1.01); }
+.olnk-link[data-hover="glow"]:hover { filter: drop-shadow(0 0 14px rgb(248 201 92 / 75%)); }
+.olnk-link[data-entrance="fade"] { animation: olnk-fade .55s both; }
+.olnk-link[data-entrance="slide"] { animation: olnk-slide .55s both; }
+.olnk-link[data-entrance="stagger"] { animation: olnk-slide .55s both; }
+.olnk-link[data-entrance="pop"] { animation: olnk-pop .5s both; }
+
+.olnk-particles {
+  pointer-events: none;
+  opacity: .42;
+  background-image: radial-gradient(circle, #fff 1.5px, transparent 1.8px);
+  background-size: 34px 34px;
+  animation: olnk-particles 12s linear infinite;
+}
+
+.olnk-gradient-motion {
+  pointer-events: none;
+  opacity: .58;
+  background: linear-gradient(120deg, #f8c95c, #f06432, #b9ddc7, #f5f0de);
+  background-size: 300% 300%;
+  animation: olnk-gradient 9s ease infinite;
+  mix-blend-mode: soft-light;
+}
+
+.olnk-custom-cursor {
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  translate: -50% -50%;
+  will-change: transform;
+}
+.olnk-custom-cursor--dot { width: 12px; height: 12px; border-radius: 50%; }
+.olnk-custom-cursor--ring { width: 30px; height: 30px; border: 3px solid; border-radius: 50%; }
+.olnk-custom-cursor--heart::before { content: "♥"; font-size: 25px; }
+.olnk-custom-cursor--star::before { content: "★"; font-size: 25px; }
+.olnk-hide-cursor, .olnk-hide-cursor * { cursor: none !important; }
+.olnk-cursor-trail { position: fixed; z-index: 9998; width: 7px; height: 7px; pointer-events: none; border-radius: 50%; translate: -50% -50%; animation: olnk-trail .65s ease-out forwards; }
+.olnk-cursor-trail--sparkles { clip-path: polygon(50% 0,61% 38%,100% 50%,61% 62%,50% 100%,39% 62%,0 50%,39% 38%); width: 12px; height: 12px; }
+.olnk-click-ripple { position: fixed; z-index: 9997; width: 16px; height: 16px; pointer-events: none; border: 3px solid; border-radius: 50%; translate: -50% -50%; animation: olnk-ripple .7s ease-out forwards; }
+
+@keyframes olnk-fade { from { opacity: 0; } }
+@keyframes olnk-slide { from { opacity: 0; transform: translateY(20px); } }
+@keyframes olnk-pop { 0% { opacity: 0; transform: scale(.86); } 70% { transform: scale(1.03); } }
+@keyframes olnk-particles { to { background-position: 34px 68px; } }
+@keyframes olnk-gradient { 0%,100% { background-position: 0 50%; } 50% { background-position: 100% 50%; } }
+@keyframes olnk-trail { to { opacity: 0; transform: scale(.2) translateY(15px); } }
+@keyframes olnk-ripple { to { opacity: 0; transform: scale(5); } }
+
 @keyframes float-in {
   from {
     opacity: 0;
