@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 process.env.DATABASE_URL ??= "postgresql://test:test@localhost:5432/olnk_test";
-process.env.NODE_ENV = "test";
+Object.assign(process.env, { NODE_ENV: "test" });
 
 export default defineConfig({
   resolve: {
