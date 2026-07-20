@@ -4,3 +4,14 @@ allowBuilds:
   prisma: true
   sharp: true
   unrs-resolver: true
+
+# Auth.js v5 currently declares Nodemailer 7 even though its SMTP integration
+# only uses the createTransport/sendMail API that remains compatible in v9.
+# Keep this narrow to the exact reviewed Auth.js releases.
+packageExtensions:
+  '@auth/core@0.41.2':
+    peerDependencies:
+      nodemailer: '>=7 <10'
+  'next-auth@5.0.0-beta.31':
+    peerDependencies:
+      nodemailer: '>=7 <10'
