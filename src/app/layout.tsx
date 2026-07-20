@@ -4,9 +4,10 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 
 import { TRPCReactProvider } from "~/trpc/react";
+import { getAppOrigin } from "~/lib/app-url";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://olnk.tr"),
+  metadataBase: new URL(getAppOrigin()),
   title: { default: "olnk — Tek link, bütün sen", template: "%s · olnk" },
   description:
     "Bütün içeriklerini tek, sana ait bir bağlantıda buluştur. Hızlı, sade ve Türkçe link sayfan.",

@@ -27,6 +27,28 @@ function config() {
   };
 }
 
+export function getPaytrTestMode() {
+  if (env.NODE_ENV !== "production") return "1" as const;
+  if (env.PAYTR_TEST_MODE === "1") return "1" as const;
+  if (
+    env.PAYTR_TEST_MODE === "0" &&
+    env.PAYTR_LIVE_MODE_ACKNOWLEDGED === "true"
+  )
+    return "0" as const;
+  throw new PaymentConfigurationError(
+    "Production PayTR mode must be explicit; live mode also requires acknowledgement.",
+  );
+}
+
+export function isPaytrModeConfigured() {
+  try {
+    getPaytrTestMode();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function hmacBase64(value: string, key: string) {
   return createHmac("sha256", key).update(value).digest("base64");
 }
@@ -44,6 +66,7 @@ export const paytrAdapter: PaymentProviderAdapter = {
 
   async createCheckoutSession(input: CheckoutInput) {
     const merchant = config();
+    const testMode = getPaytrTestMode();
     if (!input.billingDetails)
       throw new Error("PayTR için iletişim ve fatura bilgileri gerekli.");
     const currency = input.currency === "TRY" ? "TL" : input.currency;
@@ -68,7 +91,7 @@ export const paytrAdapter: PaymentProviderAdapter = {
       noInstallment +
       maxInstallment +
       currency +
-      env.PAYTR_TEST_MODE;
+      testMode;
     const token = hmacBase64(hashString + merchant.salt, merchant.key);
     const form = new URLSearchParams({
       merchant_id: merchant.id,
@@ -84,11 +107,11 @@ export const paytrAdapter: PaymentProviderAdapter = {
       user_name: input.user.name,
       user_address: input.billingDetails.address,
       user_phone: input.billingDetails.phone,
-      merchant_ok_url: `${input.returnUrl}?checkout=success`,
-      merchant_fail_url: `${input.returnUrl}?checkout=failed`,
+      merchant_ok_url: `${input.returnUrl}?checkout=return&intent=${encodeURIComponent(input.intentId)}`,
+      merchant_fail_url: `${input.returnUrl}?checkout=failed&intent=${encodeURIComponent(input.intentId)}`,
       timeout_limit: "10",
       currency,
-      test_mode: env.PAYTR_TEST_MODE,
+      test_mode: testMode,
       lang: "tr",
     });
     const response = await fetch("https://www.paytr.com/odeme/api/get-token", {

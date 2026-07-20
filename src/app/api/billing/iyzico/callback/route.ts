@@ -12,6 +12,17 @@ export async function POST(request: Request) {
   const token = body.get("token");
   if (!token || !intentId)
     return Response.json({ error: "Invalid callback" }, { status: 400 });
+  const intent = await db.paymentIntent.findFirst({
+    where: {
+      id: intentId,
+      provider: "IYZICO",
+      externalSessionId: token,
+      status: { in: ["PROCESSING", "CHECKOUT_CREATED"] },
+    },
+    select: { id: true },
+  });
+  if (!intent)
+    return Response.json({ error: "Invalid callback" }, { status: 400 });
   let outcome = "failed";
   try {
     const event = await retrieveIyzicoCheckout(token, intentId);
@@ -30,5 +41,7 @@ export async function POST(request: Request) {
       },
     });
   }
-  redirect(`/dashboard/billing?checkout=${outcome}`);
+  redirect(
+    `/dashboard/billing?checkout=${outcome}&intent=${encodeURIComponent(intentId)}`,
+  );
 }

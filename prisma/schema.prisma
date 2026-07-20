@@ -66,6 +66,7 @@ enum BillingInterval {
 
 enum PaymentIntentStatus {
   PENDING
+  PROCESSING
   CHECKOUT_CREATED
   SUCCEEDED
   FAILED
@@ -104,12 +105,14 @@ model User {
   id                 String    @id @default(cuid())
   name               String?
   email              String?   @unique
+  emailNormalized    String?   @unique @db.VarChar(254)
   emailVerified      DateTime?
   image              String?
   username           String?   @unique
   usernameNormalized String?   @unique
   bio                String    @default("") @db.VarChar(160)
   onboardedAt        DateTime?
+  usernameChangedAt  DateTime?
   editorRevision     Int       @default(0)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
@@ -222,6 +225,8 @@ model Subscription {
   providerCustomerId      String?            @db.VarChar(191)
   providerSubscriptionId  String?            @db.VarChar(191)
   providerPaymentMethodId String?            @db.VarChar(191)
+  providerStartedAt       DateTime?
+  lastProviderEventAt     DateTime?
   currentPeriodStart      DateTime?
   currentPeriodEnd        DateTime?
   cancelAtPeriodEnd       Boolean            @default(false)
@@ -246,7 +251,11 @@ model PaymentIntent {
   status                 PaymentIntentStatus @default(PENDING)
   externalSessionId      String?             @db.VarChar(191)
   externalSubscriptionId String?             @db.VarChar(191)
+  checkoutPresentation   Json?
+  activeCheckoutKey      String?             @unique @db.VarChar(191)
   renewalKey             String?             @unique @db.VarChar(191)
+  reconciliationAttempts Int                 @default(0)
+  lastReconciledAt       DateTime?
   failureCode            String?             @db.VarChar(64)
   failureMessage         String?             @db.VarChar(512)
   expiresAt              DateTime?
@@ -331,13 +340,27 @@ model UploadedAsset {
 model AuthIntent {
   id                 String   @id @default(cuid())
   token              String   @unique
-  email              String   @unique
+  email              String
+  emailNormalized    String   @db.VarChar(254)
   username           String
-  usernameNormalized String   @unique
+  usernameNormalized String
   expiresAt          DateTime
   createdAt          DateTime @default(now())
 
   @@index([expiresAt])
+  @@index([emailNormalized, expiresAt])
+  @@index([usernameNormalized, expiresAt])
+}
+
+model RateLimitBucket {
+  key          String    @id @db.VarChar(64)
+  count        Int       @default(1)
+  windowStart  DateTime  @default(now())
+  blockedUntil DateTime?
+  updatedAt    DateTime  @updatedAt
+
+  @@index([updatedAt])
+  @@index([blockedUntil])
 }
 
 model UsernameBlocklist {

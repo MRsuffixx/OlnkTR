@@ -19,7 +19,7 @@ export type UsernameValidation =
   | { ok: false; reason: "format" | "policy" };
 
 export function normalizeUsername(value: string) {
-  return value.trim().toLocaleLowerCase("tr-TR");
+  return value.trim().toLowerCase();
 }
 
 export function normalizeForModeration(value: string) {
@@ -90,33 +90,20 @@ export async function validateUsernamePolicy(
 export async function isUsernameAvailable(
   value: string,
   excludeUserId?: string,
-  claimantEmail?: string | null,
 ) {
   const validation = await validateUsernamePolicy(value);
   if (!validation.ok) return { available: false as const, validation };
 
-  const [user, intent] = await Promise.all([
-    db.user.findFirst({
-      where: {
-        usernameNormalized: validation.normalized,
-        ...(excludeUserId ? { NOT: { id: excludeUserId } } : {}),
-      },
-      select: { id: true },
-    }),
-    db.authIntent.findFirst({
-      where: {
-        usernameNormalized: validation.normalized,
-        expiresAt: { gt: new Date() },
-        ...(claimantEmail
-          ? { NOT: { email: claimantEmail.toLocaleLowerCase("tr-TR") } }
-          : {}),
-      },
-      select: { id: true, email: true },
-    }),
-  ]);
+  const user = await db.user.findFirst({
+    where: {
+      usernameNormalized: validation.normalized,
+      ...(excludeUserId ? { NOT: { id: excludeUserId } } : {}),
+    },
+    select: { id: true },
+  });
 
   return {
-    available: !user && !intent,
+    available: !user,
     validation,
   } as const;
 }

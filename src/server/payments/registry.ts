@@ -4,7 +4,10 @@ import type { BillingProvider } from "../../../generated/prisma/client";
 import { env } from "~/env";
 import { adyenAdapter } from "~/server/payments/adapters/adyen";
 import { iyzicoAdapter } from "~/server/payments/adapters/iyzico";
-import { paytrAdapter } from "~/server/payments/adapters/paytr";
+import {
+  isPaytrModeConfigured,
+  paytrAdapter,
+} from "~/server/payments/adapters/paytr";
 import { stripeAdapter } from "~/server/payments/adapters/stripe";
 import type { PaymentProviderAdapter } from "~/server/payments/types";
 
@@ -23,6 +26,7 @@ export function getEnabledProviderIds(): BillingProvider[] {
     env.STRIPE_SECRET_KEY && env.STRIPE_WEBHOOK_SECRET ? "STRIPE" : null,
     env.IYZICO_API_KEY &&
     env.IYZICO_SECRET_KEY &&
+    env.IYZICO_MERCHANT_ID &&
     env.IYZICO_MONTHLY_PLAN_CODE &&
     env.IYZICO_YEARLY_PLAN_CODE &&
     localPricing
@@ -31,6 +35,7 @@ export function getEnabledProviderIds(): BillingProvider[] {
     env.PAYTR_MERCHANT_ID &&
     env.PAYTR_MERCHANT_KEY &&
     env.PAYTR_MERCHANT_SALT &&
+    isPaytrModeConfigured() &&
     localPricing
       ? "PAYTR"
       : null,

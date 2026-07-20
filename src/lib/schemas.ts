@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { normalizeEmail } from "~/lib/email";
+
 import { appearanceSchema, hexColor } from "~/lib/appearance";
 
 const optionalWebUrl = z
@@ -91,7 +93,7 @@ export const workspaceInput = z.object({
 export type WorkspaceInput = z.infer<typeof workspaceInput>;
 
 export const registerIntentInput = z.object({
-  email: z.email().trim().toLowerCase().max(254),
+  email: z.email().trim().max(254).transform(normalizeEmail),
   username: z.string().min(1).max(64),
 });
 

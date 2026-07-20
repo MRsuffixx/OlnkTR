@@ -21,7 +21,6 @@ export const usernameRouter = createTRPCRouter({
       const result = await isUsernameAvailable(
         input.username,
         ctx.session.user.id,
-        ctx.session.user.email,
       );
       return { available: result.available };
     }),

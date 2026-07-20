@@ -77,7 +77,7 @@ Add the generated value to `AUTH_SECRET` in `.env`.
 | `AUTH_SECRET` | Session and token security | Required in production; recommended locally |
 | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Google OAuth | Required when Google sign-in is enabled |
 | `EMAIL_SERVER`, `EMAIL_FROM` | Passwordless email sign-in | Required when email sign-in is enabled |
-| `NEXT_PUBLIC_APP_URL` | Canonical application URL | Recommended |
+| `NEXT_PUBLIC_APP_URL` | Canonical application URL (required in production) | Required in production |
 | Payment-provider variables | Pro plan checkout and webhooks | Optional |
 | `STORAGE_*` | S3-compatible avatar and background uploads | Optional |
 

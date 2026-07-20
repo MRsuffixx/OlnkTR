@@ -37,6 +37,7 @@ export type CheckoutPresentation =
 
 export type BillingEventType =
   | "payment_succeeded"
+  | "payment_failed"
   | "renewed"
   | "subscription_updated"
   | "canceled"
@@ -53,7 +54,15 @@ export type NormalizedBillingEvent = {
   providerCustomerId?: string;
   providerSubscriptionId?: string;
   providerPaymentMethodId?: string;
-  status?: "ACTIVE" | "PAST_DUE" | "CANCELED" | "UNPAID" | "REFUNDED";
+  status?:
+    | "INCOMPLETE"
+    | "TRIALING"
+    | "ACTIVE"
+    | "PAST_DUE"
+    | "UNPAID"
+    | "CANCELED"
+    | "EXPIRED"
+    | "REFUNDED";
   periodStart?: Date;
   periodEnd?: Date;
   amountMinor?: number;

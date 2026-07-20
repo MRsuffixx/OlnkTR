@@ -3,7 +3,12 @@ import { api } from "~/trpc/server";
 
 export const metadata = { title: "Plan ve faturalandırma" };
 
-export default async function BillingPage() {
+export default async function BillingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ checkout?: string; intent?: string }>;
+}) {
+  const params = await searchParams;
   const initial = await api.billing.overview();
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
@@ -19,7 +24,13 @@ export default async function BillingPage() {
           tek yerden yönet.
         </p>
       </div>
-      <BillingSettings initial={initial} />
+      <BillingSettings
+        initial={initial}
+        initialIntentId={
+          params.intent && params.intent.length <= 191 ? params.intent : null
+        }
+        initialCheckoutResult={params.checkout ?? null}
+      />
     </main>
   );
 }

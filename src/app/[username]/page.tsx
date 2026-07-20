@@ -16,6 +16,7 @@ import {
   type AppearanceSettings,
 } from "~/lib/appearance";
 import { linkCustomizationSchema } from "~/lib/schemas";
+import { getAppOrigin } from "~/lib/app-url";
 import { normalizeUsername } from "~/lib/username";
 import { db } from "~/server/db";
 import { hasProAccess, resolveAppearanceForPlan } from "~/server/entitlements";
@@ -198,16 +199,17 @@ export default async function PublicProfilePage({
   const initial = (profile.name ?? profile.username)
     .slice(0, 1)
     .toLocaleUpperCase("tr-TR");
+  const profileUrl = `${getAppOrigin()}/${profile.username}`;
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "ProfilePage",
     name: profile.name ?? profile.username,
     description: profile.bio,
-    url: `https://olnk.tr/${profile.username}`,
+    url: profileUrl,
     mainEntity: {
       "@type": "Person",
       name: profile.name ?? profile.username,
-      url: `https://olnk.tr/${profile.username}`,
+      url: profileUrl,
     },
   }).replace(/</g, "\\u003c");
   const alignment =

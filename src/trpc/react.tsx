@@ -45,9 +45,9 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
     api.createClient({
       links: [
         loggerLink({
-          enabled: (op) =>
-            process.env.NODE_ENV === "development" ||
-            (op.direction === "down" && op.result instanceof Error),
+          // tRPC's default logger includes mutation inputs. Billing inputs contain
+          // identity/address data, so browser logging is development-only.
+          enabled: () => process.env.NODE_ENV === "development",
         }),
         httpBatchStreamLink({
           transformer: SuperJSON,

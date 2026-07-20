@@ -40,6 +40,17 @@ function stringValue(value: unknown) {
   return typeof value === "string" ? value : undefined;
 }
 
+export class AdyenApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly retryable: boolean,
+  ) {
+    super(message);
+    this.name = "AdyenApiError";
+  }
+}
+
 async function adyenPost(
   url: string,
   body: Record<string, unknown>,
@@ -58,8 +69,10 @@ async function adyenPost(
   });
   const result = (await response.json()) as Record<string, unknown>;
   if (!response.ok)
-    throw new Error(
-      stringValue(result.message) ?? `Adyen ağ hatası (${response.status}).`,
+    throw new AdyenApiError(
+      stringValue(result.message) ?? `Adyen API error (${response.status}).`,
+      response.status,
+      response.status >= 500 || response.headers.get("transient-error") === "true",
     );
   return result;
 }
@@ -166,8 +179,8 @@ export const adyenAdapter: PaymentProviderAdapter = {
         return [
           {
             ...base,
-            type: success ? "payment_succeeded" : "past_due",
-            status: success ? "ACTIVE" : "PAST_DUE",
+            type: success ? "payment_succeeded" : "payment_failed",
+            status: success ? "ACTIVE" : "UNPAID",
           },
         ];
       if (code === "RECURRING_CONTRACT")
