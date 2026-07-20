@@ -8,7 +8,7 @@ import { db } from "~/server/db";
 const ENTITLED_STATUSES = new Set(["ACTIVE", "TRIALING", "PAST_DUE", "CANCELED"]);
 
 export function hasProAccess(subscription: Pick<Subscription, "plan" | "status" | "currentPeriodEnd"> | null | undefined, now = new Date()) {
-  if (!subscription || subscription.plan !== "PRO" || !ENTITLED_STATUSES.has(subscription.status)) return false;
+  if (subscription?.plan !== "PRO" || !ENTITLED_STATUSES.has(subscription.status)) return false;
   return !subscription.currentPeriodEnd || subscription.currentPeriodEnd > now;
 }
 

@@ -2,7 +2,7 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 
-import type { BillingInterval, BillingProvider, Prisma } from "../../../generated/prisma/client";
+import type { BillingInterval, BillingProvider } from "../../../generated/prisma/client";
 import { db } from "~/server/db";
 import { getPaymentProvider } from "~/server/payments/registry";
 import type { NormalizedBillingEvent } from "~/server/payments/types";

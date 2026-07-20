@@ -9,11 +9,12 @@ import { z } from "zod";
 import { env } from "~/env";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { hasProAccess } from "~/server/entitlements";
+import { db } from "~/server/db";
 
 const domainSchema = z.string().trim().toLowerCase().max(253).regex(/^(?!-)(?:[a-z0-9-]{1,63}\.)+[a-z]{2,63}$/);
 
-async function requirePro(ctx: { db: typeof import("~/server/db").db; session: { user: { id: string } } }) {
-  const subscription = await ctx.db.subscription.findUnique({ where: { userId: ctx.session.user.id } });
+async function requirePro(userId: string) {
+  const subscription = await db.subscription.findUnique({ where: { userId } });
   if (!hasProAccess(subscription)) throw new TRPCError({ code: "FORBIDDEN", message: "Bu özellik Pro planında kullanılabilir." });
 }
 
@@ -28,14 +29,14 @@ export const customizationRouter = createTRPCRouter({
     return { hasPro: hasProAccess(subscription), domains };
   }),
   addDomain: protectedProcedure.input(z.object({ domain: domainSchema })).mutation(async ({ ctx, input }) => {
-    await requirePro(ctx);
+    await requirePro(ctx.session.user.id);
     const token = randomBytes(24).toString("hex");
     try {
       return await ctx.db.customDomain.create({ data: { userId: ctx.session.user.id, domain: input.domain, domainNormalized: input.domain, verificationToken: token } });
     } catch { throw new TRPCError({ code: "CONFLICT", message: "Bu alan adı zaten kullanılıyor." }); }
   }),
   verifyDomain: protectedProcedure.input(z.object({ id: z.cuid2() })).mutation(async ({ ctx, input }) => {
-    await requirePro(ctx);
+    await requirePro(ctx.session.user.id);
     const domain = await ctx.db.customDomain.findFirst({ where: { id: input.id, userId: ctx.session.user.id } });
     if (!domain) throw new TRPCError({ code: "NOT_FOUND" });
     let verified = false;
@@ -52,9 +53,10 @@ export const customizationRouter = createTRPCRouter({
   createUpload: protectedProcedure.input(z.object({ purpose: z.enum(["avatar", "background"]), fileName: z.string().max(180), mimeType: z.enum(["image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4", "video/webm"]), sizeBytes: z.number().int().positive().max(25 * 1024 * 1024) })).mutation(async ({ ctx, input }) => {
     const storage = storageConfig();
     if (!storage) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "Dosya yükleme şu anda yapılandırılmamış." });
-    if (input.purpose === "background" || input.mimeType.startsWith("video/")) await requirePro(ctx);
+    if (input.purpose === "background" || input.mimeType.startsWith("video/")) await requirePro(ctx.session.user.id);
     if (input.purpose === "avatar" && input.mimeType.startsWith("video/")) throw new TRPCError({ code: "BAD_REQUEST", message: "Avatar için görsel dosyası seçin." });
-    const extension = input.fileName.split(".").at(-1)?.replace(/[^a-z0-9]/gi, "").toLowerCase() || "bin";
+    const candidateExtension = input.fileName.split(".").at(-1)?.replace(/[^a-z0-9]/gi, "").toLowerCase();
+    const extension = candidateExtension?.length ? candidateExtension : "bin";
     const objectKey = `users/${ctx.session.user.id}/${input.purpose}/${randomUUID()}.${extension}`;
     const publicUrl = `${storage.publicUrl}/${objectKey}`;
     const uploadUrl = await getSignedUrl(storage.client, new PutObjectCommand({ Bucket: storage.bucket, Key: objectKey, ContentType: input.mimeType, ContentLength: input.sizeBytes }), { expiresIn: 300 });

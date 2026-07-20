@@ -82,7 +82,8 @@ export const adyenAdapter: PaymentProviderAdapter = {
       const success = item.success === "true";
       const additional = object(item.additionalData);
       const id = `${stringValue(item.pspReference) ?? createHash("sha256").update(rawBody).digest("hex")}:${code}`;
-      const base = { id, intentId: stringValue(item.merchantReference), occurredAt: item.eventDate ? new Date(String(item.eventDate)) : new Date(), providerCustomerId: stringValue(additional.shopperReference), amountMinor: typeof object(item.amount).value === "number" ? object(item.amount).value as number : undefined, currency: stringValue(object(item.amount).currency), invoiceId: stringValue(item.pspReference) };
+      const eventDate = stringValue(item.eventDate);
+      const base = { id, intentId: stringValue(item.merchantReference), occurredAt: eventDate ? new Date(eventDate) : new Date(), providerCustomerId: stringValue(additional.shopperReference), amountMinor: typeof object(item.amount).value === "number" ? object(item.amount).value as number : undefined, currency: stringValue(object(item.amount).currency), invoiceId: stringValue(item.pspReference) };
       if (code === "AUTHORISATION") return [{ ...base, type: success ? "payment_succeeded" : "past_due", status: success ? "ACTIVE" : "PAST_DUE" }];
       if (code === "RECURRING_CONTRACT") return [{ ...base, type: "payment_method_stored", providerPaymentMethodId: stringValue(additional["recurring.recurringDetailReference"]) ?? stringValue(additional.recurringDetailReference) }];
       if (code === "CANCELLATION") return [{ ...base, type: "canceled", status: "CANCELED" }];
