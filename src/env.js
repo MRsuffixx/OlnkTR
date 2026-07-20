@@ -26,8 +26,14 @@ export const env = createEnv({
     ADYEN_API_KEY: z.string().optional(),
     ADYEN_MERCHANT_ACCOUNT: z.string().optional(),
     ADYEN_HMAC_KEY: z.string().optional(),
-    ADYEN_API_URL: z.string().url().default("https://checkout-test.adyen.com/v72"),
-    ADYEN_RECURRING_URL: z.string().url().default("https://pal-test.adyen.com/pal/servlet/Recurring/v68"),
+    ADYEN_API_URL: z
+      .string()
+      .url()
+      .default("https://checkout-test.adyen.com/v72"),
+    ADYEN_RECURRING_URL: z
+      .string()
+      .url()
+      .default("https://pal-test.adyen.com/pal/servlet/Recurring/v68"),
     LOCAL_PRO_MONTHLY_TRY: z.coerce.number().int().positive().optional(),
     LOCAL_PRO_YEARLY_TRY: z.coerce.number().int().positive().optional(),
     CRON_SECRET: z.string().min(24).optional(),
@@ -37,7 +43,9 @@ export const env = createEnv({
     STORAGE_ACCESS_KEY_ID: z.string().optional(),
     STORAGE_SECRET_ACCESS_KEY: z.string().optional(),
     STORAGE_PUBLIC_URL: z.string().url().optional(),
-    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+    NODE_ENV: z
+      .enum(["development", "test", "production"])
+      .default("development"),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().url().optional(),

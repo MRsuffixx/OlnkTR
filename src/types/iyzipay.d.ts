@@ -1,5 +1,8 @@
 declare module "iyzipay" {
-  type Callback = (error: Error | null, result: Record<string, unknown>) => void;
+  type Callback = (
+    error: Error | null,
+    result: Record<string, unknown>,
+  ) => void;
   type Resource = {
     initialize(request: Record<string, unknown>, callback: Callback): void;
     retrieve(request: Record<string, unknown>, callback: Callback): void;

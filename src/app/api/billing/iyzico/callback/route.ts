@@ -10,7 +10,8 @@ export async function POST(request: Request) {
   const rawBody = Buffer.from(await request.arrayBuffer());
   const body = new URLSearchParams(rawBody.toString("utf8"));
   const token = body.get("token");
-  if (!token || !intentId) return Response.json({ error: "Invalid callback" }, { status: 400 });
+  if (!token || !intentId)
+    return Response.json({ error: "Invalid callback" }, { status: 400 });
   let outcome = "failed";
   try {
     const event = await retrieveIyzicoCheckout(token, intentId);
@@ -19,7 +20,14 @@ export async function POST(request: Request) {
   } catch (error) {
     await db.paymentIntent.updateMany({
       where: { id: intentId },
-      data: { status: "FAILED", failureCode: "IYZICO_CALLBACK", failureMessage: error instanceof Error ? error.message.slice(0, 512) : "iyzico callback işlenemedi." },
+      data: {
+        status: "FAILED",
+        failureCode: "IYZICO_CALLBACK",
+        failureMessage:
+          error instanceof Error
+            ? error.message.slice(0, 512)
+            : "iyzico callback işlenemedi.",
+      },
     });
   }
   redirect(`/dashboard/billing?checkout=${outcome}`);

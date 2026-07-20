@@ -5,7 +5,11 @@ import { canUseFeature, hasProAccess } from "~/server/entitlements";
 
 export const analyticsRouter = createTRPCRouter({
   overview: protectedProcedure
-    .input(z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90)]).default(30) }))
+    .input(
+      z.object({
+        days: z.union([z.literal(7), z.literal(30), z.literal(90)]).default(30),
+      }),
+    )
     .query(async ({ ctx, input }) => {
       const since = new Date();
       since.setUTCHours(0, 0, 0, 0);
@@ -29,7 +33,9 @@ export const analyticsRouter = createTRPCRouter({
           GROUP BY DATE_TRUNC('day', "createdAt")
           ORDER BY "date" ASC
         `,
-        ctx.db.subscription.findUnique({ where: { userId: ctx.session.user.id } }),
+        ctx.db.subscription.findUnique({
+          where: { userId: ctx.session.user.id },
+        }),
       ]);
       const pro = hasProAccess(subscription);
 
@@ -44,23 +50,87 @@ export const analyticsRouter = createTRPCRouter({
         byDay.set(key, day.clicks);
       }
 
-      const periodClicks = dailyCounts.reduce((sum, day) => sum + day.clicks, 0);
-      let advanced: null | { views: number; uniqueVisitors: number; countries: Array<{ label: string; count: number }>; devices: Array<{ label: string; count: number }>; sources: Array<{ label: string; count: number }> } = null;
+      const periodClicks = dailyCounts.reduce(
+        (sum, day) => sum + day.clicks,
+        0,
+      );
+      let advanced: null | {
+        views: number;
+        uniqueVisitors: number;
+        countries: Array<{ label: string; count: number }>;
+        devices: Array<{ label: string; count: number }>;
+        sources: Array<{ label: string; count: number }>;
+      } = null;
       if (canUseFeature(pro, "analytics.profileViews")) {
-        const [views, visitors, countries, devices, referrers] = await Promise.all([
-          ctx.db.profileViewEvent.count({ where: { userId: ctx.session.user.id, createdAt: { gte: since } } }),
-          ctx.db.profileViewEvent.findMany({ where: { userId: ctx.session.user.id, createdAt: { gte: since }, visitorHash: { not: null } }, distinct: ["visitorHash"], select: { visitorHash: true } }),
-          ctx.db.profileViewEvent.groupBy({ by: ["country"], where: { userId: ctx.session.user.id, createdAt: { gte: since }, country: { not: null } }, _count: true, orderBy: { _count: { country: "desc" } }, take: 8 }),
-          ctx.db.profileViewEvent.groupBy({ by: ["deviceType"], where: { userId: ctx.session.user.id, createdAt: { gte: since }, deviceType: { not: null } }, _count: true, orderBy: { _count: { deviceType: "desc" } } }),
-          ctx.db.profileViewEvent.findMany({ where: { userId: ctx.session.user.id, createdAt: { gte: since } }, select: { referrer: true }, take: 10_000 }),
-        ]);
+        const [views, visitors, countries, devices, referrers] =
+          await Promise.all([
+            ctx.db.profileViewEvent.count({
+              where: { userId: ctx.session.user.id, createdAt: { gte: since } },
+            }),
+            ctx.db.profileViewEvent.findMany({
+              where: {
+                userId: ctx.session.user.id,
+                createdAt: { gte: since },
+                visitorHash: { not: null },
+              },
+              distinct: ["visitorHash"],
+              select: { visitorHash: true },
+            }),
+            ctx.db.profileViewEvent.groupBy({
+              by: ["country"],
+              where: {
+                userId: ctx.session.user.id,
+                createdAt: { gte: since },
+                country: { not: null },
+              },
+              _count: true,
+              orderBy: { _count: { country: "desc" } },
+              take: 8,
+            }),
+            ctx.db.profileViewEvent.groupBy({
+              by: ["deviceType"],
+              where: {
+                userId: ctx.session.user.id,
+                createdAt: { gte: since },
+                deviceType: { not: null },
+              },
+              _count: true,
+              orderBy: { _count: { deviceType: "desc" } },
+            }),
+            ctx.db.profileViewEvent.findMany({
+              where: { userId: ctx.session.user.id, createdAt: { gte: since } },
+              select: { referrer: true },
+              take: 10_000,
+            }),
+          ]);
         const sourceMap = new Map<string, number>();
         for (const row of referrers) {
           let source = "Doğrudan";
-          if (row.referrer) { try { source = new URL(row.referrer).hostname.replace(/^www\./, ""); } catch { source = "Diğer"; } }
+          if (row.referrer) {
+            try {
+              source = new URL(row.referrer).hostname.replace(/^www\./, "");
+            } catch {
+              source = "Diğer";
+            }
+          }
           sourceMap.set(source, (sourceMap.get(source) ?? 0) + 1);
         }
-        advanced = { views, uniqueVisitors: visitors.length, countries: countries.map((row) => ({ label: row.country ?? "Bilinmiyor", count: row._count })), devices: devices.map((row) => ({ label: row.deviceType ?? "Bilinmiyor", count: row._count })), sources: [...sourceMap].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([label, count]) => ({ label, count })) };
+        advanced = {
+          views,
+          uniqueVisitors: visitors.length,
+          countries: countries.map((row) => ({
+            label: row.country ?? "Bilinmiyor",
+            count: row._count,
+          })),
+          devices: devices.map((row) => ({
+            label: row.deviceType ?? "Bilinmiyor",
+            count: row._count,
+          })),
+          sources: [...sourceMap]
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 8)
+            .map(([label, count]) => ({ label, count })),
+        };
       }
       return {
         hasPro: pro,

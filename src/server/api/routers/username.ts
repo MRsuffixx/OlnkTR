@@ -26,34 +26,42 @@ export const usernameRouter = createTRPCRouter({
       return { available: result.available };
     }),
 
-  claim: protectedProcedure.input(usernameInput).mutation(async ({ ctx, input }) => {
-    const validation = await validateUsernamePolicy(input.username);
-    if (!validation.ok) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: USERNAME_UNAVAILABLE_MESSAGE });
-    }
+  claim: protectedProcedure
+    .input(usernameInput)
+    .mutation(async ({ ctx, input }) => {
+      const validation = await validateUsernamePolicy(input.username);
+      if (!validation.ok) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: USERNAME_UNAVAILABLE_MESSAGE,
+        });
+      }
 
-    try {
-      await ctx.db.user.update({
-        where: { id: ctx.session.user.id },
-        data: {
-          username: validation.username,
-          usernameNormalized: validation.normalized,
-          onboardedAt: new Date(),
-        },
-      });
-      await ctx.db.authIntent.deleteMany({
-        where: {
-          OR: [
-            { usernameNormalized: validation.normalized },
-            ...(ctx.session.user.email
-              ? [{ email: ctx.session.user.email.toLocaleLowerCase("tr-TR") }]
-              : []),
-          ],
-        },
-      });
-      return { username: validation.username };
-    } catch {
-      throw new TRPCError({ code: "CONFLICT", message: USERNAME_UNAVAILABLE_MESSAGE });
-    }
-  }),
+      try {
+        await ctx.db.user.update({
+          where: { id: ctx.session.user.id },
+          data: {
+            username: validation.username,
+            usernameNormalized: validation.normalized,
+            onboardedAt: new Date(),
+          },
+        });
+        await ctx.db.authIntent.deleteMany({
+          where: {
+            OR: [
+              { usernameNormalized: validation.normalized },
+              ...(ctx.session.user.email
+                ? [{ email: ctx.session.user.email.toLocaleLowerCase("tr-TR") }]
+                : []),
+            ],
+          },
+        });
+        return { username: validation.username };
+      } catch {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: USERNAME_UNAVAILABLE_MESSAGE,
+        });
+      }
+    }),
 });

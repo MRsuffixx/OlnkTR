@@ -5,7 +5,12 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { env } from "~/env";
 
 function sign(value: string) {
-  return createHmac("sha256", env.AUTH_SECRET ?? "local-development-only-secret").update(value).digest("base64url");
+  return createHmac(
+    "sha256",
+    env.AUTH_SECRET ?? "local-development-only-secret",
+  )
+    .update(value)
+    .digest("base64url");
 }
 
 export function createLinkAccessToken(linkId: string) {
@@ -14,13 +19,24 @@ export function createLinkAccessToken(linkId: string) {
   return `${value}.${sign(value)}`;
 }
 
-export function verifyLinkAccessToken(linkId: string, token: string | undefined) {
+export function verifyLinkAccessToken(
+  linkId: string,
+  token: string | undefined,
+) {
   if (!token) return false;
   const [tokenLinkId, expires, signature] = token.split(".");
-  if (tokenLinkId !== linkId || !expires || !signature || Number(expires) <= Date.now()) return false;
+  if (
+    tokenLinkId !== linkId ||
+    !expires ||
+    !signature ||
+    Number(expires) <= Date.now()
+  )
+    return false;
   const expected = Buffer.from(sign(`${tokenLinkId}.${expires}`));
   const received = Buffer.from(signature);
-  return expected.length === received.length && timingSafeEqual(expected, received);
+  return (
+    expected.length === received.length && timingSafeEqual(expected, received)
+  );
 }
 
 export function linkAccessCookieName(linkId: string) {

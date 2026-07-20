@@ -4,7 +4,10 @@ import { after, NextResponse, type NextRequest } from "next/server";
 import { env } from "~/env";
 import { db } from "~/server/db";
 import { hasProAccess } from "~/server/entitlements";
-import { linkAccessCookieName, verifyLinkAccessToken } from "~/server/security/link-access";
+import {
+  linkAccessCookieName,
+  verifyLinkAccessToken,
+} from "~/server/security/link-access";
 
 export async function GET(
   request: NextRequest,
@@ -22,11 +25,19 @@ export async function GET(
 
   const pro = hasProAccess(link.user.subscription);
   const now = new Date();
-  const scheduledOut = pro && ((link.scheduledStart !== null && link.scheduledStart > now) || (link.scheduledEnd !== null && link.scheduledEnd <= now));
-  if (scheduledOut) return NextResponse.redirect(new URL(`/${link.user.username ?? ""}`, request.url), 302);
+  const scheduledOut =
+    pro &&
+    ((link.scheduledStart !== null && link.scheduledStart > now) ||
+      (link.scheduledEnd !== null && link.scheduledEnd <= now));
+  if (scheduledOut)
+    return NextResponse.redirect(
+      new URL(`/${link.user.username ?? ""}`, request.url),
+      302,
+    );
   if (pro && link.passwordHash) {
     const token = request.cookies.get(linkAccessCookieName(id))?.value;
-    if (!verifyLinkAccessToken(id, token)) return NextResponse.redirect(new URL(`/unlock/${id}`, request.url), 302);
+    if (!verifyLinkAccessToken(id, token))
+      return NextResponse.redirect(new URL(`/unlock/${id}`, request.url), 302);
   }
 
   const headers = request.headers;

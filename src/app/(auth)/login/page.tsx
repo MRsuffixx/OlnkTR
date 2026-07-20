@@ -18,13 +18,28 @@ export default async function LoginPage({
 
   return (
     <>
-      <p className="text-sm font-black tracking-[.16em] text-orange uppercase">Tekrar merhaba</p>
-      <h1 className="display-serif mt-3 text-5xl font-bold">Sayfan seni bekliyor.</h1>
-      <p className="mt-4 mb-8 leading-7 text-ink/60">Şifre yok. E-postana güvenli bir giriş bağlantısı göndeririz.</p>
-      <AuthForm mode="login" {...authMethods} emailSent={status === "email-sent"} />
-      <p className="mt-7 text-center text-sm text-ink/60">
+      <p className="text-orange text-sm font-black tracking-[.16em] uppercase">
+        Tekrar merhaba
+      </p>
+      <h1 className="display-serif mt-3 text-5xl font-bold">
+        Sayfan seni bekliyor.
+      </h1>
+      <p className="text-ink/60 mt-4 mb-8 leading-7">
+        Şifre yok. E-postana güvenli bir giriş bağlantısı göndeririz.
+      </p>
+      <AuthForm
+        mode="login"
+        {...authMethods}
+        emailSent={status === "email-sent"}
+      />
+      <p className="text-ink/60 mt-7 text-center text-sm">
         Henüz hesabın yok mu?{" "}
-        <Link href="/register" className="font-black text-ink underline decoration-2 underline-offset-4">Ücretsiz aç</Link>
+        <Link
+          href="/register"
+          className="text-ink font-black underline decoration-2 underline-offset-4"
+        >
+          Ücretsiz aç
+        </Link>
       </p>
     </>
   );

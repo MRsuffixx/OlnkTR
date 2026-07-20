@@ -7,15 +7,23 @@ import { isUsernameAvailable } from "~/lib/username";
 import { db } from "~/server/db";
 
 export async function POST(request: Request) {
-  const parsed = registerIntentInput.safeParse(await request.json().catch(() => null));
+  const parsed = registerIntentInput.safeParse(
+    await request.json().catch(() => null),
+  );
   if (!parsed.success) {
-    return NextResponse.json({ message: "Bilgilerinizi kontrol edin." }, { status: 400 });
+    return NextResponse.json(
+      { message: "Bilgilerinizi kontrol edin." },
+      { status: 400 },
+    );
   }
 
   const { email, username } = parsed.data;
   const result = await isUsernameAvailable(username, undefined, email);
   if (!result.available || !result.validation.ok) {
-    return NextResponse.json({ message: USERNAME_UNAVAILABLE_MESSAGE }, { status: 409 });
+    return NextResponse.json(
+      { message: USERNAME_UNAVAILABLE_MESSAGE },
+      { status: 409 },
+    );
   }
 
   const token = randomUUID();
@@ -23,7 +31,9 @@ export async function POST(request: Request) {
 
   try {
     await db.$transaction(async (tx) => {
-      await tx.authIntent.deleteMany({ where: { expiresAt: { lte: new Date() } } });
+      await tx.authIntent.deleteMany({
+        where: { expiresAt: { lte: new Date() } },
+      });
       await tx.authIntent.upsert({
         where: { email },
         create: {
@@ -42,7 +52,10 @@ export async function POST(request: Request) {
       });
     });
   } catch {
-    return NextResponse.json({ message: USERNAME_UNAVAILABLE_MESSAGE }, { status: 409 });
+    return NextResponse.json(
+      { message: USERNAME_UNAVAILABLE_MESSAGE },
+      { status: 409 },
+    );
   }
 
   const response = NextResponse.json({ ok: true });

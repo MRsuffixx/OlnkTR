@@ -17,7 +17,8 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       ...shape,
       data: {
         ...shape.data,
-        zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
+        zodError:
+          error.cause instanceof ZodError ? error.cause.flatten() : null,
       },
     };
   },
@@ -28,7 +29,10 @@ export const createTRPCRouter = t.router;
 export const publicProcedure = t.procedure;
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   if (!ctx.session?.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED", message: "Oturum açmanız gerekiyor." });
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Oturum açmanız gerekiyor.",
+    });
   }
   return next({
     ctx: {

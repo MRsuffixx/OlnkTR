@@ -1,4 +1,8 @@
-import type { BillingInterval, BillingProvider, Subscription } from "../../../generated/prisma/client";
+import type {
+  BillingInterval,
+  BillingProvider,
+  Subscription,
+} from "../../../generated/prisma/client";
 
 export type CheckoutInput = {
   intentId: string;
@@ -24,7 +28,12 @@ export type CheckoutPresentation =
   | { kind: "redirect"; url: string; externalSessionId: string }
   | { kind: "iframe"; url: string; externalSessionId: string }
   | { kind: "html"; html: string; externalSessionId: string }
-  | { kind: "adyen"; sessionId: string; sessionData: string; externalSessionId: string };
+  | {
+      kind: "adyen";
+      sessionId: string;
+      sessionData: string;
+      externalSessionId: string;
+    };
 
 export type BillingEventType =
   | "payment_succeeded"
@@ -55,7 +64,15 @@ export type NormalizedBillingEvent = {
 };
 
 export type ProviderSubscriptionStatus = {
-  status: "INCOMPLETE" | "TRIALING" | "ACTIVE" | "PAST_DUE" | "UNPAID" | "CANCELED" | "EXPIRED" | "REFUNDED";
+  status:
+    | "INCOMPLETE"
+    | "TRIALING"
+    | "ACTIVE"
+    | "PAST_DUE"
+    | "UNPAID"
+    | "CANCELED"
+    | "EXPIRED"
+    | "REFUNDED";
   currentPeriodEnd?: Date;
   cancelAtPeriodEnd?: boolean;
 };
@@ -65,9 +82,14 @@ export interface PaymentProviderAdapter {
   readonly label: string;
   readonly renewal: "automatic" | "manual";
   createCheckoutSession(input: CheckoutInput): Promise<CheckoutPresentation>;
-  handleWebhook(rawBody: Buffer, headers: Headers): Promise<NormalizedBillingEvent[]>;
+  handleWebhook(
+    rawBody: Buffer,
+    headers: Headers,
+  ): Promise<NormalizedBillingEvent[]>;
   cancelSubscription(subscription: Subscription): Promise<void>;
-  getSubscriptionStatus(subscription: Subscription): Promise<ProviderSubscriptionStatus>;
+  getSubscriptionStatus(
+    subscription: Subscription,
+  ): Promise<ProviderSubscriptionStatus>;
 }
 
 export class PaymentConfigurationError extends Error {}

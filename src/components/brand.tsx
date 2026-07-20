@@ -1,11 +1,20 @@
 import Link from "next/link";
 
-export function Brand({ href = "/", compact = false }: { href?: string; compact?: boolean }) {
+export function Brand({
+  href = "/",
+  compact = false,
+}: {
+  href?: string;
+  compact?: boolean;
+}) {
   return (
-    <Link href={href} className="inline-flex items-center gap-2 font-black tracking-[-0.04em] text-ink">
+    <Link
+      href={href}
+      className="text-ink inline-flex items-center gap-2 font-black tracking-[-0.04em]"
+    >
       <span
         aria-hidden="true"
-        className="relative grid size-8 place-items-center rounded-[11px] bg-orange text-paper shadow-[3px_3px_0_#17211b]"
+        className="bg-orange text-paper relative grid size-8 place-items-center rounded-[11px] shadow-[3px_3px_0_#17211b]"
       >
         o
       </span>

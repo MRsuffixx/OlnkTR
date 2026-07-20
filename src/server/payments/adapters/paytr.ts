@@ -3,12 +3,28 @@ import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { env } from "~/env";
-import type { CheckoutInput, NormalizedBillingEvent, PaymentProviderAdapter } from "~/server/payments/types";
-import { PaymentConfigurationError, WebhookVerificationError } from "~/server/payments/types";
+import type {
+  CheckoutInput,
+  NormalizedBillingEvent,
+  PaymentProviderAdapter,
+} from "~/server/payments/types";
+import {
+  PaymentConfigurationError,
+  WebhookVerificationError,
+} from "~/server/payments/types";
 
 function config() {
-  if (!env.PAYTR_MERCHANT_ID || !env.PAYTR_MERCHANT_KEY || !env.PAYTR_MERCHANT_SALT) throw new PaymentConfigurationError("PayTR yapılandırılmamış.");
-  return { id: env.PAYTR_MERCHANT_ID, key: env.PAYTR_MERCHANT_KEY, salt: env.PAYTR_MERCHANT_SALT };
+  if (
+    !env.PAYTR_MERCHANT_ID ||
+    !env.PAYTR_MERCHANT_KEY ||
+    !env.PAYTR_MERCHANT_SALT
+  )
+    throw new PaymentConfigurationError("PayTR yapılandırılmamış.");
+  return {
+    id: env.PAYTR_MERCHANT_ID,
+    key: env.PAYTR_MERCHANT_KEY,
+    salt: env.PAYTR_MERCHANT_SALT,
+  };
 }
 
 function hmacBase64(value: string, key: string) {
@@ -28,12 +44,31 @@ export const paytrAdapter: PaymentProviderAdapter = {
 
   async createCheckoutSession(input: CheckoutInput) {
     const merchant = config();
-    if (!input.billingDetails) throw new Error("PayTR için iletişim ve fatura bilgileri gerekli.");
+    if (!input.billingDetails)
+      throw new Error("PayTR için iletişim ve fatura bilgileri gerekli.");
     const currency = input.currency === "TRY" ? "TL" : input.currency;
-    const basket = Buffer.from(JSON.stringify([[`olnk Pro ${input.interval === "MONTHLY" ? "Aylık" : "Yıllık"}`, (input.amountMinor / 100).toFixed(2), 1]])).toString("base64");
+    const basket = Buffer.from(
+      JSON.stringify([
+        [
+          `olnk Pro ${input.interval === "MONTHLY" ? "Aylık" : "Yıllık"}`,
+          (input.amountMinor / 100).toFixed(2),
+          1,
+        ],
+      ]),
+    ).toString("base64");
     const noInstallment = "0";
     const maxInstallment = "0";
-    const hashString = merchant.id + input.ipAddress + input.intentId + input.user.email + input.amountMinor + basket + noInstallment + maxInstallment + currency + env.PAYTR_TEST_MODE;
+    const hashString =
+      merchant.id +
+      input.ipAddress +
+      input.intentId +
+      input.user.email +
+      input.amountMinor +
+      basket +
+      noInstallment +
+      maxInstallment +
+      currency +
+      env.PAYTR_TEST_MODE;
     const token = hmacBase64(hashString + merchant.salt, merchant.key);
     const form = new URLSearchParams({
       merchant_id: merchant.id,
@@ -56,11 +91,25 @@ export const paytrAdapter: PaymentProviderAdapter = {
       test_mode: env.PAYTR_TEST_MODE,
       lang: "tr",
     });
-    const response = await fetch("https://www.paytr.com/odeme/api/get-token", { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: form, signal: AbortSignal.timeout(15_000) });
+    const response = await fetch("https://www.paytr.com/odeme/api/get-token", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: form,
+      signal: AbortSignal.timeout(15_000),
+    });
     if (!response.ok) throw new Error(`PayTR ağ hatası (${response.status}).`);
-    const result = await response.json() as { status?: string; token?: string; reason?: string };
-    if (result.status !== "success" || !result.token) throw new Error(result.reason ?? "PayTR ödeme oturumu oluşturamadı.");
-    return { kind: "iframe" as const, url: `https://www.paytr.com/odeme/guvenli/${encodeURIComponent(result.token)}`, externalSessionId: result.token };
+    const result = (await response.json()) as {
+      status?: string;
+      token?: string;
+      reason?: string;
+    };
+    if (result.status !== "success" || !result.token)
+      throw new Error(result.reason ?? "PayTR ödeme oturumu oluşturamadı.");
+    return {
+      kind: "iframe" as const,
+      url: `https://www.paytr.com/odeme/guvenli/${encodeURIComponent(result.token)}`,
+      externalSessionId: result.token,
+    };
   },
 
   async handleWebhook(rawBody: Buffer) {
@@ -70,16 +119,27 @@ export const paytrAdapter: PaymentProviderAdapter = {
     const status = body.get("status") ?? "";
     const totalAmount = body.get("total_amount") ?? "";
     const received = body.get("hash") ?? "";
-    const expected = hmacBase64(merchantOid + merchant.salt + status + totalAmount, merchant.key);
-    if (!merchantOid || !received || !safeEqual(received, expected)) throw new WebhookVerificationError("PayTR bildirim imzası geçersiz.");
-    const base = { id: `paytr:${merchantOid}:${status}:${totalAmount}`, intentId: merchantOid, occurredAt: new Date(), amountMinor: Number.parseInt(totalAmount, 10) || undefined, currency: "TRY" };
-    const event: NormalizedBillingEvent = status === "success"
-      ? { ...base, type: "payment_succeeded", status: "ACTIVE" }
-      : status === "refunded"
-        ? { ...base, type: "refunded", status: "REFUNDED" }
-        : status === "chargeback"
-          ? { ...base, type: "disputed", status: "UNPAID" }
-          : { ...base, type: "past_due", status: "UNPAID" };
+    const expected = hmacBase64(
+      merchantOid + merchant.salt + status + totalAmount,
+      merchant.key,
+    );
+    if (!merchantOid || !received || !safeEqual(received, expected))
+      throw new WebhookVerificationError("PayTR bildirim imzası geçersiz.");
+    const base = {
+      id: `paytr:${merchantOid}:${status}:${totalAmount}`,
+      intentId: merchantOid,
+      occurredAt: new Date(),
+      amountMinor: Number.parseInt(totalAmount, 10) || undefined,
+      currency: "TRY",
+    };
+    const event: NormalizedBillingEvent =
+      status === "success"
+        ? { ...base, type: "payment_succeeded", status: "ACTIVE" }
+        : status === "refunded"
+          ? { ...base, type: "refunded", status: "REFUNDED" }
+          : status === "chargeback"
+            ? { ...base, type: "disputed", status: "UNPAID" }
+            : { ...base, type: "past_due", status: "UNPAID" };
     return [event];
   },
 
@@ -89,7 +149,14 @@ export const paytrAdapter: PaymentProviderAdapter = {
   },
 
   async getSubscriptionStatus(subscription) {
-    const expired = Boolean(subscription.currentPeriodEnd && subscription.currentPeriodEnd <= new Date());
-    return { status: expired ? "EXPIRED" : subscription.status, currentPeriodEnd: subscription.currentPeriodEnd ?? undefined, cancelAtPeriodEnd: true };
+    const expired = Boolean(
+      subscription.currentPeriodEnd &&
+      subscription.currentPeriodEnd <= new Date(),
+    );
+    return {
+      status: expired ? "EXPIRED" : subscription.status,
+      currentPeriodEnd: subscription.currentPeriodEnd ?? undefined,
+      cancelAtPeriodEnd: true,
+    };
   },
 };
