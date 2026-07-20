@@ -3,11 +3,15 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTypeScript from "eslint-config-next/typescript";
 import tseslint from "typescript-eslint";
 
+const typedRules = [
+  ...tseslint.configs.recommendedTypeChecked,
+  ...tseslint.configs.stylisticTypeChecked,
+].map((config) => ({ ...config, files: ["**/*.ts", "**/*.tsx"] }));
+
 export default defineConfig([
   ...nextVitals,
   ...nextTypeScript,
-  ...tseslint.configs.recommendedTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
+  ...typedRules,
   {
     files: ["**/*.ts", "**/*.tsx"],
     languageOptions: { parserOptions: { projectService: true } },

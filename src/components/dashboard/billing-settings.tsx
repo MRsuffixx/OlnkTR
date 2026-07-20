@@ -32,11 +32,11 @@ export function BillingSettings({ initial }: { initial: Overview }) {
   const selected = useMemo(() => data.providers.find((item) => item.id === provider), [data.providers, provider]);
   const requiresBilling = provider === "IYZICO" || provider === "PAYTR";
 
-  async function refresh() {
+  const refresh = useCallback(async () => {
     await utils.billing.overview.invalidate();
     const next = await utils.billing.overview.fetch();
     setData(next);
-  }
+  }, [utils.billing.overview]);
 
   async function startCheckout() {
     if (!provider) return;
@@ -50,7 +50,7 @@ export function BillingSettings({ initial }: { initial: Overview }) {
     }
   }
 
-  const completed = useCallback(() => { setPresentation(null); void refresh(); }, []);
+  const completed = useCallback(() => { setPresentation(null); void refresh(); }, [refresh]);
   const checkoutError = useCallback((message: string) => setError(message), []);
 
   if (data.hasPro && data.subscription) {
@@ -75,7 +75,7 @@ export function BillingSettings({ initial }: { initial: Overview }) {
     </div>
 
     {!data.checkoutAvailable ? <section className="rounded-3xl border border-dashed border-ink/20 bg-paper p-8 text-center"><LockKeyhole className="mx-auto size-8 text-ink/30" /><h3 className="mt-3 text-xl font-black">Ödemeler şu anda kullanılamıyor</h3><p className="mx-auto mt-2 max-w-lg text-sm text-ink/50">Henüz etkin bir ödeme sağlayıcısı yok. Profilin Free planda kesintisiz çalışmaya devam eder.</p></section> : <section className="rounded-[2rem] border border-ink/10 bg-paper p-5 sm:p-7"><div className="flex items-center gap-3"><span className="grid size-11 place-items-center rounded-2xl bg-mint"><CreditCard className="size-5" /></span><div><h3 className="text-xl font-black">Ödeme yöntemini seç</h3><p className="text-sm text-ink/50">Kart bilgilerin olnk sunucularına ulaşmaz.</p></div></div><div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{data.providers.map((item) => <button type="button" key={item.id} onClick={() => setProvider(item.id)} className={`rounded-2xl border p-4 text-left transition ${provider === item.id ? "border-ink bg-cream shadow-[3px_3px_0_#F8C95C]" : "border-ink/10 hover:border-ink/30"}`}><div className="flex items-center justify-between"><strong>{item.label}</strong>{provider === item.id && <Check className="size-4" />}</div><p className="mt-2 text-xs text-ink/50">{item.renewal === "manual" ? "Dönemlik · manuel yenileme" : "Otomatik yenileme"}</p><p className="mt-3 font-black">{money((interval === "MONTHLY" ? item.monthly : item.yearly).amountMinor, (interval === "MONTHLY" ? item.monthly : item.yearly).currency)}</p></button>)}</div>
-      {requiresBilling && <div className="mt-6 grid gap-3 rounded-2xl bg-cream/60 p-4 sm:grid-cols-2"><p className="sm:col-span-2 text-sm font-bold">Türkiye'deki sağlayıcının zorunlu fatura bilgileri</p>{Object.entries({ name: "Ad", surname: "Soyad", identityNumber: "T.C. kimlik no", phone: "Telefon", address: "Adres", city: "İl", district: "İlçe", zipCode: "Posta kodu" }).map(([key, label]) => <label key={key} className={key === "address" ? "sm:col-span-2" : ""}><span className="mb-1 block text-xs font-bold text-ink/55">{label}</span><input value={details[key as keyof typeof details]} onChange={(event) => setDetails({ ...details, [key]: event.target.value })} className="h-11 w-full rounded-xl border border-ink/15 bg-white px-3 outline-none focus:border-ink" /></label>)}</div>}
+      {requiresBilling && <div className="mt-6 grid gap-3 rounded-2xl bg-cream/60 p-4 sm:grid-cols-2"><p className="sm:col-span-2 text-sm font-bold">Türkiye’deki sağlayıcının zorunlu fatura bilgileri</p>{Object.entries({ name: "Ad", surname: "Soyad", identityNumber: "T.C. kimlik no", phone: "Telefon", address: "Adres", city: "İl", district: "İlçe", zipCode: "Posta kodu" }).map(([key, label]) => <label key={key} className={key === "address" ? "sm:col-span-2" : ""}><span className="mb-1 block text-xs font-bold text-ink/55">{label}</span><input value={details[key as keyof typeof details]} onChange={(event) => setDetails({ ...details, [key]: event.target.value })} className="h-11 w-full rounded-xl border border-ink/15 bg-white px-3 outline-none focus:border-ink" /></label>)}</div>}
       <button type="button" disabled={!selected || checkout.isPending} onClick={() => void startCheckout()} className="mt-6 inline-flex h-12 items-center gap-2 rounded-full bg-orange px-6 font-black text-white shadow-[4px_4px_0_#17211b] disabled:opacity-50">{checkout.isPending ? <LoaderCircle className="size-4 animate-spin" /> : <ShieldCheck className="size-4" />} {selected ? `${selected.label} ile güvenli ödemeye geç` : "Sağlayıcı seç"}</button>
     </section>}
     <InvoiceList invoices={data.invoices} />

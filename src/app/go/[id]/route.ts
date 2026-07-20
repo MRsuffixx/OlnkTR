@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { after, NextRequest, NextResponse } from "next/server";
+import { after, NextResponse, type NextRequest } from "next/server";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
@@ -22,7 +22,7 @@ export async function GET(
 
   const pro = hasProAccess(link.user.subscription);
   const now = new Date();
-  const scheduledOut = pro && ((link.scheduledStart && link.scheduledStart > now) || (link.scheduledEnd && link.scheduledEnd <= now));
+  const scheduledOut = pro && ((link.scheduledStart !== null && link.scheduledStart > now) || (link.scheduledEnd !== null && link.scheduledEnd <= now));
   if (scheduledOut) return NextResponse.redirect(new URL(`/${link.user.username ?? ""}`, request.url), 302);
   if (pro && link.passwordHash) {
     const token = request.cookies.get(linkAccessCookieName(id))?.value;

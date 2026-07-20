@@ -3,7 +3,7 @@
 import { closestCenter, DndContext, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Check, ChevronDown, Crown, Eye, GripVertical, Link2, LoaderCircle, LockKeyhole, MonitorSmartphone, Plus, RotateCcw, Sparkles, Trash2, X } from "lucide-react";
+import { Check, ChevronDown, Crown, Eye, GripVertical, Link2, LoaderCircle, MonitorSmartphone, Plus, RotateCcw, Sparkles, Trash2, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -25,11 +25,11 @@ function localDate(value: string | null) { return value ? new Date(value).toISOS
 function isoDate(value: string) { return value ? new Date(value).toISOString() : null; }
 
 function SortableLink({ link, selected, hasPro, onUpgrade, onSelect, onChange, onDelete }: { link: DraftLink; selected: boolean; hasPro: boolean; onUpgrade: () => void; onSelect: () => void; onChange: (patch: Partial<DraftLink>) => void; onDelete: () => void }) {
-  const sortable = useSortable({ id: link.id });
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: link.id });
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const passwordMutation = api.workspace.setLinkPassword.useMutation();
-  const style = { transform: CSS.Transform.toString(sortable.transform), transition: sortable.transition };
+  const style = { transform: CSS.Transform.toString(transform), transition };
   const proAction = (action: () => void) => hasPro ? action() : onUpgrade();
   async function savePassword(value: string | null) {
     setPasswordError(null);
@@ -40,8 +40,8 @@ function SortableLink({ link, selected, hasPro, onUpgrade, onSelect, onChange, o
     } catch (error) { setPasswordError(error instanceof Error ? error.message : "Parola kaydedilemedi."); }
   }
 
-  return <article id={`editor-link-${link.id}`} ref={sortable.setNodeRef} style={style} className={`rounded-2xl border bg-paper transition ${selected ? "border-ink shadow-[3px_3px_0_#F8C95C]" : "border-ink/10"}`}>
-    <div className="flex items-center gap-2 p-3"><button type="button" {...sortable.attributes} {...sortable.listeners} className="cursor-grab touch-none rounded-lg p-2 text-ink/35 hover:bg-cream hover:text-ink" aria-label={`${link.title} bağlantısını sırala`}><GripVertical className="size-5" /></button><button type="button" onClick={onSelect} className="min-w-0 flex-1 text-left"><div className="truncate text-sm font-black">{link.title}</div><div className="mt-0.5 truncate text-xs text-ink/45">{link.url || "Henüz adres eklenmedi"}</div></button><button type="button" onClick={() => onChange({ enabled: !link.enabled })} className={`relative h-6 w-11 rounded-full ${link.enabled ? "bg-ink" : "bg-ink/15"}`} aria-label={link.enabled ? "Bağlantıyı gizle" : "Bağlantıyı yayınla"}><span className={`absolute top-1 size-4 rounded-full bg-white transition ${link.enabled ? "left-6" : "left-1"}`} /></button><button type="button" onClick={onSelect} className="rounded-lg p-2 text-ink/40" aria-label="Bağlantıyı düzenle"><ChevronDown className={`size-4 transition ${selected ? "rotate-180" : ""}`} /></button></div>
+  return <article id={`editor-link-${link.id}`} ref={setNodeRef} style={style} className={`rounded-2xl border bg-paper transition ${selected ? "border-ink shadow-[3px_3px_0_#F8C95C]" : "border-ink/10"}`}>
+    <div className="flex items-center gap-2 p-3"><button type="button" {...attributes} {...listeners} className="cursor-grab touch-none rounded-lg p-2 text-ink/35 hover:bg-cream hover:text-ink" aria-label={`${link.title} bağlantısını sırala`}><GripVertical className="size-5" /></button><button type="button" onClick={onSelect} className="min-w-0 flex-1 text-left"><div className="truncate text-sm font-black">{link.title}</div><div className="mt-0.5 truncate text-xs text-ink/45">{link.url || "Henüz adres eklenmedi"}</div></button><button type="button" onClick={() => onChange({ enabled: !link.enabled })} className={`relative h-6 w-11 rounded-full ${link.enabled ? "bg-ink" : "bg-ink/15"}`} aria-label={link.enabled ? "Bağlantıyı gizle" : "Bağlantıyı yayınla"}><span className={`absolute top-1 size-4 rounded-full bg-white transition ${link.enabled ? "left-6" : "left-1"}`} /></button><button type="button" onClick={onSelect} className="rounded-lg p-2 text-ink/40" aria-label="Bağlantıyı düzenle"><ChevronDown className={`size-4 transition ${selected ? "rotate-180" : ""}`} /></button></div>
     {selected && <div className="space-y-4 border-t border-ink/10 p-4">
       <Field label="Başlık"><input value={link.title} maxLength={80} onChange={(event) => onChange({ title: event.target.value })} className="input" /></Field>
       <Field label="Bağlantı"><div className="relative"><Link2 className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink/35" /><input type="url" value={link.url} onChange={(event) => onChange({ url: event.target.value })} placeholder="https://" className="input pl-9" /></div></Field>
@@ -107,7 +107,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
       </div></section>
       <section className={`relative place-items-center overflow-hidden bg-[radial-gradient(circle_at_top,#F8C95C33,transparent_46%)] p-5 md:grid md:p-8 ${mobileTab === "preview" ? "grid min-h-[720px]" : "hidden"}`}><div className="absolute left-6 top-5 hidden text-xs font-black tracking-[.15em] text-ink/35 uppercase md:block">Canlı önizleme</div><div className="w-[320px] rounded-[3.6rem] border-[9px] border-ink bg-ink p-2 shadow-[0_30px_70px_rgba(23,33,27,.22)] lg:w-[350px]"><div className="h-[660px] overflow-hidden rounded-[2.75rem] bg-cream"><ProfilePreview draft={draft} username={initial.username ?? "profilin"} selectedId={selectedId} onSelect={focusLink} /></div></div></section>
     </div>
-    {upgrade && <div className="fixed inset-0 z-[90] grid place-items-center bg-ink/65 p-4 backdrop-blur-sm"><div className="relative w-full max-w-md overflow-hidden rounded-[2rem] bg-paper p-7 shadow-2xl"><button type="button" onClick={() => setUpgrade(false)} className="absolute right-4 top-4 grid size-9 place-items-center rounded-full bg-cream" aria-label="Kapat"><X className="size-4" /></button><span className="grid size-12 place-items-center rounded-2xl bg-yellow"><Crown className="size-6" /></span><h2 className="display-serif mt-5 text-4xl font-bold">Bu fikir Pro istiyor.</h2><p className="mt-3 leading-7 text-ink/60">Seçtiğin ayarı, animasyonları, planlamayı ve gelişmiş analitiği Pro ile açabilirsin. Yıllık plan $22.</p><Link href="/dashboard/billing" className="mt-6 inline-flex h-12 items-center gap-2 rounded-full bg-orange px-6 font-black text-white shadow-[4px_4px_0_#17211b]"><Sparkles className="size-4" /> Pro'yu incele</Link></div></div>}
+    {upgrade && <div className="fixed inset-0 z-[90] grid place-items-center bg-ink/65 p-4 backdrop-blur-sm"><div className="relative w-full max-w-md overflow-hidden rounded-[2rem] bg-paper p-7 shadow-2xl"><button type="button" onClick={() => setUpgrade(false)} className="absolute right-4 top-4 grid size-9 place-items-center rounded-full bg-cream" aria-label="Kapat"><X className="size-4" /></button><span className="grid size-12 place-items-center rounded-2xl bg-yellow"><Crown className="size-6" /></span><h2 className="display-serif mt-5 text-4xl font-bold">Bu fikir Pro istiyor.</h2><p className="mt-3 leading-7 text-ink/60">Seçtiğin ayarı, animasyonları, planlamayı ve gelişmiş analitiği Pro ile açabilirsin. Yıllık plan $22.</p><Link href="/dashboard/billing" className="mt-6 inline-flex h-12 items-center gap-2 rounded-full bg-orange px-6 font-black text-white shadow-[4px_4px_0_#17211b]"><Sparkles className="size-4" /> Pro’yu incele</Link></div></div>}
   </main>;
 }
 
