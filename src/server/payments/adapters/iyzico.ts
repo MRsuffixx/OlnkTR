@@ -54,11 +54,11 @@ function stringValue(value: unknown) {
   return typeof value === "string" ? value : undefined;
 }
 
-function verifySignature(headers: Headers, payload: Record<string, unknown>) {
-  const received = headers.get("x-iyz-signature-v3");
-  const secret = env.IYZICO_SECRET_KEY;
-  const merchantId = env.IYZICO_MERCHANT_ID;
-  if (!received || !secret || !merchantId) return false;
+export function createIyzicoWebhookSignature(
+  payload: Record<string, unknown>,
+  merchantId: string,
+  secret: string,
+) {
   const eventType =
     stringValue(payload.iyziEventType) ?? stringValue(payload.eventType) ?? "";
   const data =
@@ -72,9 +72,17 @@ function verifySignature(headers: Headers, payload: Record<string, unknown>) {
     (stringValue(data.subscriptionReferenceCode) ?? "") +
     (stringValue(data.orderReferenceCode) ?? "") +
     (stringValue(data.customerReferenceCode) ?? "");
-  const expected = createHmac("sha256", secret)
+  return createHmac("sha256", secret)
     .update(concatenated)
     .digest("hex");
+}
+
+function verifySignature(headers: Headers, payload: Record<string, unknown>) {
+  const received = headers.get("x-iyz-signature-v3");
+  const secret = env.IYZICO_SECRET_KEY;
+  const merchantId = env.IYZICO_MERCHANT_ID;
+  if (!received || !secret || !merchantId) return false;
+  const expected = createIyzicoWebhookSignature(payload, merchantId, secret);
   const left = Buffer.from(expected.toLowerCase());
   const right = Buffer.from(received.toLowerCase());
   return left.length === right.length && timingSafeEqual(left, right);

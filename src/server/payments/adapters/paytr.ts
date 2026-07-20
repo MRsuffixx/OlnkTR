@@ -59,6 +59,22 @@ function safeEqual(left: string, right: string) {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
+export function createPaytrCallbackHash(input: {
+  merchantOid: string;
+  merchantSalt: string;
+  status: string;
+  totalAmount: string;
+  merchantKey: string;
+}) {
+  return hmacBase64(
+    input.merchantOid +
+      input.merchantSalt +
+      input.status +
+      input.totalAmount,
+    input.merchantKey,
+  );
+}
+
 export const paytrAdapter: PaymentProviderAdapter = {
   id: "PAYTR",
   label: "PayTR",
@@ -142,10 +158,13 @@ export const paytrAdapter: PaymentProviderAdapter = {
     const status = body.get("status") ?? "";
     const totalAmount = body.get("total_amount") ?? "";
     const received = body.get("hash") ?? "";
-    const expected = hmacBase64(
-      merchantOid + merchant.salt + status + totalAmount,
-      merchant.key,
-    );
+    const expected = createPaytrCallbackHash({
+      merchantOid,
+      merchantSalt: merchant.salt,
+      status,
+      totalAmount,
+      merchantKey: merchant.key,
+    });
     if (!merchantOid || !received || !safeEqual(received, expected))
       throw new WebhookVerificationError("PayTR bildirim imzası geçersiz.");
     const base = {

@@ -77,6 +77,53 @@ async function adyenPost(
   return result;
 }
 
+export function normalizeAdyenNotification(
+  item: Record<string, unknown>,
+  fallbackId: string,
+): NormalizedBillingEvent[] {
+  const code = stringValue(item.eventCode) ?? "";
+  const success = item.success === "true";
+  const additional = object(item.additionalData);
+  const eventDate = stringValue(item.eventDate);
+  const base = {
+    id: `${stringValue(item.pspReference) ?? fallbackId}:${code}`,
+    intentId: stringValue(item.merchantReference),
+    occurredAt: eventDate ? new Date(eventDate) : new Date(),
+    providerCustomerId: stringValue(additional.shopperReference),
+    amountMinor:
+      typeof object(item.amount).value === "number"
+        ? (object(item.amount).value as number)
+        : undefined,
+    currency: stringValue(object(item.amount).currency),
+    invoiceId: stringValue(item.pspReference),
+  };
+  if (code === "AUTHORISATION")
+    return [
+      {
+        ...base,
+        type: success ? "payment_succeeded" : "payment_failed",
+        status: success ? "ACTIVE" : "UNPAID",
+      },
+    ];
+  if (code === "RECURRING_CONTRACT")
+    return [
+      {
+        ...base,
+        type: "payment_method_stored",
+        providerPaymentMethodId:
+          stringValue(additional["recurring.recurringDetailReference"]) ??
+          stringValue(additional.recurringDetailReference),
+      },
+    ];
+  if (code === "CANCELLATION")
+    return [{ ...base, type: "canceled", status: "CANCELED" }];
+  if (code === "CANCEL_OR_REFUND" || code === "REFUNDED_REVERSED")
+    return [{ ...base, type: "refunded", status: "REFUNDED" }];
+  if (code === "CHARGEBACK")
+    return [{ ...base, type: "disputed", status: "UNPAID" }];
+  return [];
+}
+
 export const adyenAdapter: PaymentProviderAdapter = {
   id: "ADYEN",
   label: "Adyen",
@@ -157,50 +204,10 @@ export const adyenAdapter: PaymentProviderAdapter = {
         "Adyen webhook HMAC doğrulaması başarısız.",
       );
 
-    return items.flatMap<NormalizedBillingEvent>((item) => {
-      const code = stringValue(item.eventCode) ?? "";
-      const success = item.success === "true";
-      const additional = object(item.additionalData);
-      const id = `${stringValue(item.pspReference) ?? createHash("sha256").update(rawBody).digest("hex")}:${code}`;
-      const eventDate = stringValue(item.eventDate);
-      const base = {
-        id,
-        intentId: stringValue(item.merchantReference),
-        occurredAt: eventDate ? new Date(eventDate) : new Date(),
-        providerCustomerId: stringValue(additional.shopperReference),
-        amountMinor:
-          typeof object(item.amount).value === "number"
-            ? (object(item.amount).value as number)
-            : undefined,
-        currency: stringValue(object(item.amount).currency),
-        invoiceId: stringValue(item.pspReference),
-      };
-      if (code === "AUTHORISATION")
-        return [
-          {
-            ...base,
-            type: success ? "payment_succeeded" : "payment_failed",
-            status: success ? "ACTIVE" : "UNPAID",
-          },
-        ];
-      if (code === "RECURRING_CONTRACT")
-        return [
-          {
-            ...base,
-            type: "payment_method_stored",
-            providerPaymentMethodId:
-              stringValue(additional["recurring.recurringDetailReference"]) ??
-              stringValue(additional.recurringDetailReference),
-          },
-        ];
-      if (code === "CANCELLATION")
-        return [{ ...base, type: "canceled", status: "CANCELED" }];
-      if (code === "CANCEL_OR_REFUND" || code === "REFUNDED_REVERSED")
-        return [{ ...base, type: "refunded", status: "REFUNDED" }];
-      if (code === "CHARGEBACK")
-        return [{ ...base, type: "disputed", status: "UNPAID" }];
-      return [];
-    });
+    const fallbackId = createHash("sha256").update(rawBody).digest("hex");
+    return items.flatMap((item) =>
+      normalizeAdyenNotification(item, fallbackId),
+    );
   },
 
   async cancelSubscription(subscription) {

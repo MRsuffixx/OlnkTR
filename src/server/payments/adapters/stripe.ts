@@ -37,7 +37,7 @@ function metadata(object: Record<string, unknown>) {
   return record(object.metadata);
 }
 
-function subscriptionStatus(value: unknown) {
+export function mapStripeSubscriptionStatus(value: unknown) {
   switch (text(value)) {
     case "active":
       return "ACTIVE" as const;
@@ -203,7 +203,7 @@ export const stripeAdapter: PaymentProviderAdapter = {
         providerSubscriptionId: text(object.id),
         status: event.type.endsWith("deleted")
           ? "CANCELED"
-          : subscriptionStatus(statusValue),
+          : mapStripeSubscriptionStatus(statusValue),
         periodStart: dateFromUnix(object.current_period_start),
         periodEnd: dateFromUnix(object.current_period_end),
       });
@@ -254,7 +254,7 @@ export const stripeAdapter: PaymentProviderAdapter = {
     );
     const remoteStatus = text(remote.status);
     return {
-      status: subscriptionStatus(remoteStatus),
+      status: mapStripeSubscriptionStatus(remoteStatus),
       currentPeriodEnd: dateFromUnix(remote.current_period_end),
       cancelAtPeriodEnd: Boolean(remote.cancel_at_period_end),
     };
