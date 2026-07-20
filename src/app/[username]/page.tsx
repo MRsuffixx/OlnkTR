@@ -210,11 +210,17 @@ export default async function PublicProfilePage({
             )}
           </div>
           {appearance.layout.bioPlacement === "aboveName" && profile.bio && (
-            <p className="mt-5 max-w-md leading-7 opacity-70">{profile.bio}</p>
+            <p
+              className="max-w-md leading-7 opacity-70"
+              style={{ marginTop: density.profileGap }}
+            >
+              {profile.bio}
+            </p>
           )}
           <h1
-            className="mt-5 font-black"
+            className="font-black"
             style={{
+              marginTop: density.profileGap,
               fontFamily: profileFontFamily(
                 appearance.typography.headingFont,
               ),
@@ -225,7 +231,12 @@ export default async function PublicProfilePage({
             {profile.name ?? `@${profile.username}`}
           </h1>
           {appearance.layout.bioPlacement === "belowName" && profile.bio && (
-            <p className="mt-3 max-w-md leading-7 opacity-70">{profile.bio}</p>
+            <p
+              className="max-w-md leading-7 opacity-70"
+              style={{ marginTop: Math.max(8, density.profileGap / 2) }}
+            >
+              {profile.bio}
+            </p>
           )}
         </section>
         <nav
@@ -257,6 +268,7 @@ export default async function PublicProfilePage({
                 key={link.id}
                 className="olnk-link"
                 data-hover={appearance.buttons.hover}
+                data-press={appearance.buttons.press}
                 data-entrance={appearance.effects.entrance}
                 style={{
                   animationDelay: `${index * appearance.effects.staggerMs}ms`,

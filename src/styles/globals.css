@@ -100,6 +100,8 @@ a {
 .olnk-link[data-hover="grow"]:hover { transform: scale(1.025); }
 .olnk-link[data-hover="tilt"]:hover { transform: rotate(-1deg) scale(1.01); }
 .olnk-link[data-hover="glow"]:hover { filter: drop-shadow(0 0 14px rgb(248 201 92 / 75%)); }
+.olnk-link[data-press="compress"]:active { transform: scale(.97); }
+.olnk-link[data-press="sink"]:active { transform: translateY(3px); }
 .olnk-link[data-entrance="fade"] { animation: olnk-fade .55s both; }
 .olnk-link[data-entrance="slide"] { animation: olnk-slide .55s both; }
 .olnk-link[data-entrance="stagger"] { animation: olnk-slide .55s both; }

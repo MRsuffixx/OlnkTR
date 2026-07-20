@@ -377,6 +377,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
   const [status, setStatus] = useState<SaveStatus>("saved");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [upgrade, setUpgrade] = useState(false);
+  const [previewCss, setPreviewCss] = useState(initial.customCss);
   const draftRef = useRef(draft);
   const revisionRef = useRef(initial.revision);
   const savedHashRef = useRef(JSON.stringify(draft));
@@ -426,6 +427,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
         try {
           const result = await saveMutation.mutateAsync(validated.data);
           revisionRef.current = result.revision;
+          setPreviewCss(result.sanitizedCustomCss);
           savedHashRef.current = payloadHash;
         } catch (reason) {
           const error = reason as {
@@ -757,6 +759,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
               <ProfilePreview
                 draft={draft}
                 username={initial.username ?? "profilin"}
+                customCss={previewCss}
                 selectedId={selectedId}
                 onSelect={focusLink}
               />

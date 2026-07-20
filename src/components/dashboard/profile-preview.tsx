@@ -2,7 +2,13 @@
 
 /* eslint-disable @next/next/no-img-element -- Previewed avatar and favicon hosts are user-defined. */
 
-import { ArrowUpRight, ImageIcon, LockKeyhole } from "lucide-react";
+import {
+  ArrowUpRight,
+  ImageIcon,
+  LockKeyhole,
+  QrCode,
+  Share2,
+} from "lucide-react";
 
 import { appearanceBackground } from "~/lib/appearance";
 import { ProfileBackgroundVideo } from "~/components/profile/profile-background-video";
@@ -20,11 +26,13 @@ type PreviewDraft = Omit<WorkspaceInput, "revision">;
 export function ProfilePreview({
   draft,
   username,
+  customCss,
   selectedId,
   onSelect,
 }: {
   draft: PreviewDraft;
   username: string;
+  customCss: string;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
 }) {
@@ -44,6 +52,7 @@ export function ProfilePreview({
       : "text-center items-center";
   return (
     <div
+      data-olnk-profile
       className={`relative flex min-h-full flex-col overflow-hidden px-5 py-10 ${align}`}
       style={{
         ...appearanceBackground(appearance),
@@ -54,6 +63,9 @@ export function ProfilePreview({
       }}
       onClick={() => onSelect(null)}
     >
+      {appearance.advanced.customCssEnabled && customCss && (
+        <style>{customCss}</style>
+      )}
       {appearance.background.mode === "video" &&
         appearance.background.mediaUrl && (
           <ProfileBackgroundVideo src={appearance.background.mediaUrl} />
@@ -65,6 +77,27 @@ export function ProfilePreview({
         <div className="olnk-gradient-motion absolute inset-0" />
       )}
       <div className="bg-ink absolute top-3 left-1/2 h-5 w-24 -translate-x-1/2 rounded-full" />
+      <div
+        className="relative flex w-full justify-end gap-2"
+        style={{
+          order:
+            appearance.layout.socialPlacement === "aboveBio"
+              ? 1
+              : appearance.layout.socialPlacement === "belowBio"
+                ? 3
+                : 5,
+        }}
+        aria-hidden="true"
+      >
+        {[QrCode, Share2].map((Icon, index) => (
+          <span
+            key={index}
+            className="grid size-8 place-items-center rounded-full border border-current/15 bg-white/50"
+          >
+            <Icon className="size-3.5" />
+          </span>
+        ))}
+      </div>
       <button
         type="button"
         onClick={(event) => {
@@ -81,6 +114,7 @@ export function ProfilePreview({
             appearance.layout.avatarShape === "hexagon"
               ? "polygon(25% 6.7%,75% 6.7%,100% 50%,75% 93.3%,25% 93.3%,0 50%)"
               : undefined,
+          order: 2,
         }}
         aria-label="Profil bilgilerini düzenle"
       >
@@ -93,7 +127,7 @@ export function ProfilePreview({
       {appearance.layout.bioPlacement === "aboveName" && (
         <p
           className="relative max-w-[280px] leading-6 opacity-70"
-          style={{ marginTop: density.profileGap }}
+          style={{ marginTop: density.profileGap, order: 2 }}
         >
           {draft.bio || "Kendini birkaç kelimeyle anlat."}
         </p>
@@ -105,12 +139,16 @@ export function ProfilePreview({
           fontFamily: profileFontFamily(appearance.typography.headingFont),
           fontSize: appearance.typography.headingSize,
           letterSpacing: appearance.typography.letterSpacing,
+          order: 2,
         }}
       >
         {draft.name || "Görünen adın"}
       </h2>
       {appearance.layout.bioPlacement === "belowName" && (
-        <p className="relative mt-2 max-w-[280px] leading-6 opacity-70">
+        <p
+          className="relative mt-2 max-w-[280px] leading-6 opacity-70"
+          style={{ order: 2 }}
+        >
           {draft.bio || "Kendini birkaç kelimeyle anlat."}
         </p>
       )}
@@ -120,6 +158,7 @@ export function ProfilePreview({
           display: "grid",
           gap: appearance.buttons.spacing,
           marginTop: density.linksTop,
+          order: 4,
         }}
       >
         {!previewLinks.length && (
@@ -157,6 +196,7 @@ export function ProfilePreview({
               }}
               className={`olnk-link flex w-full items-center gap-3 px-4 text-left font-bold transition ${link.enabled ? "" : "opacity-45"} ${selectedId === link.id ? "ring-4 ring-white/80 ring-offset-2 ring-offset-transparent" : ""}`}
               data-hover={appearance.buttons.hover}
+              data-press={appearance.buttons.press}
               data-entrance={appearance.effects.entrance}
               style={{
                 ...profileButtonStyle(appearance, link.customization),
@@ -188,7 +228,10 @@ export function ProfilePreview({
         })}
       </div>
       {!appearance.advanced.removeBranding && (
-        <div className="relative mt-auto pt-10 text-xs font-black opacity-60">
+        <div
+          className="relative mt-auto pt-10 text-xs font-black opacity-60"
+          style={{ order: 6 }}
+        >
           olnk.tr/{username}
         </div>
       )}
