@@ -58,8 +58,7 @@ export function AuthForm({
     !isRegister || (shapeValid && availability.data?.available === true);
   const emailValid = registerIntentInput.shape.email.safeParse(email).success;
   const canContinueWithEmail = usernameReady && emailValid;
-  const canContinueWithGoogle =
-    usernameReady && (!isRegister || emailValid);
+  const canContinueWithGoogle = usernameReady && (!isRegister || emailValid);
 
   async function createIntent() {
     const response = await fetch("/api/register/intent", {

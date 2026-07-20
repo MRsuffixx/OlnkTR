@@ -31,6 +31,7 @@ jobs:
       NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
       CRON_SECRET: ci-only-cron-secret-that-is-long-enough
       TRUSTED_IP_HEADER: none
+      RUN_DATABASE_E2E: 1
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

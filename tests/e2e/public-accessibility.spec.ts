@@ -24,6 +24,10 @@ test("private billing route redirects unauthenticated visitors", async ({
 });
 
 test("unknown public profile uses the product 404", async ({ page }) => {
+  test.skip(
+    process.env.RUN_DATABASE_E2E !== "1",
+    "Requires a migrated PostgreSQL test database.",
+  );
   const response = await page.goto("/this-profile-does-not-exist-404");
   expect(response?.status()).toBe(404);
   await expect(page.getByText("Bu adres henüz kimsenin değil.")).toBeVisible();
