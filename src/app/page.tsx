@@ -148,7 +148,7 @@ export default function Home() {
                   key={number}
                   className="border-paper/15 bg-paper/[.06] rounded-3xl border p-6"
                 >
-                  <div className="text-orange text-sm font-black">{number}</div>
+                  <div className="text-yellow text-sm font-black">{number}</div>
                   <h3 className="mt-8 text-xl font-bold">{title}</h3>
                   <p className="text-paper/60 mt-3 leading-7">{text}</p>
                 </article>
@@ -178,12 +178,12 @@ export default function Home() {
       <footer className="bg-paper px-5 py-8 sm:px-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 sm:flex-row">
           <Brand />
-          <div className="text-ink/60 flex gap-5 text-sm font-semibold">
+          <div className="text-ink/70 flex gap-5 text-sm font-semibold">
             <Link href="/privacy">Gizlilik</Link>
             <Link href="/terms">Koşullar</Link>
             <a href="mailto:merhaba@olnk.tr">İletişim</a>
           </div>
-          <p className="text-ink/50 text-sm">
+          <p className="text-ink/70 text-sm">
             © {new Date().getFullYear()} olnk
           </p>
         </div>

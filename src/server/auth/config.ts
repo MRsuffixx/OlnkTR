@@ -145,6 +145,10 @@ const adapter = {
 export const authConfig = {
   providers,
   adapter,
+  // Auth.js must accept the deployment host to construct callback URLs. The
+  // application proxy admits auth routes only on the canonical/preview hosts
+  // and returns controlled responses for custom or unknown hosts first.
+  trustHost: true,
   pages: {
     signIn: "/login",
     verifyRequest: "/login?status=email-sent",

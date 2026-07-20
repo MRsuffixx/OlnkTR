@@ -128,7 +128,7 @@ export function AuthForm({
         <label className="block">
           <span className="mb-2 block text-sm font-bold">Kullanıcı adın</span>
           <div className="relative">
-            <span className="text-ink/45 pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm font-semibold">
+            <span className="text-ink/70 pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-sm font-semibold">
               olnk.tr/
             </span>
             <input
@@ -151,7 +151,7 @@ export function AuthForm({
           </div>
           <span
             id="username-help"
-            className={`mt-2 block min-h-5 text-xs font-medium ${username && (!shapeValid || availability.data?.available === false) ? "text-orange-ink" : "text-ink/50"}`}
+            className={`mt-2 block min-h-5 text-xs font-medium ${username && (!shapeValid || availability.data?.available === false) ? "text-orange-ink" : "text-ink/70"}`}
           >
             {!username
               ? "3–30 karakter; harfle başlamalı."
@@ -179,7 +179,7 @@ export function AuthForm({
           placeholder="sen@ornek.com"
         />
         {isRegister && googleEnabled && (
-          <span className="text-ink/50 mt-2 block text-xs">
+          <span className="text-ink/70 mt-2 block text-xs">
             Google ile devam edeceksen aynı e-posta adresini yaz.
           </span>
         )}
