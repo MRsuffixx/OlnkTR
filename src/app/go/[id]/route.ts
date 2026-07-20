@@ -15,7 +15,7 @@ export async function GET(
   const { id } = await params;
   const link = await db.profileLink.findFirst({
     where: { id, enabled: true, url: { not: "" } },
-    include: { user: { select: { username: true, subscription: true } } },
+    include: { user: { select: { username: true } } },
   });
 
   if (!link) {
