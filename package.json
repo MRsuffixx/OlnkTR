@@ -23,6 +23,9 @@
     "lint:fix": "eslint src --fix",
     "preview": "pnpm build && next start",
     "start": "next start",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
