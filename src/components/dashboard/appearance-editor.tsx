@@ -126,6 +126,7 @@ export function AppearanceEditor({
             type="button"
             key={item.id}
             onClick={() => setCategory(item.id)}
+            aria-pressed={category === item.id}
             className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-black ${category === item.id ? "bg-ink text-paper" : "border-ink/10 border bg-white"}`}
           >
             {item.label}
@@ -681,6 +682,8 @@ function Choice({
               type="button"
               key={String(option)}
               onClick={() => onChoose(path, option)}
+              aria-pressed={current === option}
+              aria-label={locked ? `${text} · Pro` : text}
               className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-black ${current === option ? "border-ink bg-ink text-paper" : "border-ink/15 bg-white"}`}
             >
               {locked && <LockKeyhole className="text-orange size-3" />}
@@ -707,24 +710,36 @@ function ColorField({
 }) {
   const locked = !hasPro && needsPro(path);
   return (
-    <label className="block">
+    <div>
       <Label label={label} path={path} />
-      <button
-        type="button"
-        onClick={() => locked && onChange(path, value)}
-        className="border-ink/15 flex h-11 w-full items-center gap-2 rounded-xl border bg-white px-2"
-      >
+      {locked ? (
+        <button
+          type="button"
+          onClick={() => onChange(path, value)}
+          className="border-ink/15 flex h-11 w-full items-center gap-2 rounded-xl border bg-white px-2"
+          aria-label={`${label} · Pro`}
+        >
+          <span
+            className="size-8 rounded-lg"
+            style={{ backgroundColor: value }}
+            aria-hidden="true"
+          />
+          <span className="text-xs font-black">{value}</span>
+          <LockKeyhole className="text-orange ml-auto size-3.5" />
+        </button>
+      ) : (
+        <label className="border-ink/15 flex h-11 w-full items-center gap-2 rounded-xl border bg-white px-2">
         <input
           type="color"
           value={value}
-          disabled={locked}
           onChange={(event) => onChange(path, event.target.value)}
           className="size-8 cursor-pointer rounded-lg border-0"
+          aria-label={label}
         />
         <span className="text-xs font-black">{value}</span>
-        {locked && <LockKeyhole className="text-orange ml-auto size-3.5" />}
-      </button>
-    </label>
+        </label>
+      )}
+    </div>
   );
 }
 function Range({
@@ -845,6 +860,8 @@ function Toggle({
     <button
       type="button"
       onClick={() => onChange(path, !checked)}
+      role="switch"
+      aria-checked={checked}
       className="border-ink/10 flex w-full items-center justify-between rounded-2xl border bg-white p-3 text-left"
     >
       <span className="flex items-center gap-2 text-sm font-black">

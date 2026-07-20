@@ -27,7 +27,9 @@ const config = {
       "base-uri 'self'",
       "form-action 'self' https://www.paytr.com https://*.iyzipay.com https://*.iyzico.com",
       "frame-ancestors 'none'",
-      "upgrade-insecure-requests",
+      ...(process.env.NODE_ENV === "production"
+        ? ["upgrade-insecure-requests"]
+        : []),
     ].join("; ");
     return [
       {

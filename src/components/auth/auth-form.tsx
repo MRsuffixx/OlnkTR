@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { api } from "~/trpc/react";
+import { registerIntentInput } from "~/lib/schemas";
 
 type AuthFormProps = {
   mode: "register" | "login";
@@ -55,7 +56,10 @@ export function AuthForm({
 
   const usernameReady =
     !isRegister || (shapeValid && availability.data?.available === true);
-  const canContinue = usernameReady && (!isRegister || email.length > 0);
+  const emailValid = registerIntentInput.shape.email.safeParse(email).success;
+  const canContinueWithEmail = usernameReady && emailValid;
+  const canContinueWithGoogle =
+    usernameReady && (!isRegister || emailValid);
 
   async function createIntent() {
     const response = await fetch("/api/register/intent", {
@@ -75,6 +79,10 @@ export function AuthForm({
 
   async function continueWith(provider: "email" | "google") {
     setError(null);
+    if ((provider === "email" || isRegister) && !emailValid) {
+      setError("Geçerli bir e-posta adresi gir.");
+      return;
+    }
     setPending(provider);
     try {
       if (isRegister) await createIntent();
@@ -143,7 +151,7 @@ export function AuthForm({
           </div>
           <span
             id="username-help"
-            className={`mt-2 block min-h-5 text-xs font-medium ${username && (!shapeValid || availability.data?.available === false) ? "text-orange" : "text-ink/50"}`}
+            className={`mt-2 block min-h-5 text-xs font-medium ${username && (!shapeValid || availability.data?.available === false) ? "text-orange-ink" : "text-ink/50"}`}
           >
             {!username
               ? "3–30 karakter; harfle başlamalı."
@@ -166,6 +174,7 @@ export function AuthForm({
           onChange={(event) => setEmail(event.target.value)}
           autoComplete="email"
           required
+          aria-invalid={email.length > 0 && !emailValid}
           className="border-ink/20 bg-paper focus:border-ink h-14 w-full rounded-2xl border-2 px-4 transition outline-none"
           placeholder="sen@ornek.com"
         />
@@ -179,7 +188,7 @@ export function AuthForm({
       {error && (
         <div
           role="alert"
-          className="bg-orange/10 text-orange rounded-2xl p-3 text-sm font-semibold"
+          className="bg-orange/10 text-orange-ink rounded-2xl p-3 text-sm font-semibold"
         >
           {error}
         </div>
@@ -189,7 +198,7 @@ export function AuthForm({
         {emailEnabled && (
           <button
             type="button"
-            disabled={!canContinue || pending !== null}
+            disabled={!canContinueWithEmail || pending !== null}
             onClick={() => void continueWith("email")}
             className="bg-ink text-paper flex h-14 w-full items-center justify-center gap-2 rounded-full px-5 font-bold shadow-[4px_4px_0_#F06432] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
           >
@@ -209,7 +218,7 @@ export function AuthForm({
         {googleEnabled && (
           <button
             type="button"
-            disabled={!canContinue || pending !== null}
+            disabled={!canContinueWithGoogle || pending !== null}
             onClick={() => void continueWith("google")}
             className="border-ink bg-paper hover:bg-cream flex h-14 w-full items-center justify-center gap-3 rounded-full border-2 px-5 font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
           >

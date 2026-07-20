@@ -1,4 +1,5 @@
 import { Brand } from "~/components/brand";
+import { TRPCReactProvider } from "~/trpc/react";
 
 export default function AuthLayout({
   children,
@@ -6,6 +7,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
+    <TRPCReactProvider>
     <main className="bg-paper grid min-h-screen lg:grid-cols-[.9fr_1.1fr]">
       <aside className="noise-grid bg-yellow relative hidden overflow-hidden p-10 lg:flex lg:flex-col lg:justify-between">
         <Brand />
@@ -36,5 +38,6 @@ export default function AuthLayout({
         </div>
       </section>
     </main>
+    </TRPCReactProvider>
   );
 }

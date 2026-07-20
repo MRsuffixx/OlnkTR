@@ -8,6 +8,7 @@ import { cache } from "react";
 
 import { Brand } from "~/components/brand";
 import { ProfileEffects } from "~/components/profile/profile-effects";
+import { ProfileBackgroundVideo } from "~/components/profile/profile-background-video";
 import { ShareButton } from "~/components/profile/share-button";
 import {
   appearanceBackground,
@@ -113,7 +114,7 @@ export default async function PublicProfilePage({
   return (
     <main
       data-olnk-profile
-      className={`relative min-h-dvh overflow-hidden px-4 py-7 ${appearance.effects.cursor !== "default" ? "olnk-hide-cursor" : ""}`}
+      className="relative min-h-dvh overflow-hidden px-4 py-7"
       style={{
         ...background,
         color: appearance.typography.color,
@@ -131,14 +132,7 @@ export default async function PublicProfilePage({
         profile.theme?.customCss && <style>{profile.theme.customCss}</style>}
       {appearance.background.mode === "video" &&
         appearance.background.mediaUrl && (
-          <video
-            src={appearance.background.mediaUrl}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="absolute inset-0 size-full object-cover"
-          />
+          <ProfileBackgroundVideo src={appearance.background.mediaUrl} />
         )}
       {appearance.background.mode === "particles" && (
         <div className="olnk-particles absolute inset-0" />
@@ -151,7 +145,17 @@ export default async function PublicProfilePage({
         className="relative mx-auto flex min-h-[calc(100dvh-3.5rem)] w-full flex-col"
         style={{ maxWidth: appearance.layout.contentWidth }}
       >
-        <div className="flex items-center justify-end gap-2">
+        <div
+          className="flex items-center justify-end gap-2"
+          style={{
+            order:
+              appearance.layout.socialPlacement === "aboveBio"
+                ? 1
+                : appearance.layout.socialPlacement === "belowBio"
+                  ? 3
+                  : 5,
+          }}
+        >
           <details className="group relative">
             <summary
               className="grid size-10 cursor-pointer list-none place-items-center rounded-full border border-current/15 bg-white/50 backdrop-blur transition hover:scale-105"
@@ -176,7 +180,10 @@ export default async function PublicProfilePage({
           </details>
           <ShareButton title={profile.name ?? profile.username} />
         </div>
-        <section className={`mt-4 flex flex-col ${alignment}`}>
+        <section
+          className={`mt-4 flex flex-col ${alignment}`}
+          style={{ order: 2 }}
+        >
           <div
             className="bg-orange grid place-items-center overflow-hidden text-4xl font-black text-white shadow-[4px_5px_0_rgba(23,33,27,.55)]"
             style={{
@@ -226,6 +233,7 @@ export default async function PublicProfilePage({
           style={{
             gap: appearance.buttons.spacing,
             marginTop: density.linksTop,
+            order: 4,
           }}
           aria-label={`${profile.name ?? profile.username} bağlantıları`}
         >
@@ -298,12 +306,12 @@ export default async function PublicProfilePage({
           })}
         </nav>
         {!links.length && (
-          <div className="mt-9 rounded-3xl border border-current/15 bg-white/25 px-5 py-8 text-center text-sm font-semibold opacity-65 backdrop-blur">
+          <div className="order-[4] mt-9 rounded-3xl border border-current/15 bg-white/25 px-5 py-8 text-center text-sm font-semibold opacity-65 backdrop-blur">
             Bu profil yakında bağlantılarını paylaşacak.
           </div>
         )}
         {!appearance.advanced.removeBranding && (
-          <div className="mt-auto flex justify-center pt-14">
+          <div className="order-[6] mt-auto flex justify-center pt-14">
             <span className="rounded-full bg-white/45 px-4 py-2 backdrop-blur">
               <Brand compact />
             </span>

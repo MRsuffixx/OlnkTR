@@ -6,6 +6,7 @@
   --color-cream: #f5f0de;
   --color-paper: #fdfcf7;
   --color-orange: #f06432;
+  --color-orange-ink: #a93b1b;
   --color-yellow: #f8c95c;
   --color-mint: #b9ddc7;
 }
@@ -16,6 +17,7 @@
   --cream: #f5f0de;
   --paper: #fdfcf7;
   --orange: #f06432;
+  --orange-ink: #a93b1b;
   --yellow: #f8c95c;
   --mint: #b9ddc7;
 }
@@ -162,6 +164,9 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .olnk-custom-cursor,
+  .olnk-cursor-trail,
+  .olnk-click-ripple { display: none !important; }
   *,
   *::before,
   *::after {
@@ -170,4 +175,10 @@ a {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+@media (pointer: coarse) {
+  .olnk-custom-cursor,
+  .olnk-cursor-trail,
+  .olnk-click-ripple { display: none !important; }
 }

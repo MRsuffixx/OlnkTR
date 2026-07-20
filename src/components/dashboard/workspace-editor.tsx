@@ -39,6 +39,7 @@ import { useEffect, useRef, useState } from "react";
 import { AppearanceEditor } from "~/components/dashboard/appearance-editor";
 import { AssetUpload } from "~/components/dashboard/asset-upload";
 import { ProfilePreview } from "~/components/dashboard/profile-preview";
+import { ModalDialog } from "~/components/ui/modal-dialog";
 import { workspaceInput, type WorkspaceInput } from "~/lib/schemas";
 import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
@@ -342,7 +343,7 @@ function SortableLink({
                 </div>
               </Field>
               {passwordError && (
-                <p className="text-orange mt-2 text-xs font-bold">
+                <p className="text-orange-ink mt-2 text-xs font-bold">
                   {passwordError}
                 </p>
               )}
@@ -351,7 +352,7 @@ function SortableLink({
           <button
             type="button"
             onClick={onDelete}
-            className="text-orange inline-flex items-center gap-2 text-sm font-bold"
+            className="text-orange-ink inline-flex items-center gap-2 text-sm font-bold"
           >
             <Trash2 className="size-4" /> Bağlantıyı sil
           </button>
@@ -550,12 +551,14 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
       <div className="border-ink/10 bg-paper flex items-center gap-2 border-b px-4 py-3 md:hidden">
         <button
           onClick={() => setMobileTab("edit")}
+          aria-pressed={mobileTab === "edit"}
           className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-xl text-sm font-bold ${mobileTab === "edit" ? "bg-ink text-paper" : "bg-cream"}`}
         >
           <MonitorSmartphone className="size-4" /> Düzenle
         </button>
         <button
           onClick={() => setMobileTab("preview")}
+          aria-pressed={mobileTab === "preview"}
           className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-xl text-sm font-bold ${mobileTab === "preview" ? "bg-ink text-paper" : "bg-cream"}`}
         >
           <Eye className="size-4" /> Önizleme
@@ -569,7 +572,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
             <div className="mb-7 flex items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <p className="text-orange text-xs font-black tracking-[.15em] uppercase">
+                  <p className="text-orange-ink text-xs font-black tracking-[.15em] uppercase">
                     Canlı düzenleyici
                   </p>
                   <span
@@ -585,7 +588,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
               <button
                 type="button"
                 onClick={retry}
-                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ${status === "error" || status === "conflict" ? "bg-orange/10 text-orange" : "bg-cream text-ink/55"}`}
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold ${status === "error" || status === "conflict" ? "bg-orange/10 text-orange-ink" : "bg-cream text-ink/55"}`}
               >
                 {status === "saving" ? (
                   <LoaderCircle className="size-3.5 animate-spin" />
@@ -598,7 +601,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
               </button>
             </div>
             {status === "conflict" && (
-              <div className="border-orange/30 bg-orange/10 text-orange mb-5 rounded-2xl border p-4 text-sm font-semibold">
+              <div className="border-orange/30 bg-orange/10 text-orange-ink mb-5 rounded-2xl border p-4 text-sm font-semibold">
                 Profil başka bir sekmede değiştirildi. Bu sekmedeki taslağı
                 korumak için sayfayı yenileyip tekrar uygula.
               </div>
@@ -762,20 +765,29 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
         </section>
       </div>
       {upgrade && (
-        <div className="bg-ink/65 fixed inset-0 z-[90] grid place-items-center p-4 backdrop-blur-sm">
+        <ModalDialog
+          open
+          onClose={() => setUpgrade(false)}
+          labelledBy="upgrade-dialog-title"
+          className="w-full max-w-md"
+        >
           <div className="bg-paper relative w-full max-w-md overflow-hidden rounded-[2rem] p-7 shadow-2xl">
             <button
               type="button"
               onClick={() => setUpgrade(false)}
               className="bg-cream absolute top-4 right-4 grid size-9 place-items-center rounded-full"
               aria-label="Kapat"
+              autoFocus
             >
               <X className="size-4" />
             </button>
             <span className="bg-yellow grid size-12 place-items-center rounded-2xl">
               <Crown className="size-6" />
             </span>
-            <h2 className="display-serif mt-5 text-4xl font-bold">
+            <h2
+              id="upgrade-dialog-title"
+              className="display-serif mt-5 text-4xl font-bold"
+            >
               Bu fikir Pro istiyor.
             </h2>
             <p className="text-ink/60 mt-3 leading-7">
@@ -789,7 +801,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
               <Sparkles className="size-4" /> Pro’yu incele
             </Link>
           </div>
-        </div>
+        </ModalDialog>
       )}
     </main>
   );

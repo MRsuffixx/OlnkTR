@@ -15,7 +15,6 @@ import {
   Space_Grotesk,
 } from "next/font/google";
 
-import { TRPCReactProvider } from "~/trpc/react";
 import { getAppOrigin } from "~/lib/app-url";
 
 export const metadata: Metadata = {
@@ -95,9 +94,7 @@ export default function RootLayout({
         robotoMono.variable,
       ].join(" ")}
     >
-      <body>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

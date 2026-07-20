@@ -24,7 +24,7 @@ export default async function AnalyticsPage() {
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="text-orange text-xs font-black tracking-[.15em] uppercase">
+          <p className="text-orange-ink text-xs font-black tracking-[.15em] uppercase">
             Son 30 gün
           </p>
           <h1 className="display-serif mt-2 text-5xl font-bold">
@@ -106,7 +106,7 @@ export default async function AnalyticsPage() {
         ) : (
           <div
             className="mt-8 flex h-60 items-end gap-1.5"
-            aria-label="Son 30 günlük tıklama grafiği"
+            aria-hidden="true"
           >
             {data.series.map((point, index) => (
               <div
@@ -114,9 +114,12 @@ export default async function AnalyticsPage() {
                 className="group relative flex h-full min-w-0 flex-1 items-end"
               >
                 <div
-                  className="bg-orange hover:bg-ink min-h-1 w-full rounded-t-md transition"
+                  className="bg-orange hover:bg-ink w-full rounded-t-md transition"
                   style={{
-                    height: `${Math.max(2, (point.clicks / max) * 100)}%`,
+                    height:
+                      point.clicks === 0
+                        ? "0%"
+                        : `${(point.clicks / max) * 100}%`,
                   }}
                 />
                 <span className="bg-ink pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-10 hidden -translate-x-1/2 rounded-lg px-2 py-1 text-[10px] font-bold whitespace-nowrap text-white group-hover:block">
@@ -137,6 +140,28 @@ export default async function AnalyticsPage() {
               </div>
             ))}
           </div>
+          <table className="sr-only">
+            <caption>Son 30 günlük tıklama sayıları</caption>
+            <thead>
+              <tr>
+                <th scope="col">Tarih</th>
+                <th scope="col">Tıklama</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.series.map((point) => (
+                <tr key={point.date}>
+                  <th scope="row">
+                    {new Date(`${point.date}T12:00:00Z`).toLocaleDateString(
+                      "tr-TR",
+                      { day: "numeric", month: "long", year: "numeric" },
+                    )}
+                  </th>
+                  <td>{point.clicks}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </section>
 

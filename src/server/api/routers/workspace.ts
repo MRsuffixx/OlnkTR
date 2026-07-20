@@ -247,6 +247,7 @@ export const workspaceRouter = createTRPCRouter({
           revision,
           effectiveAppearance: resolveAppearanceForPlan(appearance, pro)
             .effective,
+          sanitizedCustomCss: customCss,
         };
       } catch (error) {
         if (error instanceof TRPCError) throw error;

@@ -67,7 +67,7 @@ export function SettingsForm({
         {(message !== null || error !== null) && (
           <div
             role="status"
-            className={`rounded-2xl p-4 text-sm font-bold ${error ? "bg-orange/10 text-orange" : "bg-mint text-ink"}`}
+            className={`rounded-2xl p-4 text-sm font-bold ${error ? "bg-orange/10 text-orange-ink" : "bg-mint text-ink"}`}
           >
             {error ?? message}
           </div>
@@ -174,7 +174,7 @@ export function SettingsForm({
             </div>
           </label>
           <p
-            className={`mt-2 min-h-5 text-xs font-semibold ${check.data?.available === false ? "text-orange" : "text-ink/40"}`}
+            className={`mt-2 min-h-5 text-xs font-semibold ${check.data?.available === false ? "text-orange-ink" : "text-ink/40"}`}
           >
             {check.data?.available === false
               ? "Bu kullanıcı adı kullanılamıyor."
@@ -200,7 +200,7 @@ export function SettingsForm({
         </form>
 
         <section className="border-orange/25 bg-orange/[.04] rounded-3xl border p-5 sm:p-7">
-          <h2 className="text-orange text-xl font-black">Hesabı sil</h2>
+          <h2 className="text-orange-ink text-xl font-black">Hesabı sil</h2>
           <p className="text-ink/55 mt-2 max-w-xl text-sm leading-6">
             Profilin, bağlantıların ve tüm tıklama geçmişin kalıcı olarak
             silinir. Bu işlem geri alınamaz.

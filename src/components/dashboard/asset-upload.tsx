@@ -86,7 +86,7 @@ export function AssetUpload({
         )}{" "}
         Dosya yükle
       </button>
-      {error && <p className="text-orange mt-2 text-xs font-bold">{error}</p>}
+      {error && <p className="text-orange-ink mt-2 text-xs font-bold">{error}</p>}
     </div>
   );
 }

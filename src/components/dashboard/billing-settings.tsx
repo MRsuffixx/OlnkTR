@@ -15,6 +15,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { AdyenCheckoutForm } from "~/components/dashboard/adyen-checkout";
+import { ModalDialog } from "~/components/ui/modal-dialog";
 import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
 
@@ -310,6 +311,7 @@ export function BillingSettings({
             <button
               type="button"
               onClick={() => setInterval("MONTHLY")}
+              aria-pressed={interval === "MONTHLY"}
               className={`h-10 flex-1 rounded-full text-sm font-black ${interval === "MONTHLY" ? "bg-ink text-paper" : ""}`}
             >
               Aylık
@@ -317,6 +319,7 @@ export function BillingSettings({
             <button
               type="button"
               onClick={() => setInterval("YEARLY")}
+              aria-pressed={interval === "YEARLY"}
               className={`h-10 flex-1 rounded-full text-sm font-black ${interval === "YEARLY" ? "bg-ink text-paper" : ""}`}
             >
               Yıllık
@@ -355,6 +358,7 @@ export function BillingSettings({
                 type="button"
                 key={item.id}
                 onClick={() => setProvider(item.id)}
+                aria-pressed={provider === item.id}
                 className={`rounded-2xl border p-4 text-left transition ${provider === item.id ? "border-ink bg-cream shadow-[3px_3px_0_#F8C95C]" : "border-ink/10 hover:border-ink/30"}`}
               >
                 <div className="flex items-center justify-between">
@@ -429,17 +433,28 @@ export function BillingSettings({
       )}
       <InvoiceList invoices={data.invoices} />
       {presentation && !intentStatus.data?.hasPro && (
-        <div className="bg-ink/70 fixed inset-0 z-[80] grid place-items-center p-3 backdrop-blur-sm">
-          <div className="bg-paper relative max-h-[94vh] w-full max-w-2xl overflow-auto rounded-3xl p-4 shadow-2xl sm:p-6">
+        <ModalDialog
+          open
+          onClose={() => setPresentation(null)}
+          labelledBy="checkout-dialog-title"
+          className="w-full max-w-2xl"
+        >
+          <div className="bg-paper relative w-full rounded-3xl p-4 shadow-2xl sm:p-6">
             <button
               type="button"
               onClick={() => setPresentation(null)}
               className="bg-ink text-paper absolute top-4 right-4 z-10 grid size-9 place-items-center rounded-full"
               aria-label="Ödeme penceresini kapat"
+              autoFocus
             >
               <X className="size-4" />
             </button>
-            <h3 className="mb-5 pr-12 text-xl font-black">Güvenli ödeme</h3>
+            <h3
+              id="checkout-dialog-title"
+              className="mb-5 pr-12 text-xl font-black"
+            >
+              Güvenli ödeme
+            </h3>
             {presentation.kind === "iframe" && (
               <iframe
                 title="PayTR güvenli ödeme"
@@ -465,7 +480,7 @@ export function BillingSettings({
               />
             )}
           </div>
-        </div>
+        </ModalDialog>
       )}
     </div>
   );
@@ -473,7 +488,7 @@ export function BillingSettings({
 
 function ErrorBanner({ message }: { message: string }) {
   return (
-    <div className="border-orange/30 bg-orange/10 text-orange rounded-2xl border p-4 text-sm font-bold">
+    <div className="border-orange/30 bg-orange/10 text-orange-ink rounded-2xl border p-4 text-sm font-bold">
       {message}
     </div>
   );
@@ -513,7 +528,7 @@ function InvoiceList({ invoices }: { invoices: Overview["invoices"] }) {
                   href={invoice.invoiceUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-orange text-xs font-bold underline"
+                  className="text-orange-ink text-xs font-bold underline"
                 >
                   Faturayı aç
                 </a>

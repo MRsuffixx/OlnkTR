@@ -5,6 +5,7 @@
 import { ArrowUpRight, ImageIcon, LockKeyhole } from "lucide-react";
 
 import { appearanceBackground } from "~/lib/appearance";
+import { ProfileBackgroundVideo } from "~/components/profile/profile-background-video";
 import {
   profileAvatarRadius,
   profileButtonStyle,
@@ -55,14 +56,7 @@ export function ProfilePreview({
     >
       {appearance.background.mode === "video" &&
         appearance.background.mediaUrl && (
-          <video
-            src={appearance.background.mediaUrl}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="absolute inset-0 size-full object-cover"
-          />
+          <ProfileBackgroundVideo src={appearance.background.mediaUrl} />
         )}
       {appearance.background.mode === "particles" && (
         <div className="olnk-particles absolute inset-0" />
