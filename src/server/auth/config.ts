@@ -1,12 +1,17 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import type { Adapter } from "next-auth/adapters";
 import type { DefaultSession, NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import Nodemailer from "next-auth/providers/nodemailer";
 import { cookies } from "next/headers";
 
 import { env } from "~/env";
-import { validateUsernamePolicy } from "~/lib/username";
+import { normalizeEmail } from "~/lib/email";
 import { db } from "~/server/db";
+import {
+  claimUsername,
+  UsernameUnavailableError,
+} from "~/server/identity/claim-username";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -60,39 +65,65 @@ async function claimSignupIntent(userId: string, email: string | null) {
   if (!token) return;
 
   const intent = await db.authIntent.findUnique({ where: { token } });
-  if (
-    !intent ||
-    intent.expiresAt <= new Date() ||
-    intent.email !== email.toLocaleLowerCase("tr-TR")
-  ) {
-    return;
-  }
-
-  const validation = await validateUsernamePolicy(intent.username);
-  if (!validation.ok) return;
+  if (!intent) return;
 
   try {
-    await db.$transaction([
-      db.user.update({
-        where: { id: userId },
-        data: {
-          username: validation.username,
-          usernameNormalized: validation.normalized,
-          onboardedAt: new Date(),
-        },
-      }),
-      db.authIntent.delete({ where: { id: intent.id } }),
-    ]);
+    await claimUsername({
+      userId,
+      email,
+      username: intent.username,
+      intentToken: token,
+    });
     cookieStore.delete("olnk-signup-intent");
-  } catch {
+  } catch (error) {
     // A unique constraint is the final authority. The user is sent to onboarding
     // to choose another name if this reservation lost a race.
+    if (!(error instanceof UsernameUnavailableError)) throw error;
   }
 }
 
+const baseAdapter = PrismaAdapter(db);
+const adapter = {
+  ...baseAdapter,
+  async createUser(user) {
+    const email = normalizeEmail(user.email);
+    return db.user.create({
+      data: { ...user, email, emailNormalized: email },
+    });
+  },
+  async getUserByEmail(email) {
+    return db.user.findUnique({
+      where: { emailNormalized: normalizeEmail(email) },
+    });
+  },
+  async updateUser({ id, ...user }) {
+    const email = user.email ? normalizeEmail(user.email) : undefined;
+    return db.user.update({
+      where: { id },
+      data: {
+        ...user,
+        ...(email ? { email, emailNormalized: email } : {}),
+      },
+    });
+  },
+  async createVerificationToken(token) {
+    return db.verificationToken.create({
+      data: { ...token, identifier: normalizeEmail(token.identifier) },
+    });
+  },
+  async useVerificationToken({ identifier, token }) {
+    const key = {
+      identifier_token: { identifier: normalizeEmail(identifier), token },
+    };
+    const existing = await db.verificationToken.findUnique({ where: key });
+    if (!existing) return null;
+    return db.verificationToken.delete({ where: key });
+  },
+} satisfies Adapter;
+
 export const authConfig = {
   providers,
-  adapter: PrismaAdapter(db),
+  adapter,
   pages: {
     signIn: "/login",
     verifyRequest: "/login?status=email-sent",
@@ -122,6 +153,13 @@ export const authConfig = {
     },
     signIn: async ({ user }) => {
       if (!user.id) return;
+      if (user.email) {
+        const email = normalizeEmail(user.email);
+        await db.user.update({
+          where: { id: user.id },
+          data: { email, emailNormalized: email },
+        });
+      }
       await ensureTheme(user.id);
       await claimSignupIntent(user.id, user.email ?? null);
     },
