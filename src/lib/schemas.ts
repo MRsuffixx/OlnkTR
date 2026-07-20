@@ -98,6 +98,7 @@ export const registerIntentInput = z.object({
 });
 
 export const accountProfileInput = z.object({
+  revision: z.number().int().nonnegative(),
   name: z.string().trim().min(1).max(60),
   bio: z.string().trim().max(160),
   image: optionalWebUrl.nullable(),

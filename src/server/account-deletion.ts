@@ -102,6 +102,13 @@ export async function processAccountDeletionJob(jobId: string) {
 }
 
 export async function processDueAccountDeletions(limit = 20) {
+  await db.accountDeletionJob.updateMany({
+    where: {
+      status: "PROCESSING",
+      updatedAt: { lt: new Date(Date.now() - 15 * 60 * 1000) },
+    },
+    data: { status: "RETRY_PENDING", nextAttemptAt: new Date() },
+  });
   const jobs = await db.accountDeletionJob.findMany({
     where: {
       status: { in: ["PENDING", "RETRY_PENDING"] },

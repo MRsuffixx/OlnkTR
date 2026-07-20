@@ -20,6 +20,7 @@ export function SettingsForm({
   const [bio, setBio] = useState(initial.bio);
   const [image, setImage] = useState(initial.image ?? "");
   const [username, setUsername] = useState(initial.username ?? "");
+  const [revision, setRevision] = useState(initial.revision);
   const [debounced, setDebounced] = useState(username);
   const [confirmation, setConfirmation] = useState("");
   const [message, setMessage] = useState<string | null>(null);
@@ -37,7 +38,10 @@ export function SettingsForm({
     { enabled: usernameShape && debounced !== initial.username, retry: false },
   );
   const profile = api.account.updateProfile.useMutation({
-    onSuccess: () => setMessage("Profil bilgilerin güncellendi."),
+    onSuccess: (result) => {
+      setRevision(result.revision);
+      setMessage("Profil bilgilerin güncellendi.");
+    },
     onError: (reason) => setError(reason.message),
   });
   const updateUsername = api.account.updateUsername.useMutation({
@@ -73,6 +77,7 @@ export function SettingsForm({
             event.preventDefault();
             resetNotices();
             profile.mutate({
+              revision,
               name,
               bio,
               image: image.length > 0 ? image : null,

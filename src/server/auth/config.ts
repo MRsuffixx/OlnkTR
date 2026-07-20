@@ -152,6 +152,14 @@ export const authConfig = {
   },
   session: { strategy: "database" },
   callbacks: {
+    signIn: async ({ user }) => {
+      if (!user.id) return true;
+      const account = await db.user.findUnique({
+        where: { id: user.id },
+        select: { deletionRequestedAt: true },
+      });
+      return !account?.deletionRequestedAt;
+    },
     session: async ({ session, user }) => {
       const account = await db.user.findUnique({
         where: { id: user.id },
