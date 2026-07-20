@@ -1,3 +1,114 @@
+-- Convert legacy theme columns before the application switches exclusively to
+-- the structured appearance document. Common legacy gradients preserve their
+-- first/last colors and angle; invalid values fall back field-by-field.
+WITH legacy AS (
+  SELECT
+    t."id",
+    ARRAY(
+      SELECT color_match[1]
+      FROM regexp_matches(
+        t."backgroundValue",
+        '(#[0-9A-Fa-f]{6})',
+        'g'
+      ) AS matches(color_match)
+    ) AS colors,
+    COALESCE(
+      (regexp_match(t."backgroundValue", '([0-9]{1,3})deg'))[1]::integer,
+      145
+    ) AS angle
+  FROM "Theme" t
+  WHERE t."settings" = '{}'::jsonb
+)
+UPDATE "Theme" t
+SET
+  "settings" = jsonb_build_object(
+    'background', jsonb_build_object(
+      'mode', CASE t."backgroundType"::text
+        WHEN 'SOLID' THEN 'solid'
+        WHEN 'IMAGE' THEN 'image'
+        WHEN 'VIDEO' THEN 'video'
+        WHEN 'ANIMATED' THEN 'motion'
+        ELSE 'gradient'
+      END,
+      'solidColor', CASE
+        WHEN t."backgroundValue" ~ '^#[0-9A-Fa-f]{6}$' THEN t."backgroundValue"
+        ELSE COALESCE(legacy.colors[1], '#F5F0DE')
+      END,
+      'gradient', jsonb_build_object(
+        'type', CASE WHEN t."backgroundValue" ILIKE 'radial-gradient%' THEN 'radial' ELSE 'linear' END,
+        'angle', LEAST(360, GREATEST(0, legacy.angle)),
+        'stops', jsonb_build_array(
+          jsonb_build_object('color', COALESCE(legacy.colors[1], '#F5F0DE'), 'position', 0),
+          jsonb_build_object('color', COALESCE(legacy.colors[array_length(legacy.colors, 1)], '#F8C95C'), 'position', 100)
+        )
+      ),
+      'mediaUrl', CASE
+        WHEN t."backgroundType"::text IN ('IMAGE', 'VIDEO') AND t."backgroundValue" ~ '^https?://' THEN t."backgroundValue"
+        ELSE ''
+      END,
+      'overlayColor', '#17211B',
+      'overlayOpacity', 18,
+      'preset', 'custom'
+    ),
+    'buttons', jsonb_build_object(
+      'shape', CASE t."buttonShape"::text
+        WHEN 'PILL' THEN 'pill' WHEN 'SQUARE' THEN 'square' ELSE 'rounded' END,
+      'radius', 18,
+      'fill', CASE t."buttonStyle"::text
+        WHEN 'OUTLINE' THEN 'outline'
+        WHEN 'GLASS' THEN 'glass'
+        WHEN 'THREE_D' THEN 'threeD'
+        WHEN 'SHADOW' THEN 'shadow'
+        ELSE 'solid'
+      END,
+      'color', t."buttonColor",
+      'textColor', '#FFFFFF',
+      'borderColor', t."buttonColor",
+      'shadowColor', t."accentColor",
+      'height', 58,
+      'spacing', 12,
+      'hover', 'lift',
+      'press', 'compress'
+    ),
+    'typography', jsonb_build_object(
+      'headingFont', CASE t."fontFamily"::text
+        WHEN 'EDITORIAL' THEN 'Playfair Display'
+        WHEN 'MODERN' THEN 'Space Grotesk'
+        WHEN 'MONO' THEN 'Bebas Neue'
+        ELSE 'Fraunces'
+      END,
+      'bodyFont', CASE t."fontFamily"::text
+        WHEN 'EDITORIAL' THEN 'Lora'
+        WHEN 'MODERN' THEN 'Inter'
+        WHEN 'MONO' THEN 'Roboto Mono'
+        ELSE 'Manrope'
+      END,
+      'headingSize', 30,
+      'bodySize', 15,
+      'weight', 700,
+      'letterSpacing', 0,
+      'color', t."textColor"
+    ),
+    'layout', jsonb_build_object(
+      'avatarShape', 'circle', 'avatarSize', 96, 'avatarBorderWidth', 3,
+      'avatarBorderColor', '#FFFFFF', 'bioPlacement', 'belowName',
+      'alignment', 'center', 'density', 'comfortable', 'contentWidth', 620,
+      'socialPlacement', 'belowBio'
+    ),
+    'effects', jsonb_build_object(
+      'cursor', 'default', 'cursorColor', t."accentColor", 'trail', 'none',
+      'clickRipple', false, 'entrance', 'fade', 'staggerMs', 70
+    ),
+    'advanced', jsonb_build_object(
+      'removeBranding', NOT t."showBranding",
+      'customCssEnabled', false,
+      'detailedAnalytics', false
+    )
+  ),
+  "settingsVersion" = 1
+FROM legacy
+WHERE t."id" = legacy."id";
+
 ALTER TABLE "User"
 ADD COLUMN "emailNormalized" VARCHAR(254),
 ADD COLUMN "usernameChangedAt" TIMESTAMP(3),
