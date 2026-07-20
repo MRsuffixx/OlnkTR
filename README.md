@@ -1,29 +1,51 @@
-# Create T3 App
+# olnk.tr
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Türkçe içerik üreticileri ve küçük işletmeler için mobil öncelikli link paylaşım platformu. Next.js 15, TypeScript, tRPC, Prisma, PostgreSQL, Auth.js ve Tailwind CSS ile geliştirilmiştir.
 
-## What's next? How do I make an app with this?
+## Ürün kapsamı
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- Google OAuth ve e-posta bağlantısıyla şifresiz giriş
+- Ön rezervasyonlu, veritabanı kısıtlarıyla yarış durumlarına dayanıklı kullanıcı adı kaydı
+- Ayrılmış rota ve değiştirilebilir veritabanı engel listesiyle Türkçe/obfuscation duyarlı ad denetimi
+- Sunucuda hazırlanan profil sayfaları, profil QR kodu ve SEO metadata
+- Yan yana canlı telefon önizlemeli, dokunmatik uyumlu sürükle-bırak düzenleyici
+- Seri hale getirilmiş, revizyon kontrollü otomatik kayıt
+- Tema, arka plan, yazı karakteri ve bağlantı görünümü özelleştirme
+- Yanıtı bekletmeden yazılan ham tıklama olayları ve 30 günlük analitik
+- Profil, kullanıcı adı ve kalıcı hesap silme ayarları
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Yerel kurulum
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+1. `.env.example` dosyasını `.env` olarak kopyalayın ve değerleri doldurun.
+2. PostgreSQL veritabanını başlatın.
+3. Bağımlılıkları ve Prisma istemcisini hazırlayın:
 
-## Learn More
+   ```bash
+   pnpm install
+   pnpm db:generate
+   ```
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+4. Veritabanı migrasyonunu uygulayın ve geliştirme sunucusunu başlatın:
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+   ```bash
+   pnpm db:migrate
+   pnpm dev
+   ```
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+Google OAuth yönlendirme adresi üretimde `https://alan-adiniz/api/auth/callback/google`, yerelde `http://localhost:3000/api/auth/callback/google` olmalıdır. SMTP sağlayıcısı `EMAIL_SERVER` içinde standart bağlantı URL'si biçiminde tanımlanır.
 
-## How do I deploy this?
+## Doğrulama
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+```bash
+pnpm check
+pnpm build
+```
+
+İlk ürün migrasyonu `prisma/migrations/20260720130000_init_product` altında sürümlenmiştir. Kullanıcı adı politika varsayılanları `src/config/username-policy.ts` içinde; çalışma sırasında eklenebilen moderasyon terimleri ise `UsernameBlocklist` tablosunda tutulur.
+
+## Mimari notlar
+
+- `usernameNormalized` alanındaki benzersiz indeks son kullanıcı adı otoritesidir. Ön kontroller yalnızca hızlı geri bildirim sağlar; son yazma yine aynı kısıta çarpar.
+- Düzenleyici her değişikliği yerelde önizler. Sunucu kayıtları revizyon numarasıyla seri gönderilir; eski bir yanıt yeni taslağı ezemez ve başka sekme çatışmaları açıkça gösterilir.
+- `/go/[id]` hedefi bulduktan sonra hemen yönlendirir. Tıklama olayı Next.js `after()` içinde yazıldığı için ziyaretçinin yönlendirmesi analitik ekleme süresini beklemez.
+- Profil resimleri ve arka plan görselleri URL tabanlıdır. Üretimde dosya yükleme eklenecekse nesne depolama, MIME doğrulaması ve görüntü dönüştürme katmanı birlikte eklenmelidir.
