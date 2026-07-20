@@ -13,7 +13,9 @@ function sdk() {
   return new Iyzipay({ uri: env.IYZICO_BASE_URL, apiKey: env.IYZICO_API_KEY, secretKey: env.IYZICO_SECRET_KEY });
 }
 
-function invoke(resource: { initialize?: Function; retrieve?: Function; cancel?: Function }, method: "initialize" | "retrieve" | "cancel", request: Record<string, unknown>) {
+type IyzicoMethod = (request: Record<string, unknown>, callback: (error: Error | null, result: Record<string, unknown>) => void) => void;
+
+function invoke(resource: Partial<Record<"initialize" | "retrieve" | "cancel", IyzicoMethod>>, method: "initialize" | "retrieve" | "cancel", request: Record<string, unknown>) {
   return new Promise<Record<string, unknown>>((resolve, reject) => {
     const callable = resource[method];
     if (!callable) return reject(new Error(`iyzico ${method} işlemi SDK tarafından sunulmuyor.`));

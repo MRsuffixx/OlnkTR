@@ -1,7 +1,6 @@
 import { TRPCError } from "@trpc/server";
 
 import type { Prisma } from "../../../../generated/prisma/client";
-import { parseAppearance } from "~/lib/appearance";
 import { linkCustomizationSchema, setLinkPasswordInput, workspaceInput } from "~/lib/schemas";
 import { DEFAULT_THEME, faviconForUrl } from "~/lib/theme";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -104,14 +103,14 @@ export const workspaceRouter = createTRPCRouter({
       const revision = await ctx.db.$transaction(async (tx) => {
         const updated = await tx.user.updateMany({
           where: { id: userId, editorRevision: input.revision },
-          data: { name: input.name, bio: input.bio, image: input.image || null, editorRevision: { increment: 1 } },
+          data: { name: input.name, bio: input.bio, image: input.image?.length ? input.image : null, editorRevision: { increment: 1 } },
         });
         if (updated.count !== 1) throw new TRPCError({ code: "CONFLICT", message: "Bu profil başka bir sekmede değiştirildi. Sayfayı yenileyin." });
 
         await tx.theme.upsert({
           where: { userId },
-          create: { userId, ...input.theme, showBranding: pro ? input.theme.showBranding : true, settings: appearance as Prisma.InputJsonValue, customCss },
-          update: { ...input.theme, showBranding: pro ? input.theme.showBranding : true, settings: appearance as Prisma.InputJsonValue, customCss },
+          create: { userId, ...input.theme, showBranding: pro ? input.theme.showBranding : true, settings: appearance, customCss },
+          update: { ...input.theme, showBranding: pro ? input.theme.showBranding : true, settings: appearance, customCss },
         });
 
         await Promise.all(input.links.map((link, position) => {
