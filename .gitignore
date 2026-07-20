@@ -51,7 +51,6 @@ vite.config.ts.timestamp-*
 /swagger.yaml
 /openapi.json
 /prisma/generated/
-
 /generated
 /generated/*
 
