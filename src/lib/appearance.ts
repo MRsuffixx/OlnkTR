@@ -5,6 +5,7 @@ const mediaUrl = z.union([
   z.literal(""),
   z
     .url()
+    .max(2048)
     .refine((value) => ["http:", "https:"].includes(new URL(value).protocol)),
 ]);
 

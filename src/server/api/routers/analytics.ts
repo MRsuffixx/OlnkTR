@@ -15,29 +15,37 @@ export const analyticsRouter = createTRPCRouter({
       since.setUTCHours(0, 0, 0, 0);
       since.setUTCDate(since.getUTCDate() - input.days + 1);
 
-      const [links, dailyCounts, subscription] = await Promise.all([
-        ctx.db.profileLink.findMany({
-          where: { userId: ctx.session.user.id },
-          orderBy: { position: "asc" },
-          select: {
-            id: true,
-            title: true,
-            enabled: true,
-            _count: { select: { clicks: true } },
-          },
-        }),
-        ctx.db.$queryRaw<Array<{ date: Date; clicks: number }>>`
-          SELECT DATE_TRUNC('day', "createdAt") AS "date", COUNT(*)::int AS "clicks"
-          FROM "ClickEvent"
-          WHERE "userId" = ${ctx.session.user.id} AND "createdAt" >= ${since}
-          GROUP BY DATE_TRUNC('day', "createdAt")
-          ORDER BY "date" ASC
-        `,
-        ctx.db.subscription.findUnique({
-          where: { userId: ctx.session.user.id },
-        }),
-      ]);
+      const [links, dailyCounts, clickTotals, subscription] = await Promise.all(
+        [
+          ctx.db.profileLink.findMany({
+            where: { userId: ctx.session.user.id, deletedAt: null },
+            orderBy: { position: "asc" },
+            select: { id: true, title: true, enabled: true },
+          }),
+          ctx.db.analyticsDailyBucket.groupBy({
+            by: ["date"],
+            where: {
+              userId: ctx.session.user.id,
+              eventType: "CLICK",
+              date: { gte: since },
+            },
+            _sum: { count: true },
+            orderBy: { date: "asc" },
+          }),
+          ctx.db.analyticsDailyBucket.groupBy({
+            by: ["targetKey"],
+            where: { userId: ctx.session.user.id, eventType: "CLICK" },
+            _sum: { count: true },
+          }),
+          ctx.db.subscription.findUnique({
+            where: { userId: ctx.session.user.id },
+          }),
+        ],
+      );
       const pro = hasProAccess(subscription);
+      const totalByLink = new Map(
+        clickTotals.map((row) => [row.targetKey, row._sum.count ?? 0]),
+      );
 
       const byDay = new Map<string, number>();
       for (let offset = 0; offset < input.days; offset += 1) {
@@ -45,13 +53,11 @@ export const analyticsRouter = createTRPCRouter({
         date.setUTCDate(since.getUTCDate() + offset);
         byDay.set(date.toISOString().slice(0, 10), 0);
       }
-      for (const day of dailyCounts) {
-        const key = day.date.toISOString().slice(0, 10);
-        byDay.set(key, day.clicks);
-      }
+      for (const day of dailyCounts)
+        byDay.set(day.date.toISOString().slice(0, 10), day._sum.count ?? 0);
 
       const periodClicks = dailyCounts.reduce(
-        (sum, day) => sum + day.clicks,
+        (sum, day) => sum + (day._sum.count ?? 0),
         0,
       );
       let advanced: null | {
@@ -62,20 +68,23 @@ export const analyticsRouter = createTRPCRouter({
         sources: Array<{ label: string; count: number }>;
       } = null;
       if (canUseFeature(pro, "analytics.profileViews")) {
-        const [views, visitors, countries, devices, referrers] =
+        const [viewBuckets, visitorRows, countries, devices, sources] =
           await Promise.all([
-            ctx.db.profileViewEvent.count({
-              where: { userId: ctx.session.user.id, createdAt: { gte: since } },
-            }),
-            ctx.db.profileViewEvent.findMany({
+            ctx.db.analyticsDailyBucket.aggregate({
               where: {
                 userId: ctx.session.user.id,
-                createdAt: { gte: since },
-                visitorHash: { not: null },
+                eventType: "VIEW",
+                date: { gte: since },
               },
-              distinct: ["visitorHash"],
-              select: { visitorHash: true },
+              _sum: { count: true },
             }),
+            ctx.db.$queryRaw<Array<{ count: number }>>`
+              SELECT COUNT(DISTINCT "visitorHash")::int AS "count"
+              FROM "ProfileViewEvent"
+              WHERE "userId" = ${ctx.session.user.id}
+                AND "createdAt" >= ${since}
+                AND "visitorHash" IS NOT NULL
+            `,
             ctx.db.profileViewEvent.groupBy({
               by: ["country"],
               where: {
@@ -96,28 +105,23 @@ export const analyticsRouter = createTRPCRouter({
               },
               _count: true,
               orderBy: { _count: { deviceType: "desc" } },
+              take: 8,
             }),
-            ctx.db.profileViewEvent.findMany({
-              where: { userId: ctx.session.user.id, createdAt: { gte: since } },
-              select: { referrer: true },
-              take: 10_000,
+            ctx.db.profileViewEvent.groupBy({
+              by: ["referrerHost"],
+              where: {
+                userId: ctx.session.user.id,
+                createdAt: { gte: since },
+                referrerHost: { not: null },
+              },
+              _count: true,
+              orderBy: { _count: { referrerHost: "desc" } },
+              take: 8,
             }),
           ]);
-        const sourceMap = new Map<string, number>();
-        for (const row of referrers) {
-          let source = "Doğrudan";
-          if (row.referrer) {
-            try {
-              source = new URL(row.referrer).hostname.replace(/^www\./, "");
-            } catch {
-              source = "Diğer";
-            }
-          }
-          sourceMap.set(source, (sourceMap.get(source) ?? 0) + 1);
-        }
         advanced = {
-          views,
-          uniqueVisitors: visitors.length,
+          views: viewBuckets._sum.count ?? 0,
+          uniqueVisitors: visitorRows[0]?.count ?? 0,
           countries: countries.map((row) => ({
             label: row.country ?? "Bilinmiyor",
             count: row._count,
@@ -126,24 +130,30 @@ export const analyticsRouter = createTRPCRouter({
             label: row.deviceType ?? "Bilinmiyor",
             count: row._count,
           })),
-          sources: [...sourceMap]
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 8)
-            .map(([label, count]) => ({ label, count })),
+          sources: sources.map((row) => ({
+            label:
+              row.referrerHost === "direct"
+                ? "Doğrudan"
+                : row.referrerHost === "other"
+                  ? "Diğer"
+                  : (row.referrerHost ?? "Bilinmiyor"),
+            count: row._count,
+          })),
         };
       }
       return {
         hasPro: pro,
         advanced,
-        totalClicks: links.reduce((sum, link) => sum + link._count.clicks, 0),
+        totalClicks: clickTotals.reduce(
+          (sum, row) => sum + (row._sum.count ?? 0),
+          0,
+        ),
         periodClicks,
         activeDays: dailyCounts.length,
         series: [...byDay].map(([date, clicks]) => ({ date, clicks })),
         links: links.map((link) => ({
-          id: link.id,
-          title: link.title,
-          enabled: link.enabled,
-          clicks: link._count.clicks,
+          ...link,
+          clicks: totalByLink.get(link.id) ?? 0,
         })),
       };
     }),

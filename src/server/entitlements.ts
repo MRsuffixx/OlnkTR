@@ -34,7 +34,9 @@ export function hasProAccess(
     !ENTITLED_STATUSES.has(subscription.status)
   )
     return false;
-  return !subscription.currentPeriodEnd || subscription.currentPeriodEnd > now;
+  return Boolean(
+    subscription.currentPeriodEnd && subscription.currentPeriodEnd > now,
+  );
 }
 
 export async function getUserEntitlements(userId: string) {

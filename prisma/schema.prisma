@@ -66,6 +66,7 @@ enum BillingInterval {
 
 enum PaymentIntentStatus {
   PENDING
+  PROCESSING
   CHECKOUT_CREATED
   SUCCEEDED
   FAILED
@@ -100,16 +101,44 @@ enum DomainStatus {
   FAILED
 }
 
+enum AnalyticsEventType {
+  CLICK
+  VIEW
+}
+
+enum AssetPurpose {
+  AVATAR
+  BACKGROUND
+}
+
+enum AssetStatus {
+  PENDING
+  READY
+  DELETE_PENDING
+  DELETED
+  FAILED
+}
+
+enum AccountDeletionStatus {
+  PENDING
+  PROCESSING
+  RETRY_PENDING
+  COMPLETED
+}
+
 model User {
   id                 String    @id @default(cuid())
   name               String?
   email              String?   @unique
+  emailNormalized    String?   @unique @db.VarChar(254)
   emailVerified      DateTime?
   image              String?
   username           String?   @unique
   usernameNormalized String?   @unique
   bio                String    @default("") @db.VarChar(160)
   onboardedAt        DateTime?
+  usernameChangedAt  DateTime?
+  deletionRequestedAt DateTime?
   editorRevision     Int       @default(0)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
@@ -124,6 +153,7 @@ model User {
   billingInvoices BillingInvoice[]
   profileViews   ProfileViewEvent[]
   customDomains  CustomDomain[]
+  domainReclaimChallenges DomainReclaimChallenge[]
   assets         UploadedAsset[]
 
   @@index([usernameNormalized])
@@ -162,6 +192,8 @@ model ProfileLink {
   scheduledStart DateTime?
   scheduledEnd   DateTime?
   passwordHash   String?  @db.VarChar(256)
+  accessVersion  Int      @default(0)
+  deletedAt      DateTime?
   embedType      EmbedType @default(LINK)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -171,6 +203,7 @@ model ProfileLink {
 
   @@unique([id, userId])
   @@index([userId, position])
+  @@index([userId, deletedAt, position])
   @@index([userId, enabled])
   @@index([userId, scheduledStart, scheduledEnd])
 }
@@ -181,15 +214,19 @@ model ClickEvent {
   userId      String
   createdAt   DateTime @default(now())
   referrer    String?  @db.VarChar(512)
+  referrerHost String? @db.VarChar(253)
   userAgent   String?  @db.VarChar(512)
   country     String?  @db.VarChar(2)
   visitorHash String?  @db.VarChar(64)
+  dedupeKey   String?  @unique @db.VarChar(64)
 
   link ProfileLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
   user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([linkId, createdAt])
   @@index([userId, createdAt])
+  @@index([userId, visitorHash, createdAt])
+  @@index([userId, referrerHost, createdAt])
   @@index([createdAt])
 }
 
@@ -198,16 +235,34 @@ model ProfileViewEvent {
   userId      String
   createdAt   DateTime @default(now())
   referrer    String?  @db.VarChar(512)
+  referrerHost String? @db.VarChar(253)
   userAgent   String?  @db.VarChar(512)
   country     String?  @db.VarChar(2)
   deviceType String?   @db.VarChar(24)
   visitorHash String?  @db.VarChar(64)
+  dedupeKey   String?  @unique @db.VarChar(64)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@index([userId, visitorHash, createdAt])
+  @@index([userId, referrerHost, createdAt])
   @@index([userId, country, createdAt])
   @@index([userId, deviceType, createdAt])
+}
+
+model AnalyticsDailyBucket {
+  id         String             @id @default(cuid())
+  eventType  AnalyticsEventType
+  userId     String
+  targetKey  String             @db.VarChar(191)
+  date       DateTime           @db.Date
+  count      Int                @default(0)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  @@unique([eventType, userId, targetKey, date])
+  @@index([userId, eventType, date])
 }
 
 model Subscription {
@@ -222,6 +277,8 @@ model Subscription {
   providerCustomerId      String?            @db.VarChar(191)
   providerSubscriptionId  String?            @db.VarChar(191)
   providerPaymentMethodId String?            @db.VarChar(191)
+  providerStartedAt       DateTime?
+  lastProviderEventAt     DateTime?
   currentPeriodStart      DateTime?
   currentPeriodEnd        DateTime?
   cancelAtPeriodEnd       Boolean            @default(false)
@@ -246,7 +303,11 @@ model PaymentIntent {
   status                 PaymentIntentStatus @default(PENDING)
   externalSessionId      String?             @db.VarChar(191)
   externalSubscriptionId String?             @db.VarChar(191)
+  checkoutPresentation   Json?
+  activeCheckoutKey      String?             @unique @db.VarChar(191)
   renewalKey             String?             @unique @db.VarChar(191)
+  reconciliationAttempts Int                 @default(0)
+  lastReconciledAt       DateTime?
   failureCode            String?             @db.VarChar(64)
   failureMessage         String?             @db.VarChar(512)
   expiresAt              DateTime?
@@ -306,12 +367,32 @@ model CustomDomain {
   status             DomainStatus @default(PENDING)
   verifiedAt         DateTime?
   lastCheckedAt      DateTime?
+  claimExpiresAt     DateTime
+  nextRevalidationAt DateTime?
+  failureCount       Int          @default(0)
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, status])
+  @@index([status, claimExpiresAt])
+  @@index([status, nextRevalidationAt])
+}
+
+model DomainReclaimChallenge {
+  id               String   @id @default(cuid())
+  userId           String
+  domainNormalized String   @db.VarChar(253)
+  verificationToken String  @unique @db.VarChar(64)
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, domainNormalized])
+  @@index([expiresAt])
 }
 
 model UploadedAsset {
@@ -321,23 +402,61 @@ model UploadedAsset {
   publicUrl String   @db.VarChar(2048)
   mimeType  String   @db.VarChar(128)
   sizeBytes Int
+  actualSizeBytes Int?
+  purpose   AssetPurpose
+  status    AssetStatus @default(PENDING)
+  finalizedAt DateTime?
+  deletionAttempts Int @default(0)
+  nextDeletionAt DateTime?
+  lastError String? @db.VarChar(512)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+  @@index([status, nextDeletionAt])
 }
 
 model AuthIntent {
   id                 String   @id @default(cuid())
   token              String   @unique
-  email              String   @unique
+  email              String
+  emailNormalized    String   @db.VarChar(254)
   username           String
-  usernameNormalized String   @unique
+  usernameNormalized String
   expiresAt          DateTime
   createdAt          DateTime @default(now())
 
   @@index([expiresAt])
+  @@index([emailNormalized, expiresAt])
+  @@index([usernameNormalized, expiresAt])
+}
+
+model RateLimitBucket {
+  key          String    @id @db.VarChar(64)
+  count        Int       @default(1)
+  windowStart  DateTime  @default(now())
+  blockedUntil DateTime?
+  updatedAt    DateTime  @updatedAt
+
+  @@index([updatedAt])
+  @@index([blockedUntil])
+}
+
+model AccountDeletionJob {
+  id              String                @id @default(cuid())
+  userId          String                @unique
+  emailNormalized String?               @db.VarChar(254)
+  status          AccountDeletionStatus @default(PENDING)
+  attempts        Int                   @default(0)
+  nextAttemptAt   DateTime              @default(now())
+  lastError       String?               @db.VarChar(1024)
+  completedAt     DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  @@index([status, nextAttemptAt])
 }
 
 model UsernameBlocklist {

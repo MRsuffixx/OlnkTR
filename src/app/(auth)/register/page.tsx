@@ -13,18 +13,18 @@ export default async function RegisterPage() {
 
   return (
     <>
-      <p className="text-orange text-sm font-black tracking-[.16em] uppercase">
+      <p className="text-orange-ink text-sm font-black tracking-[.16em] uppercase">
         Ücretsiz başla
       </p>
       <h1 className="display-serif mt-3 text-5xl font-bold">
         Adresini seç, kendini anlat.
       </h1>
-      <p className="text-ink/60 mt-4 mb-8 leading-7">
+      <p className="text-ink/70 mt-4 mb-8 leading-7">
         Kullanıcı adın herkese açık profil adresin olacak. Sonradan ayarlardan
         değiştirebilirsin.
       </p>
       <AuthForm mode="register" {...authMethods} />
-      <p className="text-ink/60 mt-7 text-center text-sm">
+      <p className="text-ink/70 mt-7 text-center text-sm">
         Zaten hesabın var mı?{" "}
         <Link
           href="/login"

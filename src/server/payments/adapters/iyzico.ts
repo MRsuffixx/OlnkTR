@@ -54,14 +54,11 @@ function stringValue(value: unknown) {
   return typeof value === "string" ? value : undefined;
 }
 
-function verifySignature(
-  rawBody: Buffer,
-  headers: Headers,
+export function createIyzicoWebhookSignature(
   payload: Record<string, unknown>,
+  merchantId: string,
+  secret: string,
 ) {
-  const received = headers.get("x-iyz-signature-v3");
-  const secret = env.IYZICO_SECRET_KEY;
-  if (!received || !secret) return false;
   const eventType =
     stringValue(payload.iyziEventType) ?? stringValue(payload.eventType) ?? "";
   const data =
@@ -69,23 +66,24 @@ function verifySignature(
       ? (payload.data as Record<string, unknown>)
       : payload;
   const concatenated =
+    merchantId +
     secret +
-    (env.IYZICO_API_KEY ?? "") +
     eventType +
     (stringValue(data.subscriptionReferenceCode) ?? "") +
     (stringValue(data.orderReferenceCode) ?? "") +
     (stringValue(data.customerReferenceCode) ?? "");
-  const officialSubscriptionSignature = createHmac("sha256", secret)
-    .update(concatenated)
-    .digest("hex");
-  const rawSignature = createHmac("sha256", secret)
-    .update(rawBody)
-    .digest("hex");
-  return [officialSubscriptionSignature, rawSignature].some((candidate) => {
-    const left = Buffer.from(candidate.toLowerCase());
-    const right = Buffer.from(received.toLowerCase());
-    return left.length === right.length && timingSafeEqual(left, right);
-  });
+  return createHmac("sha256", secret).update(concatenated).digest("hex");
+}
+
+function verifySignature(headers: Headers, payload: Record<string, unknown>) {
+  const received = headers.get("x-iyz-signature-v3");
+  const secret = env.IYZICO_SECRET_KEY;
+  const merchantId = env.IYZICO_MERCHANT_ID;
+  if (!received || !secret || !merchantId) return false;
+  const expected = createIyzicoWebhookSignature(payload, merchantId, secret);
+  const left = Buffer.from(expected.toLowerCase());
+  const right = Buffer.from(received.toLowerCase());
+  return left.length === right.length && timingSafeEqual(left, right);
 }
 
 export const iyzicoAdapter: PaymentProviderAdapter = {
@@ -148,7 +146,7 @@ export const iyzicoAdapter: PaymentProviderAdapter = {
     } catch {
       throw new WebhookVerificationError("iyzico webhook gövdesi geçersiz.");
     }
-    if (!verifySignature(rawBody, headers, payload))
+    if (!verifySignature(headers, payload))
       throw new WebhookVerificationError("iyzico webhook imzası geçersiz.");
     const data =
       payload.data && typeof payload.data === "object"
@@ -160,11 +158,15 @@ export const iyzicoAdapter: PaymentProviderAdapter = {
       ""
     ).toLowerCase();
     const id =
-      stringValue(payload.iyziEventId) ??
+      stringValue(payload.iyziReferenceCode) ??
       createHash("sha256").update(rawBody).digest("hex");
+    const eventTime = payload.iyziEventTime;
     const base = {
       id,
-      occurredAt: new Date(),
+      occurredAt:
+        typeof eventTime === "number" && Number.isFinite(eventTime)
+          ? new Date(eventTime)
+          : new Date(),
       providerSubscriptionId: stringValue(data.subscriptionReferenceCode),
       providerCustomerId: stringValue(data.customerReferenceCode),
       invoiceId: stringValue(data.orderReferenceCode),
@@ -185,7 +187,7 @@ export const iyzicoAdapter: PaymentProviderAdapter = {
       eventType.includes("order.failure") ||
       eventType.includes("payment.failure")
     )
-      output.push({ ...base, type: "past_due", status: "PAST_DUE" });
+      output.push({ ...base, type: "payment_failed", status: "UNPAID" });
     else if (eventType.includes("cancel") || eventType.includes("ended"))
       output.push({ ...base, type: "canceled", status: "CANCELED" });
     else if (eventType.includes("refund"))
@@ -254,13 +256,16 @@ export async function retrieveIyzicoCheckout(
   const subscriptionStatus = stringValue(
     data.subscriptionStatus,
   )?.toUpperCase();
+  const conversationId =
+    stringValue(data.conversationId) ?? stringValue(result.conversationId);
   if (
     status !== "success" ||
-    !["ACTIVE", "PENDING"].includes(subscriptionStatus ?? "")
+    subscriptionStatus !== "ACTIVE" ||
+    conversationId !== intentId
   ) {
     return {
       id: `iyzico-checkout:${token}:failed`,
-      type: "past_due",
+      type: "payment_failed",
       intentId,
       providerSubscriptionId: stringValue(data.subscriptionReferenceCode),
       providerCustomerId: stringValue(data.customerReferenceCode),

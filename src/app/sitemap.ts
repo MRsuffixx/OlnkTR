@@ -1,19 +1,21 @@
 import type { MetadataRoute } from "next";
+import { getAppOrigin } from "~/lib/app-url";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const origin = getAppOrigin();
   return [
-    { url: "https://olnk.tr", changeFrequency: "weekly", priority: 1 },
+    { url: origin, changeFrequency: "weekly", priority: 1 },
     {
-      url: "https://olnk.tr/register",
+      url: `${origin}/register`,
       changeFrequency: "monthly",
       priority: 0.8,
     },
-    { url: "https://olnk.tr/login", changeFrequency: "monthly", priority: 0.6 },
+    { url: `${origin}/login`, changeFrequency: "monthly", priority: 0.6 },
     {
-      url: "https://olnk.tr/privacy",
+      url: `${origin}/privacy`,
       changeFrequency: "yearly",
       priority: 0.2,
     },
-    { url: "https://olnk.tr/terms", changeFrequency: "yearly", priority: 0.2 },
+    { url: `${origin}/terms`, changeFrequency: "yearly", priority: 0.2 },
   ];
 }

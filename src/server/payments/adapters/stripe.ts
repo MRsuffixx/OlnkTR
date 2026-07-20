@@ -37,6 +37,27 @@ function metadata(object: Record<string, unknown>) {
   return record(object.metadata);
 }
 
+export function mapStripeSubscriptionStatus(value: unknown) {
+  switch (text(value)) {
+    case "active":
+      return "ACTIVE" as const;
+    case "trialing":
+      return "TRIALING" as const;
+    case "past_due":
+      return "PAST_DUE" as const;
+    case "unpaid":
+      return "UNPAID" as const;
+    case "canceled":
+      return "CANCELED" as const;
+    case "incomplete_expired":
+      return "EXPIRED" as const;
+    case "incomplete":
+    case "paused":
+    default:
+      return "INCOMPLETE" as const;
+  }
+}
+
 export const stripeAdapter: PaymentProviderAdapter = {
   id: "STRIPE",
   label: "Stripe",
@@ -48,8 +69,8 @@ export const stripeAdapter: PaymentProviderAdapter = {
         mode: "subscription",
         customer_email: input.user.email,
         client_reference_id: input.user.id,
-        success_url: `${input.returnUrl}?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${input.returnUrl}?checkout=canceled`,
+        success_url: `${input.returnUrl}?checkout=return&intent=${encodeURIComponent(input.intentId)}&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${input.returnUrl}?checkout=canceled&intent=${encodeURIComponent(input.intentId)}`,
         allow_promotion_codes: false,
         billing_address_collection: "auto",
         line_items: [
@@ -110,15 +131,28 @@ export const stripeAdapter: PaymentProviderAdapter = {
     const meta = metadata(object);
     const base = { id: event.id, occurredAt: new Date(event.created * 1000) };
     const output: NormalizedBillingEvent[] = [];
-    if (event.type === "checkout.session.completed") {
+    if (
+      event.type === "checkout.session.completed" ||
+      event.type === "checkout.session.async_payment_succeeded" ||
+      event.type === "checkout.session.async_payment_failed"
+    ) {
+      const paid =
+        event.type === "checkout.session.async_payment_succeeded" ||
+        (event.type === "checkout.session.completed" &&
+          object.payment_status === "paid");
       output.push({
         ...base,
-        type: "payment_succeeded",
+        type: paid ? "payment_succeeded" : "payment_failed",
         intentId: text(meta.intentId),
         userId: text(meta.userId) ?? text(object.client_reference_id),
         providerCustomerId: text(object.customer),
         providerSubscriptionId: text(object.subscription),
-        status: "ACTIVE",
+        status: paid ? "ACTIVE" : "INCOMPLETE",
+        amountMinor:
+          typeof object.amount_total === "number"
+            ? object.amount_total
+            : undefined,
+        currency: text(object.currency)?.toUpperCase(),
       });
     } else if (event.type === "invoice.paid") {
       const parent = record(object.parent);
@@ -127,7 +161,6 @@ export const stripeAdapter: PaymentProviderAdapter = {
       output.push({
         ...base,
         type: "renewed",
-        intentId: text(subscriptionMeta.intentId),
         userId: text(subscriptionMeta.userId),
         providerCustomerId: text(object.customer),
         providerSubscriptionId: text(subscriptionDetails.subscription),
@@ -143,10 +176,15 @@ export const stripeAdapter: PaymentProviderAdapter = {
         invoiceUrl: text(object.hosted_invoice_url),
       });
     } else if (event.type === "invoice.payment_failed") {
+      const parent = record(object.parent);
+      const subscriptionDetails = record(parent.subscription_details);
+      const subscriptionMeta = metadata(subscriptionDetails);
       output.push({
         ...base,
         type: "past_due",
+        userId: text(subscriptionMeta.userId),
         providerCustomerId: text(object.customer),
+        providerSubscriptionId: text(subscriptionDetails.subscription),
         status: "PAST_DUE",
       });
     } else if (
@@ -163,14 +201,9 @@ export const stripeAdapter: PaymentProviderAdapter = {
         userId: text(meta.userId),
         providerCustomerId: text(object.customer),
         providerSubscriptionId: text(object.id),
-        status:
-          event.type.endsWith("deleted") || statusValue === "canceled"
-            ? "CANCELED"
-            : statusValue === "past_due"
-              ? "PAST_DUE"
-              : statusValue === "unpaid"
-                ? "UNPAID"
-                : "ACTIVE",
+        status: event.type.endsWith("deleted")
+          ? "CANCELED"
+          : mapStripeSubscriptionStatus(statusValue),
         periodStart: dateFromUnix(object.current_period_start),
         periodEnd: dateFromUnix(object.current_period_end),
       });
@@ -221,18 +254,7 @@ export const stripeAdapter: PaymentProviderAdapter = {
     );
     const remoteStatus = text(remote.status);
     return {
-      status:
-        remoteStatus === "active"
-          ? "ACTIVE"
-          : remoteStatus === "trialing"
-            ? "TRIALING"
-            : remoteStatus === "past_due"
-              ? "PAST_DUE"
-              : remoteStatus === "unpaid"
-                ? "UNPAID"
-                : remoteStatus === "canceled"
-                  ? "CANCELED"
-                  : "INCOMPLETE",
+      status: mapStripeSubscriptionStatus(remoteStatus),
       currentPeriodEnd: dateFromUnix(remote.current_period_end),
       cancelAtPeriodEnd: Boolean(remote.cancel_at_period_end),
     };

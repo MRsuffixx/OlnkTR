@@ -18,13 +18,13 @@ export default async function LoginPage({
 
   return (
     <>
-      <p className="text-orange text-sm font-black tracking-[.16em] uppercase">
+      <p className="text-orange-ink text-sm font-black tracking-[.16em] uppercase">
         Tekrar merhaba
       </p>
       <h1 className="display-serif mt-3 text-5xl font-bold">
         Sayfan seni bekliyor.
       </h1>
-      <p className="text-ink/60 mt-4 mb-8 leading-7">
+      <p className="text-ink/70 mt-4 mb-8 leading-7">
         Şifre yok. E-postana güvenli bir giriş bağlantısı göndeririz.
       </p>
       <AuthForm
@@ -32,7 +32,7 @@ export default async function LoginPage({
         {...authMethods}
         emailSent={status === "email-sent"}
       />
-      <p className="text-ink/60 mt-7 text-center text-sm">
+      <p className="text-ink/70 mt-7 text-center text-sm">
         Henüz hesabın yok mu?{" "}
         <Link
           href="/register"

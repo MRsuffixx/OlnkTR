@@ -6,6 +6,7 @@
   --color-cream: #f5f0de;
   --color-paper: #fdfcf7;
   --color-orange: #f06432;
+  --color-orange-ink: #a93b1b;
   --color-yellow: #f8c95c;
   --color-mint: #b9ddc7;
 }
@@ -16,6 +17,7 @@
   --cream: #f5f0de;
   --paper: #fdfcf7;
   --orange: #f06432;
+  --orange-ink: #a93b1b;
   --yellow: #f8c95c;
   --mint: #b9ddc7;
 }
@@ -98,6 +100,8 @@ a {
 .olnk-link[data-hover="grow"]:hover { transform: scale(1.025); }
 .olnk-link[data-hover="tilt"]:hover { transform: rotate(-1deg) scale(1.01); }
 .olnk-link[data-hover="glow"]:hover { filter: drop-shadow(0 0 14px rgb(248 201 92 / 75%)); }
+.olnk-link[data-press="compress"]:active { transform: scale(.97); }
+.olnk-link[data-press="sink"]:active { transform: translateY(3px); }
 .olnk-link[data-entrance="fade"] { animation: olnk-fade .55s both; }
 .olnk-link[data-entrance="slide"] { animation: olnk-slide .55s both; }
 .olnk-link[data-entrance="stagger"] { animation: olnk-slide .55s both; }
@@ -162,6 +166,9 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .olnk-custom-cursor,
+  .olnk-cursor-trail,
+  .olnk-click-ripple { display: none !important; }
   *,
   *::before,
   *::after {
@@ -170,4 +177,10 @@ a {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+@media (pointer: coarse) {
+  .olnk-custom-cursor,
+  .olnk-cursor-trail,
+  .olnk-click-ripple { display: none !important; }
 }
