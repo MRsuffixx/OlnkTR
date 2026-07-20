@@ -121,12 +121,77 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
-exports.Prisma.PostScalarFieldEnum = {
+exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  email: 'email',
+  emailVerified: 'emailVerified',
+  image: 'image',
+  username: 'username',
+  usernameNormalized: 'usernameNormalized',
+  bio: 'bio',
+  onboardedAt: 'onboardedAt',
+  editorRevision: 'editorRevision',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  createdById: 'createdById'
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ThemeScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  backgroundType: 'backgroundType',
+  backgroundValue: 'backgroundValue',
+  buttonStyle: 'buttonStyle',
+  buttonShape: 'buttonShape',
+  buttonColor: 'buttonColor',
+  textColor: 'textColor',
+  accentColor: 'accentColor',
+  fontFamily: 'fontFamily',
+  showBranding: 'showBranding',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProfileLinkScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  url: 'url',
+  iconUrl: 'iconUrl',
+  position: 'position',
+  enabled: 'enabled',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ClickEventScalarFieldEnum = {
+  id: 'id',
+  linkId: 'linkId',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  referrer: 'referrer',
+  userAgent: 'userAgent',
+  country: 'country',
+  visitorHash: 'visitorHash'
+};
+
+exports.Prisma.AuthIntentScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  email: 'email',
+  username: 'username',
+  usernameNormalized: 'usernameNormalized',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.UsernameBlocklistScalarFieldEnum = {
+  id: 'id',
+  termNormalized: 'termNormalized',
+  enabled: 'enabled',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.AccountScalarFieldEnum = {
@@ -152,14 +217,6 @@ exports.Prisma.SessionScalarFieldEnum = {
   expires: 'expires'
 };
 
-exports.Prisma.UserScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  email: 'email',
-  emailVerified: 'emailVerified',
-  image: 'image'
-};
-
 exports.Prisma.VerificationTokenScalarFieldEnum = {
   identifier: 'identifier',
   token: 'token',
@@ -180,13 +237,41 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.BackgroundType = exports.$Enums.BackgroundType = {
+  SOLID: 'SOLID',
+  GRADIENT: 'GRADIENT',
+  IMAGE: 'IMAGE'
+};
 
+exports.ButtonStyle = exports.$Enums.ButtonStyle = {
+  SOLID: 'SOLID',
+  OUTLINE: 'OUTLINE',
+  GLASS: 'GLASS',
+  SHADOW: 'SHADOW'
+};
+
+exports.ButtonShape = exports.$Enums.ButtonShape = {
+  ROUNDED: 'ROUNDED',
+  PILL: 'PILL',
+  SQUARE: 'SQUARE'
+};
+
+exports.FontFamily = exports.$Enums.FontFamily = {
+  MODERN: 'MODERN',
+  FRIENDLY: 'FRIENDLY',
+  EDITORIAL: 'EDITORIAL',
+  MONO: 'MONO'
+};
 
 exports.Prisma.ModelName = {
-  Post: 'Post',
+  User: 'User',
+  Theme: 'Theme',
+  ProfileLink: 'ProfileLink',
+  ClickEvent: 'ClickEvent',
+  AuthIntent: 'AuthIntent',
+  UsernameBlocklist: 'UsernameBlocklist',
   Account: 'Account',
   Session: 'Session',
-  User: 'User',
   VerificationToken: 'VerificationToken'
 };
 

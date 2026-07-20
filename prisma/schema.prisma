@@ -42,11 +42,11 @@ model User {
   image              String?
   username           String?   @unique
   usernameNormalized String?   @unique
-  bio                 String    @default("") @db.VarChar(160)
-  onboardedAt         DateTime?
+  bio                String    @default("") @db.VarChar(160)
+  onboardedAt        DateTime?
   editorRevision     Int       @default(0)
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   accounts Account[]
   sessions Session[]
@@ -62,15 +62,15 @@ model Theme {
   userId          String         @unique
   backgroundType  BackgroundType @default(GRADIENT)
   backgroundValue String         @default("linear-gradient(145deg, #F5F0DE 0%, #F8C95C 100%)")
-  buttonStyle     ButtonStyle     @default(SHADOW)
-  buttonShape     ButtonShape     @default(ROUNDED)
-  buttonColor     String          @default("#17211B")
-  textColor       String          @default("#17211B")
-  accentColor     String          @default("#F06432")
-  fontFamily      FontFamily      @default(FRIENDLY)
-  showBranding    Boolean         @default(true)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  buttonStyle     ButtonStyle    @default(SHADOW)
+  buttonShape     ButtonShape    @default(ROUNDED)
+  buttonColor     String         @default("#17211B")
+  textColor       String         @default("#17211B")
+  accentColor     String         @default("#F06432")
+  fontFamily      FontFamily     @default(FRIENDLY)
+  showBranding    Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -93,12 +93,77 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
-exports.Prisma.PostScalarFieldEnum = {
+exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  email: 'email',
+  emailVerified: 'emailVerified',
+  image: 'image',
+  username: 'username',
+  usernameNormalized: 'usernameNormalized',
+  bio: 'bio',
+  onboardedAt: 'onboardedAt',
+  editorRevision: 'editorRevision',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  createdById: 'createdById'
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ThemeScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  backgroundType: 'backgroundType',
+  backgroundValue: 'backgroundValue',
+  buttonStyle: 'buttonStyle',
+  buttonShape: 'buttonShape',
+  buttonColor: 'buttonColor',
+  textColor: 'textColor',
+  accentColor: 'accentColor',
+  fontFamily: 'fontFamily',
+  showBranding: 'showBranding',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ProfileLinkScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  url: 'url',
+  iconUrl: 'iconUrl',
+  position: 'position',
+  enabled: 'enabled',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ClickEventScalarFieldEnum = {
+  id: 'id',
+  linkId: 'linkId',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  referrer: 'referrer',
+  userAgent: 'userAgent',
+  country: 'country',
+  visitorHash: 'visitorHash'
+};
+
+exports.Prisma.AuthIntentScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  email: 'email',
+  username: 'username',
+  usernameNormalized: 'usernameNormalized',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.UsernameBlocklistScalarFieldEnum = {
+  id: 'id',
+  termNormalized: 'termNormalized',
+  enabled: 'enabled',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.AccountScalarFieldEnum = {
@@ -124,14 +189,6 @@ exports.Prisma.SessionScalarFieldEnum = {
   expires: 'expires'
 };
 
-exports.Prisma.UserScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  email: 'email',
-  emailVerified: 'emailVerified',
-  image: 'image'
-};
-
 exports.Prisma.VerificationTokenScalarFieldEnum = {
   identifier: 'identifier',
   token: 'token',
@@ -152,13 +209,41 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.BackgroundType = exports.$Enums.BackgroundType = {
+  SOLID: 'SOLID',
+  GRADIENT: 'GRADIENT',
+  IMAGE: 'IMAGE'
+};
 
+exports.ButtonStyle = exports.$Enums.ButtonStyle = {
+  SOLID: 'SOLID',
+  OUTLINE: 'OUTLINE',
+  GLASS: 'GLASS',
+  SHADOW: 'SHADOW'
+};
+
+exports.ButtonShape = exports.$Enums.ButtonShape = {
+  ROUNDED: 'ROUNDED',
+  PILL: 'PILL',
+  SQUARE: 'SQUARE'
+};
+
+exports.FontFamily = exports.$Enums.FontFamily = {
+  MODERN: 'MODERN',
+  FRIENDLY: 'FRIENDLY',
+  EDITORIAL: 'EDITORIAL',
+  MONO: 'MONO'
+};
 
 exports.Prisma.ModelName = {
-  Post: 'Post',
+  User: 'User',
+  Theme: 'Theme',
+  ProfileLink: 'ProfileLink',
+  ClickEvent: 'ClickEvent',
+  AuthIntent: 'AuthIntent',
+  UsernameBlocklist: 'UsernameBlocklist',
   Account: 'Account',
   Session: 'Session',
-  User: 'User',
   VerificationToken: 'VerificationToken'
 };
 /**
@@ -209,13 +294,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below\n  // Further reading:\n  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema\n  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Post {\n  id        Int      @id @default(autoincrement())\n  name      String\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  createdBy   User   @relation(fields: [createdById], references: [id])\n  createdById String\n\n  @@index([name])\n}\n\n// Necessary for Next auth\nmodel Account {\n  id                       String  @id @default(cuid())\n  userId                   String\n  type                     String\n  provider                 String\n  providerAccountId        String\n  refresh_token            String? // @db.Text\n  access_token             String? // @db.Text\n  expires_at               Int?\n  token_type               String?\n  scope                    String?\n  id_token                 String? // @db.Text\n  session_state            String?\n  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)\n  refresh_token_expires_in Int?\n\n  @@unique([provider, providerAccountId])\n}\n\nmodel Session {\n  id           String   @id @default(cuid())\n  sessionToken String   @unique\n  userId       String\n  expires      DateTime\n  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n}\n\nmodel User {\n  id            String    @id @default(cuid())\n  name          String?\n  email         String?   @unique\n  emailVerified DateTime?\n  image         String?\n  accounts      Account[]\n  sessions      Session[]\n  posts         Post[]\n}\n\nmodel VerificationToken {\n  identifier String\n  token      String   @unique\n  expires    DateTime\n\n  @@unique([identifier, token])\n}\n",
-  "inlineSchemaHash": "dd9a6edd7dcf3768e8fd246695361ce51823871115a517c30ff53e4d5bffa20b",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum BackgroundType {\n  SOLID\n  GRADIENT\n  IMAGE\n}\n\nenum ButtonStyle {\n  SOLID\n  OUTLINE\n  GLASS\n  SHADOW\n}\n\nenum ButtonShape {\n  ROUNDED\n  PILL\n  SQUARE\n}\n\nenum FontFamily {\n  MODERN\n  FRIENDLY\n  EDITORIAL\n  MONO\n}\n\nmodel User {\n  id                 String    @id @default(cuid())\n  name               String?\n  email              String?   @unique\n  emailVerified      DateTime?\n  image              String?\n  username           String?   @unique\n  usernameNormalized String?   @unique\n  bio                String    @default(\"\") @db.VarChar(160)\n  onboardedAt        DateTime?\n  editorRevision     Int       @default(0)\n  createdAt          DateTime  @default(now())\n  updatedAt          DateTime  @updatedAt\n\n  accounts Account[]\n  sessions Session[]\n  theme    Theme?\n  links    ProfileLink[]\n  clicks   ClickEvent[]\n\n  @@index([usernameNormalized])\n}\n\nmodel Theme {\n  id              String         @id @default(cuid())\n  userId          String         @unique\n  backgroundType  BackgroundType @default(GRADIENT)\n  backgroundValue String         @default(\"linear-gradient(145deg, #F5F0DE 0%, #F8C95C 100%)\")\n  buttonStyle     ButtonStyle    @default(SHADOW)\n  buttonShape     ButtonShape    @default(ROUNDED)\n  buttonColor     String         @default(\"#17211B\")\n  textColor       String         @default(\"#17211B\")\n  accentColor     String         @default(\"#F06432\")\n  fontFamily      FontFamily     @default(FRIENDLY)\n  showBranding    Boolean        @default(true)\n  createdAt       DateTime       @default(now())\n  updatedAt       DateTime       @updatedAt\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n}\n\nmodel ProfileLink {\n  id        String   @id\n  userId    String\n  title     String   @db.VarChar(80)\n  url       String   @db.VarChar(2048)\n  iconUrl   String?  @db.VarChar(2048)\n  position  Int\n  enabled   Boolean  @default(true)\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)\n  clicks ClickEvent[]\n\n  @@unique([id, userId])\n  @@index([userId, position])\n  @@index([userId, enabled])\n}\n\nmodel ClickEvent {\n  id          String   @id @default(cuid())\n  linkId      String\n  userId      String\n  createdAt   DateTime @default(now())\n  referrer    String?  @db.VarChar(512)\n  userAgent   String?  @db.VarChar(512)\n  country     String?  @db.VarChar(2)\n  visitorHash String?  @db.VarChar(64)\n\n  link ProfileLink @relation(fields: [linkId], references: [id], onDelete: Cascade)\n  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@index([linkId, createdAt])\n  @@index([userId, createdAt])\n  @@index([createdAt])\n}\n\nmodel AuthIntent {\n  id                 String   @id @default(cuid())\n  token              String   @unique\n  email              String   @unique\n  username           String\n  usernameNormalized String   @unique\n  expiresAt          DateTime\n  createdAt          DateTime @default(now())\n\n  @@index([expiresAt])\n}\n\nmodel UsernameBlocklist {\n  id             String   @id @default(cuid())\n  termNormalized String   @unique\n  enabled        Boolean  @default(true)\n  note           String?\n  createdAt      DateTime @default(now())\n  updatedAt      DateTime @updatedAt\n\n  @@index([enabled])\n}\n\nmodel Account {\n  id                       String  @id @default(cuid())\n  userId                   String\n  type                     String\n  provider                 String\n  providerAccountId        String\n  refresh_token            String?\n  access_token             String?\n  expires_at               Int?\n  token_type               String?\n  scope                    String?\n  id_token                 String?\n  session_state            String?\n  refresh_token_expires_in Int?\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@unique([provider, providerAccountId])\n  @@index([userId])\n}\n\nmodel Session {\n  id           String   @id @default(cuid())\n  sessionToken String   @unique\n  userId       String\n  expires      DateTime\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@index([userId])\n}\n\nmodel VerificationToken {\n  identifier String\n  token      String   @unique\n  expires    DateTime\n\n  @@unique([identifier, token])\n}\n",
+  "inlineSchemaHash": "c7bded47d38dad06f0e05d39a414981b726267ea22396b00292432f058cc9b9d",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"Post\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdBy\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"PostToUser\"},{\"name\":\"createdById\",\"kind\":\"scalar\",\"type\":\"String\"}],\"dbName\":null},\"Account\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"provider\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"providerAccountId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"refresh_token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"access_token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expires_at\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"token_type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"scope\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"id_token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"session_state\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"AccountToUser\"},{\"name\":\"refresh_token_expires_in\",\"kind\":\"scalar\",\"type\":\"Int\"}],\"dbName\":null},\"Session\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"sessionToken\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expires\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"SessionToUser\"}],\"dbName\":null},\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"emailVerified\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"image\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"accounts\",\"kind\":\"object\",\"type\":\"Account\",\"relationName\":\"AccountToUser\"},{\"name\":\"sessions\",\"kind\":\"object\",\"type\":\"Session\",\"relationName\":\"SessionToUser\"},{\"name\":\"posts\",\"kind\":\"object\",\"type\":\"Post\",\"relationName\":\"PostToUser\"}],\"dbName\":null},\"VerificationToken\":{\"fields\":[{\"name\":\"identifier\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expires\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"emailVerified\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"image\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"username\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"usernameNormalized\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"bio\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"onboardedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"editorRevision\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"accounts\",\"kind\":\"object\",\"type\":\"Account\",\"relationName\":\"AccountToUser\"},{\"name\":\"sessions\",\"kind\":\"object\",\"type\":\"Session\",\"relationName\":\"SessionToUser\"},{\"name\":\"theme\",\"kind\":\"object\",\"type\":\"Theme\",\"relationName\":\"ThemeToUser\"},{\"name\":\"links\",\"kind\":\"object\",\"type\":\"ProfileLink\",\"relationName\":\"ProfileLinkToUser\"},{\"name\":\"clicks\",\"kind\":\"object\",\"type\":\"ClickEvent\",\"relationName\":\"ClickEventToUser\"}],\"dbName\":null},\"Theme\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"backgroundType\",\"kind\":\"enum\",\"type\":\"BackgroundType\"},{\"name\":\"backgroundValue\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"buttonStyle\",\"kind\":\"enum\",\"type\":\"ButtonStyle\"},{\"name\":\"buttonShape\",\"kind\":\"enum\",\"type\":\"ButtonShape\"},{\"name\":\"buttonColor\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"textColor\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"accentColor\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"fontFamily\",\"kind\":\"enum\",\"type\":\"FontFamily\"},{\"name\":\"showBranding\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"ThemeToUser\"}],\"dbName\":null},\"ProfileLink\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"title\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"url\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"iconUrl\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"position\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"enabled\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"ProfileLinkToUser\"},{\"name\":\"clicks\",\"kind\":\"object\",\"type\":\"ClickEvent\",\"relationName\":\"ClickEventToProfileLink\"}],\"dbName\":null},\"ClickEvent\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"linkId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"referrer\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userAgent\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"country\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"visitorHash\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"link\",\"kind\":\"object\",\"type\":\"ProfileLink\",\"relationName\":\"ClickEventToProfileLink\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"ClickEventToUser\"}],\"dbName\":null},\"AuthIntent\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"username\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"usernameNormalized\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"UsernameBlocklist\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"termNormalized\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"enabled\",\"kind\":\"scalar\",\"type\":\"Boolean\"},{\"name\":\"note\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null},\"Account\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"provider\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"providerAccountId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"refresh_token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"access_token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expires_at\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"token_type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"scope\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"id_token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"session_state\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"refresh_token_expires_in\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"AccountToUser\"}],\"dbName\":null},\"Session\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"sessionToken\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expires\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"SessionToUser\"}],\"dbName\":null},\"VerificationToken\":{\"fields\":[{\"name\":\"identifier\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expires\",\"kind\":\"scalar\",\"type\":\"DateTime\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),
