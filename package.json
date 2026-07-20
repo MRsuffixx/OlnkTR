@@ -58,6 +58,8 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.12.1",
+    "@playwright/test": "1.61.1",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "26.1.1",
     "@types/nodemailer": "8.0.1",
@@ -72,7 +74,8 @@
     "prisma": "7.8.0",
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.64.0"
+    "typescript-eslint": "8.64.0",
+    "vitest": "4.1.10"
   },
   "packageManager": "pnpm@11.9.0"
 }
