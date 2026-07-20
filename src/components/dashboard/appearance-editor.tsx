@@ -3,6 +3,7 @@
 import { Crown, LockKeyhole, Palette, Sparkles } from "lucide-react";
 import { useState } from "react";
 
+import { AssetUpload } from "~/components/dashboard/asset-upload";
 import { FEATURE_CATALOG, type AppearanceFeaturePath } from "~/config/feature-catalog";
 import type { AppearanceSettings } from "~/lib/appearance";
 
@@ -43,7 +44,7 @@ export function AppearanceEditor({ appearance, customCss, hasPro, onChange, onCs
         <Choice label="Tür" path="background.mode" current={value("background.mode")} hasPro={hasPro} onChoose={update} options={[["solid", "Düz"], ["gradient", "Geçiş"], ["image", "Görsel"], ["video", "Video"], ["particles", "Parçacık"], ["motion", "Akış"]]} />
         {value("background.mode") === "solid" && <ColorField label="Arka plan rengi" path="background.solidColor" value={value("background.solidColor")} hasPro={hasPro} onChange={update} />}
         {value("background.mode") === "gradient" && <><Choice label="Geçiş geometrisi" path="background.gradient.type" current={value("background.gradient.type")} hasPro={hasPro} onChoose={update} options={[["linear", "Doğrusal"], ["radial", "Dairesel"]]} /><Range label="Açı" path="background.gradient.angle" value={value("background.gradient.angle")} min={0} max={360} suffix="°" hasPro={hasPro} onChange={update} /><div className="grid grid-cols-2 gap-3">{appearance.background.gradient.stops.slice(0, 2).map((stop, index) => <label key={index} className="text-xs font-bold text-ink/55"><span className="mb-1.5 block">Renk {index + 1}</span><input type="color" value={stop.color} onChange={(event) => { if (!hasPro) return onUpgrade(); const stops = [...appearance.background.gradient.stops]; stops[index] = { ...stop, color: event.target.value }; update("background.gradient.stops", stops); }} className="h-11 w-full rounded-xl border border-ink/15 bg-white p-1" /></label>)}</div></>}
-        {["image", "video"].includes(value("background.mode")) && <TextField label="Medya adresi" path="background.mediaUrl" value={value("background.mediaUrl")} hasPro={hasPro} onChange={update} placeholder="https://" />}
+        {["image", "video"].includes(value("background.mode")) && <><TextField label="Medya adresi" path="background.mediaUrl" value={value("background.mediaUrl")} hasPro={hasPro} onChange={update} placeholder="https://" /><AssetUpload purpose="background" accept={value("background.mode") === "video" ? "video/mp4,video/webm" : "image/jpeg,image/png,image/webp,image/gif"} disabled={!hasPro} onUploaded={(url) => update("background.mediaUrl", url)} /></>}
         <Choice label="Hazır paket" path="background.preset" current={value("background.preset")} hasPro={hasPro} onChoose={update} options={[["sunrise", "Gündoğumu"], ["mint", "Nane"], ["paper", "Kâğıt"], ["aurora", "Aurora"], ["midnight", "Gece"], ["mesh", "Mesh"], ["confetti", "Konfeti"]]} />
       </>}
       {category === "buttons" && <>
