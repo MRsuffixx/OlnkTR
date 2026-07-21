@@ -13,26 +13,30 @@ function sign(value: string) {
     .digest("base64url");
 }
 
-export function createLinkAccessToken(linkId: string) {
+export function createLinkAccessToken(linkId: string, accessVersion: number) {
   const expires = Date.now() + 12 * 60 * 60 * 1000;
-  const value = `${linkId}.${expires}`;
+  const value = `${linkId}.${accessVersion}.${expires}`;
   return `${value}.${sign(value)}`;
 }
 
 export function verifyLinkAccessToken(
   linkId: string,
+  accessVersion: number,
   token: string | undefined,
 ) {
   if (!token) return false;
-  const [tokenLinkId, expires, signature] = token.split(".");
+  const [tokenLinkId, tokenVersion, expires, signature] = token.split(".");
   if (
     tokenLinkId !== linkId ||
+    tokenVersion !== String(accessVersion) ||
     !expires ||
     !signature ||
     Number(expires) <= Date.now()
   )
     return false;
-  const expected = Buffer.from(sign(`${tokenLinkId}.${expires}`));
+  const expected = Buffer.from(
+    sign(`${tokenLinkId}.${tokenVersion}.${expires}`),
+  );
   const received = Buffer.from(signature);
   return (
     expected.length === received.length && timingSafeEqual(expected, received)

@@ -1,7 +1,7 @@
 # olnk.tr
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-veritabanı-4169E1?logo=postgresql&logoColor=white)
 ![pnpm](https://img.shields.io/badge/pnpm-11-F69220?logo=pnpm&logoColor=white)
 [![Lisans](https://img.shields.io/badge/lisans-OMAL--1.0-5C4EE5)](LICENSE.tr)
@@ -30,7 +30,7 @@
 
 | Katman | Teknoloji |
 | --- | --- |
-| Uygulama | Next.js 16, React 19, TypeScript 5.9 |
+| Uygulama | Next.js 16, React 19, TypeScript 6 |
 | Uygulama programlama arayüzü ve doğrulama | tRPC 11, TanStack Query, Zod 4, SuperJSON |
 | Kimlik doğrulama | Auth.js / NextAuth 5, Prisma bağdaştırıcısı, Google OAuth, Nodemailer |
 | Veritabanı | PostgreSQL, Prisma 7 |
@@ -44,7 +44,7 @@
 
 ### Gereksinimler
 
-- Node.js 20.9 veya daha yeni bir sürüm
+- Node.js 20.19+, 22.13+ veya 24+
 - Corepack ya da doğrudan kurulum üzerinden pnpm 11
 - Çalışan bir PostgreSQL veritabanı
 - En az bir kimlik doğrulama sağlayıcısı: Google OAuth veya SMTP sunucusu
@@ -58,7 +58,9 @@ corepack enable
 pnpm install
 ```
 
-`postinstall` betiği Prisma istemcisini kendiliğinden oluşturur.
+Prisma istemcisi `pnpm dev`, `pnpm build` veya açıkça çalıştırılan
+`pnpm db:generate` komutuyla oluşturulur. `pnpm start` bağımlılıkları değiştirmez
+ve önceden hazırlanmış bir üretim derlemesi bekler.
 
 ### 2. Ortamı yapılandırın
 

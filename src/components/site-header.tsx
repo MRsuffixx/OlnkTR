@@ -1,11 +1,8 @@
 import Link from "next/link";
 
 import { Brand } from "~/components/brand";
-import { auth } from "~/server/auth";
 
-export async function SiteHeader() {
-  const session = await auth();
-
+export function SiteHeader() {
   return (
     <header className="absolute inset-x-0 top-0 z-30">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8">
@@ -18,10 +15,10 @@ export async function SiteHeader() {
             Özellikler
           </Link>
           <Link
-            href={session ? "/dashboard" : "/login"}
+            href="/login"
             className="border-ink bg-paper rounded-full border-2 px-4 py-2 text-sm font-bold shadow-[3px_3px_0_#17211b] transition hover:-translate-y-0.5"
           >
-            {session ? "Panele git" : "Giriş yap"}
+            Giriş yap
           </Link>
         </nav>
       </div>

@@ -12,9 +12,10 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { AdyenCheckoutForm } from "~/components/dashboard/adyen-checkout";
+import { ModalDialog } from "~/components/ui/modal-dialog";
 import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
 
@@ -39,20 +40,55 @@ function money(amount: number, currency: string) {
   );
 }
 
-export function BillingSettings({ initial }: { initial: Overview }) {
+export function BillingSettings({
+  initial,
+  initialIntentId,
+  initialCheckoutResult,
+}: {
+  initial: Overview;
+  initialIntentId: string | null;
+  initialCheckoutResult: string | null;
+}) {
   const utils = api.useUtils();
-  const [data, setData] = useState(initial);
+  const overview = api.billing.overview.useQuery(undefined, {
+    initialData: initial,
+    refetchOnWindowFocus: true,
+  });
+  const data = overview.data;
   const [interval, setInterval] = useState<"MONTHLY" | "YEARLY">("YEARLY");
   const [provider, setProvider] = useState<Provider | null>(
     initial.providers[0]?.id ?? null,
   );
   const [details, setDetails] = useState(emptyBilling);
   const [presentation, setPresentation] = useState<Presentation | null>(null);
+  const [activeIntentId, setActiveIntentId] = useState(initialIntentId);
+  const [pollStartedAt, setPollStartedAt] = useState(() => Date.now());
+  const [pollingTimedOut, setPollingTimedOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const checkout = api.billing.createCheckout.useMutation();
   const cancel = api.billing.cancel.useMutation();
   const sync = api.billing.sync.useMutation();
+  const intentStatus = api.billing.intentStatus.useQuery(
+    { intentId: activeIntentId ?? "" },
+    {
+      enabled: Boolean(activeIntentId),
+      retry: 2,
+      refetchInterval: (query) => {
+        const status = query.state.data?.intent.status;
+        const terminal = [
+          "SUCCEEDED",
+          "FAILED",
+          "CANCELED",
+          "REFUNDED",
+          "DISPUTED",
+        ].includes(status ?? "");
+        return !terminal && Date.now() - pollStartedAt < 120_000
+          ? 1_500
+          : false;
+      },
+    },
+  );
   const selected = useMemo(
     () => data.providers.find((item) => item.id === provider),
     [data.providers, provider],
@@ -61,9 +97,20 @@ export function BillingSettings({ initial }: { initial: Overview }) {
 
   const refresh = useCallback(async () => {
     await utils.billing.overview.invalidate();
-    const next = await utils.billing.overview.fetch();
-    setData(next);
   }, [utils.billing.overview]);
+
+  useEffect(() => {
+    if (intentStatus.data?.hasPro) {
+      void refresh();
+    }
+  }, [intentStatus.data?.hasPro, refresh]);
+
+  useEffect(() => {
+    if (!activeIntentId || intentStatus.data?.hasPro) return;
+    const remaining = Math.max(0, 120_000 - (Date.now() - pollStartedAt));
+    const timer = window.setTimeout(() => setPollingTimedOut(true), remaining);
+    return () => window.clearTimeout(timer);
+  }, [activeIntentId, intentStatus.data?.hasPro, pollStartedAt]);
 
   async function startCheckout() {
     if (!provider) return;
@@ -74,6 +121,9 @@ export function BillingSettings({ initial }: { initial: Overview }) {
         interval,
         ...(requiresBilling ? { billingDetails: details } : {}),
       });
+      setActiveIntentId(result.intentId);
+      setPollStartedAt(Date.now());
+      setPollingTimedOut(false);
       if (result.presentation.kind === "redirect")
         window.location.assign(result.presentation.url);
       else setPresentation(result.presentation);
@@ -89,7 +139,7 @@ export function BillingSettings({ initial }: { initial: Overview }) {
     void refresh();
   }, [refresh]);
   const checkoutError = useCallback((message: string) => setError(message), []);
-
+  const returnedStatus = intentStatus.data?.intent.status;
   if (data.hasPro && data.subscription) {
     const renewal = data.subscription.currentPeriodEnd
       ? new Date(data.subscription.currentPeriodEnd).toLocaleDateString(
@@ -214,6 +264,25 @@ export function BillingSettings({ initial }: { initial: Overview }) {
 
   return (
     <div className="space-y-6">
+      {Boolean(initialCheckoutResult ?? activeIntentId) && (
+        <div
+          className={`rounded-2xl border p-4 text-sm font-bold ${returnedStatus === "SUCCEEDED" || intentStatus.data?.hasPro ? "border-mint/50 bg-mint/15" : ["FAILED", "CANCELED", "REFUNDED", "DISPUTED"].includes(returnedStatus ?? "") || initialCheckoutResult === "failed" || initialCheckoutResult === "canceled" ? "border-orange/30 bg-orange/10 text-red-800" : "border-yellow bg-yellow/15"}`}
+          role="status"
+          aria-live="polite"
+        >
+          {returnedStatus === "SUCCEEDED" || intentStatus.data?.hasPro
+            ? "Ödemen doğrulandı; Pro erişimin etkin."
+            : ["FAILED", "CANCELED", "REFUNDED", "DISPUTED"].includes(
+                  returnedStatus ?? "",
+                ) ||
+                initialCheckoutResult === "failed" ||
+                initialCheckoutResult === "canceled"
+              ? "Ödeme tamamlanmadı. Ücret alındığını düşünüyorsan durumu yenile."
+              : pollingTimedOut
+                ? "Sağlayıcı doğrulaması beklenenden uzun sürüyor. Bu sayfayı daha sonra güvenle yenileyebilirsin."
+                : "Ödeme sağlayıcısından güvenli doğrulama bekleniyor…"}
+        </div>
+      )}
       {error && <ErrorBanner message={error} />}
       <div className="grid gap-5 lg:grid-cols-2">
         <article className="border-ink/10 bg-paper rounded-[2rem] border p-6">
@@ -222,7 +291,7 @@ export function BillingSettings({ initial }: { initial: Overview }) {
           </span>
           <h2 className="mt-5 text-3xl font-black">Temel ve güçlü.</h2>
           <p className="text-ink/55 mt-2">
-            Sınırsız bağlantı, temel temalar, QR kod ve tıklama analitiği.
+            50 bağlantı, temel temalar, QR kod ve tıklama analitiği.
           </p>
           <div className="mt-8 inline-flex items-center gap-2 font-black">
             <Check className="text-mint size-5" /> Şu anki planın
@@ -242,16 +311,18 @@ export function BillingSettings({ initial }: { initial: Overview }) {
             <button
               type="button"
               onClick={() => setInterval("MONTHLY")}
+              aria-pressed={interval === "MONTHLY"}
               className={`h-10 flex-1 rounded-full text-sm font-black ${interval === "MONTHLY" ? "bg-ink text-paper" : ""}`}
             >
-              Aylık · $3
+              Aylık
             </button>
             <button
               type="button"
               onClick={() => setInterval("YEARLY")}
+              aria-pressed={interval === "YEARLY"}
               className={`h-10 flex-1 rounded-full text-sm font-black ${interval === "YEARLY" ? "bg-ink text-paper" : ""}`}
             >
-              Yıllık · $22
+              Yıllık
             </button>
           </div>
         </article>
@@ -287,6 +358,7 @@ export function BillingSettings({ initial }: { initial: Overview }) {
                 type="button"
                 key={item.id}
                 onClick={() => setProvider(item.id)}
+                aria-pressed={provider === item.id}
                 className={`rounded-2xl border p-4 text-left transition ${provider === item.id ? "border-ink bg-cream shadow-[3px_3px_0_#F8C95C]" : "border-ink/10 hover:border-ink/30"}`}
               >
                 <div className="flex items-center justify-between">
@@ -360,18 +432,29 @@ export function BillingSettings({ initial }: { initial: Overview }) {
         </section>
       )}
       <InvoiceList invoices={data.invoices} />
-      {presentation && (
-        <div className="bg-ink/70 fixed inset-0 z-[80] grid place-items-center p-3 backdrop-blur-sm">
-          <div className="bg-paper relative max-h-[94vh] w-full max-w-2xl overflow-auto rounded-3xl p-4 shadow-2xl sm:p-6">
+      {presentation && !intentStatus.data?.hasPro && (
+        <ModalDialog
+          open
+          onClose={() => setPresentation(null)}
+          labelledBy="checkout-dialog-title"
+          className="w-full max-w-2xl"
+        >
+          <div className="bg-paper relative w-full rounded-3xl p-4 shadow-2xl sm:p-6">
             <button
               type="button"
               onClick={() => setPresentation(null)}
               className="bg-ink text-paper absolute top-4 right-4 z-10 grid size-9 place-items-center rounded-full"
               aria-label="Ödeme penceresini kapat"
+              autoFocus
             >
               <X className="size-4" />
             </button>
-            <h3 className="mb-5 pr-12 text-xl font-black">Güvenli ödeme</h3>
+            <h3
+              id="checkout-dialog-title"
+              className="mb-5 pr-12 text-xl font-black"
+            >
+              Güvenli ödeme
+            </h3>
             {presentation.kind === "iframe" && (
               <iframe
                 title="PayTR güvenli ödeme"
@@ -397,7 +480,7 @@ export function BillingSettings({ initial }: { initial: Overview }) {
               />
             )}
           </div>
-        </div>
+        </ModalDialog>
       )}
     </div>
   );
@@ -405,7 +488,7 @@ export function BillingSettings({ initial }: { initial: Overview }) {
 
 function ErrorBanner({ message }: { message: string }) {
   return (
-    <div className="border-orange/30 bg-orange/10 text-orange rounded-2xl border p-4 text-sm font-bold">
+    <div className="border-orange/30 bg-orange/10 text-orange-ink rounded-2xl border p-4 text-sm font-bold">
       {message}
     </div>
   );
@@ -445,7 +528,7 @@ function InvoiceList({ invoices }: { invoices: Overview["invoices"] }) {
                   href={invoice.invoiceUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-orange text-xs font-bold underline"
+                  className="text-orange-ink text-xs font-bold underline"
                 >
                   Faturayı aç
                 </a>

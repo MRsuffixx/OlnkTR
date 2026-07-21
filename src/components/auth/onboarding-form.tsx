@@ -61,7 +61,7 @@ export function OnboardingForm() {
         )}
       </div>
       <p
-        className={`min-h-5 text-xs font-semibold ${check.data?.available === false || error ? "text-orange" : "text-ink/50"}`}
+        className={`min-h-5 text-xs font-semibold ${check.data?.available === false || error ? "text-orange-ink" : "text-ink/50"}`}
       >
         {error ??
           (check.data?.available === false
