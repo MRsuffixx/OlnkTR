@@ -134,6 +134,14 @@ export const setLinkPasswordInput = z.object({
     .nullable(),
 });
 
+export const setProfilePasswordInput = z.object({
+  password: z
+    .string()
+    .min(6, "Parola en az 6 karakter olmalı.")
+    .max(72)
+    .nullable(),
+});
+
 const adminReason = z.string().trim().min(3).max(500);
 const adminPage = z.number().int().min(1).default(1);
 const adminPageSize = z.number().int().min(10).max(100).default(25);

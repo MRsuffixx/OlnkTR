@@ -109,6 +109,8 @@ enum AnalyticsEventType {
 enum AssetPurpose {
   AVATAR
   BACKGROUND
+  AUDIO
+  ENTRY_SOUND
 }
 
 enum AssetStatus {
@@ -170,6 +172,8 @@ model User {
   accountStatusExpiresAt DateTime?
   lastLoginAt        DateTime?
   lastActiveAt       DateTime?
+  profilePasswordHash String?    @db.VarChar(256)
+  profileAccessVersion Int       @default(0)
   editorRevision     Int       @default(0)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt

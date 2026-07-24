@@ -19,6 +19,10 @@ const EXTENSIONS = {
   "image/gif": "gif",
   "video/mp4": "mp4",
   "video/webm": "webm",
+  "audio/mpeg": "mp3",
+  "audio/mp4": "m4a",
+  "audio/ogg": "ogg",
+  "audio/wav": "wav",
 } as const;
 
 let cached: ReturnType<typeof buildStorageConfig> | undefined;
@@ -54,7 +58,7 @@ export function getStorageConfig() {
 
 export async function createAssetUpload(input: {
   userId: string;
-  purpose: "avatar" | "background";
+  purpose: "avatar" | "background" | "audio" | "entrySound";
   mimeType: keyof typeof EXTENSIONS;
   sizeBytes: number;
 }) {

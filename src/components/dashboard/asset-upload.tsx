@@ -1,6 +1,6 @@
 "use client";
 
-import { ImageUp, LoaderCircle } from "lucide-react";
+import { LoaderCircle, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { api } from "~/trpc/react";
@@ -11,7 +11,7 @@ export function AssetUpload({
   disabled = false,
   onUploaded,
 }: {
-  purpose: "avatar" | "background";
+  purpose: "avatar" | "background" | "audio" | "entrySound";
   accept: string;
   disabled?: boolean;
   onUploaded: (url: string) => void;
@@ -32,7 +32,11 @@ export function AssetUpload({
           | "image/webp"
           | "image/gif"
           | "video/mp4"
-          | "video/webm",
+          | "video/webm"
+          | "audio/mpeg"
+          | "audio/mp4"
+          | "audio/ogg"
+          | "audio/wav",
         sizeBytes: file.size,
       });
       const response = await fetch(signed.uploadUrl, {
@@ -82,7 +86,7 @@ export function AssetUpload({
         {createUpload.isPending || finalizeUpload.isPending ? (
           <LoaderCircle className="size-4 animate-spin" />
         ) : (
-          <ImageUp className="size-4" />
+          <Upload className="size-4" />
         )}{" "}
         Dosya yükle
       </button>

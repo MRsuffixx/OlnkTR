@@ -202,6 +202,115 @@ export const FEATURE_CATALOG = {
     tier: "pro",
     fallback: 70,
   },
+  "effects.mouseParticles": {
+    label: "Fareyi izleyen parçacıklar",
+    tier: "pro",
+    fallback: "off",
+  },
+  "effects.cardTilt": {
+    label: "3B kart eğimi",
+    tier: "pro",
+    fallback: "off",
+  },
+  "effects.matrixRain": {
+    label: "Matrix yağmuru",
+    tier: "pro",
+    fallback: "off",
+  },
+  "effects.crtFilter": {
+    label: "CRT filtresi",
+    tier: "pro",
+    fallback: false,
+  },
+  "effects.glitch": {
+    label: "Glitch efekti",
+    tier: "pro",
+    fallback: false,
+  },
+  "effects.scanlines": {
+    label: "Tarama çizgileri",
+    tier: "pro",
+    fallback: false,
+  },
+  "audio.enabled": {
+    label: "Profil müziği",
+    tier: "free",
+    fallback: false,
+  },
+  "audio.source": {
+    label: "Ses kaynağı",
+    tier: "free",
+    fallback: "none",
+    proValues: ["upload"],
+  },
+  "audio.sourceUrl": {
+    label: "Ses adresi",
+    tier: "free",
+    fallback: "",
+  },
+  "audio.title": {
+    label: "Parça başlığı",
+    tier: "free",
+    fallback: "",
+  },
+  "audio.volume": {
+    label: "Başlangıç ses düzeyi",
+    tier: "free",
+    fallback: 70,
+  },
+  "audio.loop": {
+    label: "Sürekli tekrar",
+    tier: "pro",
+    fallback: false,
+  },
+  "audio.skin": {
+    label: "Oynatıcı görünümü",
+    tier: "free",
+    fallback: "minimal",
+    proValues: ["glass", "retro"],
+  },
+  "audio.accentColor": {
+    label: "Oynatıcı vurgu rengi",
+    tier: "pro",
+    fallback: "#F06432",
+  },
+  "audio.entryEnabled": {
+    label: "Giriş sesi",
+    tier: "pro",
+    fallback: false,
+  },
+  "audio.entryUrl": {
+    label: "Giriş sesi dosyası",
+    tier: "pro",
+    fallback: "",
+  },
+  "audio.entryVolume": {
+    label: "Giriş sesi düzeyi",
+    tier: "pro",
+    fallback: 65,
+  },
+  "socialProof.enabled": {
+    label: "Ziyaretçi sayacı",
+    tier: "free",
+    fallback: false,
+  },
+  "socialProof.metric": {
+    label: "Sayaç ölçümü",
+    tier: "free",
+    fallback: "total",
+    proValues: ["live"],
+  },
+  "socialProof.style": {
+    label: "Sayaç görünümü",
+    tier: "free",
+    fallback: "plain",
+    proValues: ["retro"],
+  },
+  "socialProof.label": {
+    label: "Sayaç etiketi",
+    tier: "free",
+    fallback: "",
+  },
   "advanced.removeBranding": {
     label: "olnk markasını kaldır",
     tier: "pro",
@@ -258,6 +367,20 @@ export const FEATURE_GROUPS = [
     ),
   },
   {
+    id: "audio",
+    label: "Ses",
+    paths: Object.keys(FEATURE_CATALOG).filter((key) =>
+      key.startsWith("audio."),
+    ),
+  },
+  {
+    id: "socialProof",
+    label: "Sosyal kanıt",
+    paths: Object.keys(FEATURE_CATALOG).filter((key) =>
+      key.startsWith("socialProof."),
+    ),
+  },
+  {
     id: "advanced",
     label: "Gelişmiş",
     paths: Object.keys(FEATURE_CATALOG).filter((key) =>
@@ -283,6 +406,18 @@ export const CAPABILITY_CATALOG = {
   "assets.avatarUpload": { label: "Avatar yükleme", tier: "free" },
   "assets.backgroundUpload": {
     label: "Arka plan görseli veya videosu",
+    tier: "pro",
+  },
+  "assets.audioUpload": {
+    label: "Doğrudan ses dosyası yükleme",
+    tier: "pro",
+  },
+  "assets.entrySoundUpload": {
+    label: "Giriş sesi yükleme",
+    tier: "pro",
+  },
+  "profiles.password": {
+    label: "Profil parolası",
     tier: "pro",
   },
 } as const satisfies Record<string, { label: string; tier: ProductTier }>;

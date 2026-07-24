@@ -266,7 +266,7 @@ export const customizationRouter = createTRPCRouter({
   createUpload: protectedProcedure
     .input(
       z.object({
-        purpose: z.enum(["avatar", "background"]),
+        purpose: z.enum(["avatar", "background", "audio", "entrySound"]),
         mimeType: z.enum([
           "image/jpeg",
           "image/png",
@@ -274,6 +274,10 @@ export const customizationRouter = createTRPCRouter({
           "image/gif",
           "video/mp4",
           "video/webm",
+          "audio/mpeg",
+          "audio/mp4",
+          "audio/ogg",
+          "audio/wav",
         ]),
         sizeBytes: z
           .number()
@@ -288,12 +292,16 @@ export const customizationRouter = createTRPCRouter({
           code: "PRECONDITION_FAILED",
           message: "Dosya yükleme şu anda yapılandırılmamış.",
         });
-      await requireFeature(
-        ctx.session.user.id,
-        input.purpose === "background" || input.mimeType.startsWith("video/")
-          ? "assets.backgroundUpload"
-          : "assets.avatarUpload",
-      );
+      const capability =
+        input.purpose === "audio"
+          ? "assets.audioUpload"
+          : input.purpose === "entrySound"
+            ? "assets.entrySoundUpload"
+            : input.purpose === "background" ||
+                input.mimeType.startsWith("video/")
+              ? "assets.backgroundUpload"
+              : "assets.avatarUpload";
+      await requireFeature(ctx.session.user.id, capability);
       if (input.purpose === "avatar" && input.mimeType.startsWith("video/"))
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -303,6 +311,25 @@ export const customizationRouter = createTRPCRouter({
         throw new TRPCError({
           code: "PAYLOAD_TOO_LARGE",
           message: "Avatar en fazla 8 MB olabilir.",
+        });
+      const isAudio = input.mimeType.startsWith("audio/");
+      if (
+        (input.purpose === "audio" || input.purpose === "entrySound") !==
+        isAudio
+      )
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Bu alan için geçerli bir ses dosyası seçin.",
+        });
+      if (input.purpose === "entrySound" && input.sizeBytes > 2 * 1024 * 1024)
+        throw new TRPCError({
+          code: "PAYLOAD_TOO_LARGE",
+          message: "Giriş sesi en fazla 2 MB olabilir.",
+        });
+      if (input.purpose === "audio" && input.sizeBytes > 25 * 1024 * 1024)
+        throw new TRPCError({
+          code: "PAYLOAD_TOO_LARGE",
+          message: "Ses dosyası en fazla 25 MB olabilir.",
         });
       const rate = await consumeRateLimit({
         key: `upload:${ctx.session.user.id}:${getTrustedClientAddress(ctx.headers)}`,
@@ -353,7 +380,14 @@ export const customizationRouter = createTRPCRouter({
             publicUrl: upload.publicUrl,
             mimeType: input.mimeType,
             sizeBytes: input.sizeBytes,
-            purpose: input.purpose === "avatar" ? "AVATAR" : "BACKGROUND",
+            purpose:
+              input.purpose === "avatar"
+                ? "AVATAR"
+                : input.purpose === "background"
+                  ? "BACKGROUND"
+                  : input.purpose === "audio"
+                    ? "AUDIO"
+                    : "ENTRY_SOUND",
           },
         });
       });

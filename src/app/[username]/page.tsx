@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- Public avatars and favicons can come from user-configured HTTPS hosts. */
 import { after } from "next/server";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import type { Metadata } from "next";
 import { ArrowUpRight, Download, LockKeyhole, QrCode } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -9,7 +9,9 @@ import { cache } from "react";
 import { Brand } from "~/components/brand";
 import { ProfileEffects } from "~/components/profile/profile-effects";
 import { ProfileBackgroundVideo } from "~/components/profile/profile-background-video";
+import { ProfileGate } from "~/components/profile/profile-gate";
 import { ShareButton } from "~/components/profile/share-button";
+import { VisitorCounter } from "~/components/profile/visitor-counter";
 import { appearanceBackground } from "~/lib/appearance";
 import { linkCustomizationSchema } from "~/lib/schemas";
 import { getAppOrigin } from "~/lib/app-url";
@@ -23,8 +25,13 @@ import {
 } from "~/lib/profile-rendering";
 import { db } from "~/server/db";
 import { recordProfileView } from "~/server/analytics/ingest";
+import { getPublicVisitCount } from "~/server/analytics/public-count";
 import { canPublishAccount } from "~/server/auth/account-access";
 import { hasProAccess, resolveAppearanceForPlan } from "~/server/entitlements";
+import {
+  profileAccessCookieName,
+  verifyProfileAccessToken,
+} from "~/server/security/profile-access";
 
 const getProfile = cache((username: string) =>
   db.user.findUnique({
@@ -50,6 +57,13 @@ export async function generateMetadata({
   const profile = await getProfile(username);
   if (!profile?.username || !canPublishAccount(profile))
     return { title: "Profil bulunamadı" };
+  const pro = hasProAccess(profile.subscription, profile.manualEntitlement);
+  if (pro && profile.profilePasswordHash)
+    return {
+      title: `@${profile.username} · Korumalı profil`,
+      description: "Bu olnk profili parola ile korunuyor.",
+      robots: { index: false, follow: false },
+    };
   const title = profile.name ?? `@${profile.username}`;
   const description = profile.bio || `${title} bağlantılarını olnk'te keşfet.`;
   return {
@@ -68,13 +82,35 @@ export async function generateMetadata({
 
 export default async function PublicProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ username: string }>;
+  searchParams: Promise<{ gateError?: string }>;
 }) {
   const { username } = await params;
+  const query = await searchParams;
   const profile = await getProfile(username);
   if (!profile?.username || !canPublishAccount(profile)) notFound();
   const pro = hasProAccess(profile.subscription, profile.manualEntitlement);
+  const requestHeaders = await headers();
+  after(() =>
+    recordProfileView(profile.id, requestHeaders).catch(() => undefined),
+  );
+  if (pro && profile.profilePasswordHash) {
+    const cookieStore = await cookies();
+    const unlocked = verifyProfileAccessToken(
+      profile.id,
+      profile.profileAccessVersion,
+      cookieStore.get(profileAccessCookieName(profile.id))?.value,
+    );
+    if (!unlocked)
+      return (
+        <ProfileGate
+          username={profile.username}
+          hasError={query.gateError === "1"}
+        />
+      );
+  }
   const appearance = resolveAppearanceForPlan(
     profile.theme?.settings,
     pro,
@@ -84,10 +120,6 @@ export default async function PublicProfilePage({
     (link) =>
       (!link.scheduledStart || link.scheduledStart <= now) &&
       (!link.scheduledEnd || link.scheduledEnd > now),
-  );
-  const requestHeaders = await headers();
-  after(() =>
-    recordProfileView(profile.id, requestHeaders).catch(() => undefined),
   );
   const initial = (profile.name ?? profile.username)
     .slice(0, 1)
@@ -111,6 +143,9 @@ export default async function PublicProfilePage({
       : "text-center items-center";
   const background = appearanceBackground(appearance);
   const density = profileDensity(appearance.layout.density);
+  const visitorCount = appearance.socialProof.enabled
+    ? await getPublicVisitCount(profile.id, appearance.socialProof.metric)
+    : null;
 
   return (
     <main
@@ -234,6 +269,13 @@ export default async function PublicProfilePage({
             >
               {profile.bio}
             </p>
+          )}
+          {visitorCount !== null && (
+            <VisitorCounter
+              username={profile.username}
+              initialCount={visitorCount}
+              settings={appearance.socialProof}
+            />
           )}
         </section>
         <nav

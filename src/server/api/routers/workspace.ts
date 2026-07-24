@@ -4,6 +4,7 @@ import type { Prisma } from "../../../../generated/prisma/client";
 import {
   linkCustomizationSchema,
   setLinkPasswordInput,
+  setProfilePasswordInput,
   workspaceInput,
 } from "~/lib/schemas";
 import { DEFAULT_THEME, faviconForUrl } from "~/lib/theme";
@@ -73,6 +74,7 @@ export const workspaceRouter = createTRPCRouter({
       appearance: appearance.raw,
       effectiveAppearance: appearance.effective,
       customCss: user.theme?.customCss ?? "",
+      profilePasswordProtected: Boolean(user.profilePasswordHash),
       theme: user.theme
         ? {
             backgroundType: user.theme.backgroundType,
@@ -232,6 +234,10 @@ export const workspaceRouter = createTRPCRouter({
           const referencedAssets = [
             input.image,
             appearance.background.mediaUrl,
+            appearance.audio.source === "upload"
+              ? appearance.audio.sourceUrl
+              : null,
+            appearance.audio.entryEnabled ? appearance.audio.entryUrl : null,
           ].filter((value): value is string => Boolean(value));
           await tx.uploadedAsset.updateMany({
             where: {
@@ -290,5 +296,41 @@ export const workspaceRouter = createTRPCRouter({
       });
       if (!updated.count) throw new TRPCError({ code: "NOT_FOUND" });
       return { passwordProtected: Boolean(passwordHash) };
+    }),
+
+  setProfilePassword: protectedProcedure
+    .input(setProfilePasswordInput)
+    .mutation(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        select: {
+          subscription: true,
+          manualEntitlement: true,
+          profilePasswordHash: true,
+        },
+      });
+      if (!user) throw new TRPCError({ code: "NOT_FOUND" });
+      if (
+        input.password &&
+        !canUseFeature(
+          hasProAccess(user.subscription, user.manualEntitlement),
+          "profiles.password",
+        )
+      )
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Bu özellik Pro planında kullanılabilir.",
+        });
+      const passwordHash = input.password
+        ? await hashLinkPassword(input.password)
+        : null;
+      await ctx.db.user.update({
+        where: { id: ctx.session.user.id },
+        data: {
+          profilePasswordHash: passwordHash,
+          profileAccessVersion: { increment: 1 },
+        },
+      });
+      return { profilePasswordProtected: Boolean(passwordHash) };
     }),
 });

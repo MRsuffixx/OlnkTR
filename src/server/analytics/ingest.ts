@@ -78,8 +78,10 @@ export async function recordProfileView(
   if (!clientLimit.allowed || !profileLimit.allowed) return;
 
   const now = new Date();
-  const minute = Math.floor(now.getTime() / 60_000);
-  const dedupeKey = digest(`view:${userId}:${identity.visitorHash}:${minute}`);
+  const thirtyMinuteWindow = Math.floor(now.getTime() / (30 * 60_000));
+  const dedupeKey = digest(
+    `view:${userId}:${identity.visitorHash}:${thirtyMinuteWindow}`,
+  );
   const deviceType = /tablet|ipad/i.test(identity.agent)
     ? "tablet"
     : /mobile|iphone|android/i.test(identity.agent)

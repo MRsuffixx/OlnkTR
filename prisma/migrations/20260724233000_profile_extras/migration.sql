@@ -1,0 +1,6 @@
+ALTER TYPE "AssetPurpose" ADD VALUE 'AUDIO';
+ALTER TYPE "AssetPurpose" ADD VALUE 'ENTRY_SOUND';
+
+ALTER TABLE "User"
+ADD COLUMN "profilePasswordHash" VARCHAR(256),
+ADD COLUMN "profileAccessVersion" INTEGER NOT NULL DEFAULT 0;
