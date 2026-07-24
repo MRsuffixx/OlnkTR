@@ -7,7 +7,7 @@ import { AdminConfirmDialog } from "~/components/admin/admin-confirm-dialog";
 import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
 
-type Detail = RouterOutputs["admin"]["billing"]["detail"];
+type Detail = NonNullable<RouterOutputs["admin"]["billing"]["detail"]>;
 
 export function AdminSubscriptionActions({
   detail,

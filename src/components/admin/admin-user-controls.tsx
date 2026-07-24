@@ -9,7 +9,7 @@ import { AdminConfirmDialog } from "~/components/admin/admin-confirm-dialog";
 import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
 
-type UserDetail = RouterOutputs["admin"]["users"]["detail"];
+type UserDetail = NonNullable<RouterOutputs["admin"]["users"]["detail"]>;
 
 function localDateAfter(days: number) {
   const date = new Date(Date.now() + days * 24 * 60 * 60 * 1000);

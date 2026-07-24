@@ -205,7 +205,7 @@ export const adminBillingRouter = createTRPCRouter({
           },
         },
       });
-      if (!subscription) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!subscription) return null;
       const [invoices, intents] = await Promise.all([
         ctx.db.billingInvoice.findMany({
           where: { userId: subscription.user.id },

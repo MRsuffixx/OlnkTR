@@ -16,7 +16,7 @@ export default async function AdminUserDetailPage({
 }) {
   await requireAdminSession();
   const { id } = await params;
-  const user = await api.admin.users.detail({ userId: id }).catch(() => null);
+  const user = await api.admin.users.detail({ userId: id });
   if (!user) notFound();
   return (
     <main className="p-5 sm:p-8">

@@ -17,7 +17,7 @@ import { DEFAULT_THEME } from "~/lib/theme";
 import type { RouterOutputs } from "~/trpc/react";
 import { api } from "~/trpc/react";
 
-type UserDetail = RouterOutputs["admin"]["users"]["detail"];
+type UserDetail = NonNullable<RouterOutputs["admin"]["users"]["detail"]>;
 
 function toLocalDate(value: string | null) {
   if (!value) return "";

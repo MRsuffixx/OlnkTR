@@ -292,7 +292,7 @@ export const adminUsersRouter = createTRPCRouter({
           },
         },
       });
-      if (!user) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!user) return null;
       const [clicks, views, uniqueVisitorRows] = await Promise.all([
         ctx.db.clickEvent.count({ where: { userId: user.id } }),
         ctx.db.profileViewEvent.count({ where: { userId: user.id } }),

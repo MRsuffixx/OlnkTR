@@ -15,9 +15,7 @@ export default async function AdminSubscriptionDetailPage({
 }) {
   await requireAdminSession();
   const { id } = await params;
-  const detail = await api.admin.billing
-    .detail({ subscriptionId: id })
-    .catch(() => null);
+  const detail = await api.admin.billing.detail({ subscriptionId: id });
   if (!detail) notFound();
   const subscription = detail.subscription;
   return (
