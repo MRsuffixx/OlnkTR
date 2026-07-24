@@ -123,7 +123,7 @@
   reports zero vulnerabilities.
 - Refreshed compatible runtime/tooling packages. ESLint 9.39.5 and TypeScript 6.0.3 remain the
   newest releases accepted by the official strict peer graph.
-- Verification: Prisma generation, `pnpm check`, format, 22 unit tests, production build, and
+- Verification: Prisma generation, `pnpm check`, format, 25 unit tests, production build, and
   Playwright desktop/mobile access checks all pass.
 
 ### 2026-07-21 — Stabilization (HEAD `433f4fb`)

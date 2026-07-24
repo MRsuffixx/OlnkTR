@@ -38,6 +38,7 @@ Colocation keeps tests close to the module they exercise and easy to discover. N
 | `src/lib/profile-rendering.test.ts` | 3 | `outline` button preserves color/border/transparent background; every offered font maps to `var(--font-…)`; Spotify and YouTube URL transformations. |
 | `src/lib/schemas.test.ts` | 3 | Duplicate link ids rejected; 50 links accepted, 51st rejected; temporary admin suspensions require a future expiry. |
 | `src/server/entitlements.test.ts` | 4 (parameterised) | Provider entitlement status/period rules, deterministic free fallbacks, and active/expired/revoked/future manual grants. |
+| `src/server/api/trpc.test.ts` | 3 | Live database role overrides stale session claims; inactive admins are blocked; active admins pass through the dedicated rate limit. |
 | `src/server/payments/adapters/providers.test.ts` | 4 | `mapStripeSubscriptionStatus` always returns non-Pro for unknown; declined Adyen authorisation becomes `payment_failed`/`UNPAID`; iyzico v3 signature fixture; PayTR callback hash fixture. |
 | `src/server/security/custom-css.test.ts` | 3 | Safe selectors scoped to `[data-olnk-profile]`; CSS-escape obfuscation rejected; global selectors and `url(...)` stripped. |
 
