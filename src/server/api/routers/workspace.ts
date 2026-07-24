@@ -50,6 +50,7 @@ export const workspaceRouter = createTRPCRouter({
       include: {
         theme: true,
         subscription: true,
+        manualEntitlement: true,
         links: {
           where: { deletedAt: null },
           orderBy: { position: "asc" },
@@ -58,7 +59,7 @@ export const workspaceRouter = createTRPCRouter({
     });
     if (!user) throw new TRPCError({ code: "NOT_FOUND" });
 
-    const pro = hasProAccess(user.subscription);
+    const pro = hasProAccess(user.subscription, user.manualEntitlement);
     const appearance = resolveAppearanceForPlan(user.theme?.settings, pro);
     return {
       revision: user.editorRevision,
@@ -111,11 +112,15 @@ export const workspaceRouter = createTRPCRouter({
         include: {
           theme: true,
           subscription: true,
+          manualEntitlement: true,
           links: { where: { deletedAt: null } },
         },
       });
       if (!current) throw new TRPCError({ code: "NOT_FOUND" });
-      const pro = hasProAccess(current.subscription);
+      const pro = hasProAccess(
+        current.subscription,
+        current.manualEntitlement,
+      );
       const appearance = mergePermittedAppearance(
         input.appearance,
         current.theme?.settings,
@@ -261,10 +266,16 @@ export const workspaceRouter = createTRPCRouter({
   setLinkPassword: protectedProcedure
     .input(setLinkPasswordInput)
     .mutation(async ({ ctx, input }) => {
-      const subscription = await ctx.db.subscription.findUnique({
-        where: { userId: ctx.session.user.id },
+      const user = await ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        select: { subscription: true, manualEntitlement: true },
       });
-      if (!canUseFeature(hasProAccess(subscription), "links.password"))
+      if (
+        !canUseFeature(
+          hasProAccess(user?.subscription, user?.manualEntitlement),
+          "links.password",
+        )
+      )
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Bu özellik Pro planında kullanılabilir.",

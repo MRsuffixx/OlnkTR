@@ -50,7 +50,7 @@ export async function getAccountAccess(userId: string) {
 
 export function canAccessAccount(
   account: AccountAccessRecord | null | undefined,
-) {
+): account is AccountAccessRecord {
   return Boolean(
     account &&
       account.accountStatus === "ACTIVE" &&

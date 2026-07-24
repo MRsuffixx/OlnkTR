@@ -7,6 +7,14 @@ import { cookies } from "next/headers";
 
 import { env } from "~/env";
 import { normalizeEmail } from "~/lib/email";
+import {
+  adminActorLabel,
+  recordAdminAudit,
+} from "~/server/admin/audit";
+import {
+  canAccessAccount,
+  getAccountAccess,
+} from "~/server/auth/account-access";
 import { db } from "~/server/db";
 import {
   claimUsername,
@@ -18,6 +26,7 @@ declare module "next-auth" {
     user: {
       id: string;
       username: string | null;
+      role: "USER" | "ADMIN";
     } & DefaultSession["user"];
   }
 }
@@ -158,16 +167,12 @@ export const authConfig = {
   callbacks: {
     signIn: async ({ user }) => {
       if (!user.id) return true;
-      const account = await db.user.findUnique({
-        where: { id: user.id },
-        select: { deletionRequestedAt: true },
-      });
-      return !account?.deletionRequestedAt;
+      return canAccessAccount(await getAccountAccess(user.id));
     },
     session: async ({ session, user }) => {
       const account = await db.user.findUnique({
         where: { id: user.id },
-        select: { username: true },
+        select: { username: true, role: true },
       });
       return {
         ...session,
@@ -175,6 +180,7 @@ export const authConfig = {
           ...session.user,
           id: user.id,
           username: account?.username ?? null,
+          role: account?.role ?? "USER",
         },
       };
     },
@@ -186,13 +192,23 @@ export const authConfig = {
     },
     signIn: async ({ user }) => {
       if (!user.id) return;
-      if (user.email) {
-        const email = normalizeEmail(user.email);
-        await db.user.update({
-          where: { id: user.id },
-          data: { email, emailNormalized: email },
+      const email = user.email ? normalizeEmail(user.email) : undefined;
+      const account = await db.user.update({
+        where: { id: user.id },
+        data: {
+          ...(email ? { email, emailNormalized: email } : {}),
+          lastLoginAt: new Date(),
+          lastActiveAt: new Date(),
+        },
+        select: { id: true, email: true, username: true, role: true },
+      });
+      if (account.role === "ADMIN")
+        await recordAdminAudit({
+          actorUserId: account.id,
+          actorLabel: adminActorLabel(account),
+          category: "AUTHORIZATION",
+          action: "ADMIN_SIGN_IN",
         });
-      }
       await ensureTheme(user.id);
       await claimSignupIntent(user.id, user.email ?? null);
     },
