@@ -22,7 +22,10 @@ export default async function DashboardLayout({
         <header className="border-ink/10 bg-paper/90 sticky top-0 z-40 border-b backdrop-blur-xl">
           <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-4 sm:px-6">
             <Brand />
-            <DashboardNav username={session.user.username} />
+            <DashboardNav
+              username={session.user.username}
+              isAdmin={session.user.role === "ADMIN"}
+            />
           </div>
         </header>
         {children}

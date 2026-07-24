@@ -6,6 +6,7 @@ import {
   ExternalLink,
   LayoutDashboard,
   LogOut,
+  Shield,
   Settings,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
@@ -19,7 +20,13 @@ const items = [
   { href: "/dashboard/settings", label: "Ayarlar", icon: Settings },
 ];
 
-export function DashboardNav({ username }: { username: string }) {
+export function DashboardNav({
+  username,
+  isAdmin,
+}: {
+  username: string;
+  isAdmin: boolean;
+}) {
   const pathname = usePathname();
   return (
     <>
@@ -45,6 +52,15 @@ export function DashboardNav({ username }: { username: string }) {
         })}
       </nav>
       <div className="flex items-center gap-1">
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className="text-ink/60 hover:bg-cream hover:text-ink grid size-10 place-items-center rounded-full"
+            aria-label="Yönetim panelini aç"
+          >
+            <Shield className="size-4" />
+          </Link>
+        )}
         <Link
           href={`/${username}`}
           target="_blank"

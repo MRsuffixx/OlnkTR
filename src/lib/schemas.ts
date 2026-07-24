@@ -251,6 +251,10 @@ export const adminSubscriptionListInput = z.object({
   pageSize: adminPageSize,
 });
 
+export const adminSubscriptionIdInput = z.object({
+  subscriptionId: z.cuid2(),
+});
+
 export const adminSubscriptionActionInput = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("EXTEND"),
