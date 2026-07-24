@@ -167,16 +167,18 @@ export const authConfig = {
       if (!user.id) return true;
       const account = await getAccountAccess(user.id);
       if (account?.role === "ADMIN") {
+        const actorUserId = account.id;
+        const actorLabel = adminActorLabel(account);
         const rate = await consumeRateLimit({
-          key: `admin-auth:${account.id}`,
+          key: `admin-auth:${actorUserId}`,
           limit: 20,
           windowMs: 15 * 60 * 1000,
           blockMs: 30 * 60 * 1000,
         });
         if (!rate.allowed) {
           await recordAdminAudit({
-            actorUserId: account.id,
-            actorLabel: adminActorLabel(account),
+            actorUserId,
+            actorLabel,
             category: "AUTHORIZATION",
             action: "ADMIN_SIGN_IN_RATE_LIMIT",
             outcome: "DENIED",
@@ -187,8 +189,8 @@ export const authConfig = {
         }
         if (!canAccessAccount(account)) {
           await recordAdminAudit({
-            actorUserId: account.id,
-            actorLabel: adminActorLabel(account),
+            actorUserId,
+            actorLabel,
             category: "AUTHORIZATION",
             action: "ADMIN_SIGN_IN_DENIED",
             outcome: "DENIED",
