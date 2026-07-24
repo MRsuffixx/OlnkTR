@@ -272,3 +272,23 @@ another user.
 - Provider revenue and support grants remain distinguishable.
 - Admins cannot invisibly change another user's credentials or payment method.
 - A future moderator role requires a capability matrix, not another ad-hoc role check.
+
+---
+
+## ADR-019 — Toolchain majors follow the strict peer graph
+
+**Date:** 2026-07-24
+**Status:** Accepted
+**Context:** npm publishes TypeScript 7 and ESLint 10, but the current official Next.js
+ESLint plugins declare support through ESLint 9, while `typescript-eslint@8.65.0` declares
+TypeScript `<6.1`.
+
+**Decision:** Keep ESLint `9.39.5` and TypeScript `6.0.3`, the newest versions satisfying
+the complete strict peer graph. Do not force or silence peer mismatches. Re-evaluate when the
+official plugins widen their ranges.
+
+**Consequences:**
+- `pnpm peers check` stays clean.
+- `pnpm outdated` intentionally reports only ESLint 10 and TypeScript 7.
+- Framework, runtime, Auth.js, storage, formatting, and lint integration packages remain at
+  their current compatible releases.

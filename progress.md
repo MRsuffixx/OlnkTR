@@ -1,7 +1,6 @@
 # progress.md — Dynamic Project Tracker
 
-> Branch: `codex/stabilize-upgrades-fixes` · HEAD: `433f4fb`
-> Updated against the 30-commit history through `433f4fb`.
+> Branch: `codex/stabilize-upgrades-fixes`.
 > This file is the canonical status board; update whenever features ship, the stack changes, or in-progress work starts/stops.
 
 ---
@@ -25,6 +24,9 @@
 - Email normalisation single source of truth (`src/lib/email.ts`).
 - Username normalisation and moderation (`src/lib/username.ts`, `src/config/username-policy.ts`).
 - Accessibility suite: axe-core on `/`, `/login`, `/register`; redirect test on `/dashboard/billing`; 404 path.
+- Admin control room under `/admin`: live database RBAC, user/workspace/account operations,
+  unified subscriptions, revenue/platform charts, provider visibility, immutable audit, and
+  trusted-shell role management.
 
 ### 1.2 Shipped and Working (Pro Tier)
 - All Pro-only appearance paths (Crown icon + lock).
@@ -56,7 +58,6 @@
 
 | Task | Owner context | Notes |
 |---|---|---|
-| **Admin control room** | current build | Add database-authoritative RBAC, immutable audit events, user/subscription operations, platform analytics, provider visibility, and the server-only role-management CLI. |
 | **Public profile cache invalidation** (known gap) | stabilisation | Add `revalidateTag` after `workspace.save` + `account.updateProfile` so the editor's preview matches the live page without re-deploying. |
 | **Live checkout result overlay** | stabilisation | The `/dashboard/billing?checkout=…&intent=…` states already pass to `<BillingSettings/>`; refine the success / failure copy and link to the updated settings panel. |
 | **PayTR local-mode pricing display** | stabilisation | `LOCAL_PRO_*_TRY` defaults to `12900` / `94900`; verify against the production PayTR dashboard before launch. |
@@ -108,6 +109,22 @@
 ---
 
 ## 5. Change Log (recent)
+
+### 2026-07-24 — Admin control room and security refresh
+
+- Added `USER`/`ADMIN` RBAC, account suspension/ban state, manual Pro grants, immutable audit
+  events, invoice refund-operation flags, and migration `20260724120000_admin_control_room`.
+- Added `/admin` user, billing, analytics, system, and audit sections with server-rendered
+  protection plus typed confirmation for sensitive actions.
+- Added `pnpm admin:role <email> --role ADMIN|USER`; no public role-management endpoint exists.
+- Added distinct admin authentication/API/page rate limits and successful/denied audit events.
+- Deliberately avoided user-session impersonation; troubleshooting is a public-profile preview.
+- Upgraded Next.js/Auth.js and transitives to close all known audit findings; `pnpm audit --prod`
+  reports zero vulnerabilities.
+- Refreshed compatible runtime/tooling packages. ESLint 9.39.5 and TypeScript 6.0.3 remain the
+  newest releases accepted by the official strict peer graph.
+- Verification: Prisma generation, `pnpm check`, format, 22 unit tests, production build, and
+  Playwright desktop/mobile access checks all pass.
 
 ### 2026-07-21 — Stabilization (HEAD `433f4fb`)
 - **chore(config): use port 3100 and disable implicit dep installs** (`433f4fb`) — Playwright webserver switched from `pnpm dev` to `pnpm start`, port 3000 → 3100, webserver timeout 120 s → 180 s, `verifyDepsBeforeRun: false`.

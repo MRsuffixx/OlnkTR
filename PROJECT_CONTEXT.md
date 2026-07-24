@@ -42,34 +42,34 @@
 | Runtime | Node.js | `^20.19 \|\| ^22.13 \|\| >=24` (pinned `22.13.0`) | LTS node |
 | Package manager | pnpm | `11.9.0` | Workspace + peer override management |
 | Framework | Next.js (App Router, Turbopack) | `16.2.11` | RSC + server actions + middleware |
-| UI | React + React DOM | `19.2.7` | Concurrent rendering |
+| UI | React + React DOM | `19.2.8` | Concurrent rendering |
 | Language | TypeScript | `6.0.3` | strict + verbatimModuleSyntax + noUncheckedIndexedAccess |
 | Styling | Tailwind CSS | `4.3.3` | PostCSS plugin only; tokens via `@theme` |
 | ORM | Prisma (`prisma-client` ESM gen) | `7.9.0` | Output to `generated/prisma` |
 | DB driver | `@prisma/adapter-pg` + `pg` | `7.9.0` / `8.22.0` | Postgres connection pool |
 | DB | PostgreSQL | 17 (CI) | Migrations + advisory locks |
-| API | tRPC + TanStack Query | `11.18.0` / `5.101.2` | End-to-end typed RPC + cache |
+| API | tRPC + TanStack Query | `11.18.0` / `5.101.4` | End-to-end typed RPC + cache |
 | Wire format | superjson | `2.2.6` | Date / Map / Set / BigInt round-trip |
 | Auth | Auth.js (NextAuth v5 beta) | `5.0.0-beta.32` | Server-rendered OAuth + magic link |
 | Auth adapter | `@auth/prisma-adapter` | `2.11.3` | Adapter normalisation extension in `src/server/auth/config.ts` |
 | Email | Nodemailer | `9.0.3` | pinned via peer rules |
 | Validation | Zod | `4.4.3` | All untrusted input |
 | Env validation | `@t3-oss/env-nextjs` | `0.13.11` | `src/env.js` |
-| Storage | AWS SDK v3 (S3-compatible) | `3.1090.0` | Presigned PUTs, head + delete |
+| Storage | AWS SDK v3 (S3-compatible) | `3.1095.0` | Presigned PUTs, head + delete |
 | Payments — Stripe | `stripe` | `22.3.2` | Subscriptions + webhooks |
 | Payments — iyzico | `iyzipay` | `2.0.69` | serverExternalPackages; ambient `.d.ts` |
 | Payments — PayTR | (HTTP) | — | Manual iframe + HMAC |
 | Payments — Adyen | `@adyen/api-library` | `32.0.0` | HMAC validator + API |
 | Adyen Web | `@adyen/adyen-web` | `6.41.0` | Drop-in UI (client only) |
 | Drag & drop | `@dnd-kit/core` / `sortable` / `utilities` | `6.3.1` / `10.0.0` / `3.2.2` | Editor reorder |
-| Icons | `lucide-react` | `1.25.0` | Throughout UI |
+| Icons | `lucide-react` | `1.26.0` | Throughout UI |
 | QR | `qrcode` | `1.5.4` | `/api/qr/[username]` |
 | Analytics parser | none | — | rolling window + dedupe handled in code |
 | Logging | none | — | `console.*` + Prisma query log in dev |
 | Testing — Unit | Vitest | `4.1.10` | `src/**/*.test.ts` |
 | Testing — E2E | Playwright | `1.61.1` | `tests/e2e/*.spec.ts` (port 3100) |
 | Accessibility | `@axe-core/playwright` | `4.12.1` | Playwright a11y assertions |
-| Dev tools | ESLint / Prettier / typescript-eslint | `9.39.5` / `3.9.5` / `8.64.0` | `--max-warnings=0` gate |
+| Dev tools | ESLint / Prettier / typescript-eslint | `9.39.5` / `3.9.6` / `8.65.0` | `--max-warnings=0` gate |
 
 ### CI/CD
 - **GitHub Actions** (`.github/workflows/ci.yml`) on `push` to `main` and on every `pull_request`.

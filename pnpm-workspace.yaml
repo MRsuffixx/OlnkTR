@@ -22,7 +22,7 @@ overrides:
   'valibot': '1.4.2'
   'postman-request>qs': '6.15.3'
   'postman-request>uuid': '11.1.1'
-  'next>postcss': '8.5.20'
+  'next>postcss': '8.5.23'
   'next>sharp': '0.35.3'
 
 minimumReleaseAgeExclude:
@@ -36,3 +36,21 @@ minimumReleaseAgeExclude:
   - '@prisma/fetch-engine@7.9.0'
   - '@prisma/get-platform@7.9.0'
   - prisma@7.9.0
+  - '@aws-sdk/checksums@3.1000.20'
+  - '@aws-sdk/client-s3@3.1095.0'
+  - '@aws-sdk/core@3.977.0'
+  - '@aws-sdk/credential-provider-env@3.972.61'
+  - '@aws-sdk/credential-provider-http@3.972.63'
+  - '@aws-sdk/credential-provider-ini@3.973.6'
+  - '@aws-sdk/credential-provider-login@3.972.68'
+  - '@aws-sdk/credential-provider-node@3.972.72'
+  - '@aws-sdk/credential-provider-process@3.972.61'
+  - '@aws-sdk/credential-provider-sso@3.973.5'
+  - '@aws-sdk/credential-provider-web-identity@3.972.67'
+  - '@aws-sdk/middleware-sdk-s3@3.972.66'
+  - '@aws-sdk/nested-clients@3.997.35'
+  - '@aws-sdk/s3-request-presigner@3.1095.0'
+  - '@aws-sdk/signature-v4-multi-region@3.996.42'
+  - '@aws-sdk/token-providers@3.1095.0'
+  - '@aws-sdk/xml-builder@3.972.37'
+  - postcss@8.5.23
