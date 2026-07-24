@@ -1,6 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
+import { isCustomProfileHost } from "~/lib/app-url";
 import { db } from "~/server/db";
+import { hasProAccess } from "~/server/entitlements";
 import { getTrustedClientAddress } from "~/server/security/client-identity";
 import {
   createLinkAccessToken,
@@ -10,6 +12,10 @@ import {
   PasswordVerificationBusyError,
   verifyLinkPassword,
 } from "~/server/security/link-password";
+import {
+  profileAccessCookieName,
+  verifyProfileAccessToken,
+} from "~/server/security/profile-access";
 import { consumeRateLimit } from "~/server/security/rate-limit";
 import { readRequestText } from "~/server/security/request-body";
 
@@ -23,7 +29,7 @@ function rejected(request: Request, id: string, retryAfter?: number) {
 }
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
@@ -81,9 +87,39 @@ export async function POST(
         ],
       },
     },
+    include: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+          profilePasswordHash: true,
+          profileAccessVersion: true,
+          subscription: true,
+          manualEntitlement: true,
+        },
+      },
+    },
   });
   if (!link?.passwordHash || !link.enabled || link.deletedAt)
     return rejected(request, id);
+  if (
+    link.user.profilePasswordHash &&
+    hasProAccess(link.user.subscription, link.user.manualEntitlement) &&
+    !verifyProfileAccessToken(
+      link.user.id,
+      link.user.profileAccessVersion,
+      request.cookies.get(profileAccessCookieName(link.user.id))?.value,
+    )
+  )
+    return NextResponse.redirect(
+      new URL(
+        isCustomProfileHost(request.headers.get("host"))
+          ? "/"
+          : `/${link.user.username ?? ""}`,
+        request.url,
+      ),
+      303,
+    );
   try {
     if (!(await verifyLinkPassword(password, link.passwordHash)))
       return rejected(request, id);

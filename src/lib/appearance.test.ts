@@ -10,10 +10,12 @@ describe("appearance schema evolution", () => {
   it("fills new Part 5 settings without resetting an older theme", () => {
     const legacy = structuredClone(
       DEFAULT_APPEARANCE,
-    ) as Partial<AppearanceSettings> & {
+    ) as Omit<AppearanceSettings, "audio" | "socialProof" | "effects"> & {
+      audio?: AppearanceSettings["audio"];
+      socialProof?: AppearanceSettings["socialProof"];
       effects: Partial<AppearanceSettings["effects"]>;
     };
-    legacy.background!.solidColor = "#123456";
+    legacy.background.solidColor = "#123456";
     delete legacy.audio;
     delete legacy.socialProof;
     delete legacy.effects.mouseParticles;

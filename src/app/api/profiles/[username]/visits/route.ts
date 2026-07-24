@@ -74,7 +74,7 @@ export async function GET(
     {
       headers: {
         "Cache-Control":
-          socialProof.metric === "live"
+          profile.profilePasswordHash || socialProof.metric === "live"
             ? "private, no-store"
             : "public, max-age=30, stale-while-revalidate=60",
       },

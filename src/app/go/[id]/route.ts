@@ -1,6 +1,7 @@
 import { after, NextResponse, type NextRequest } from "next/server";
 
 import { recordLinkClick } from "~/server/analytics/ingest";
+import { isCustomProfileHost } from "~/lib/app-url";
 import { db } from "~/server/db";
 import { hasProAccess } from "~/server/entitlements";
 import {
@@ -53,14 +54,14 @@ export async function GET(
     return NextResponse.redirect(new URL("/", request.url), 302);
   }
 
+  const profilePath = isCustomProfileHost(request.headers.get("host"))
+    ? "/"
+    : `/${link.user.username ?? ""}`;
   const scheduledOut =
     (link.scheduledStart !== null && link.scheduledStart > now) ||
     (link.scheduledEnd !== null && link.scheduledEnd <= now);
   if (scheduledOut)
-    return NextResponse.redirect(
-      new URL(`/${link.user.username ?? ""}`, request.url),
-      302,
-    );
+    return NextResponse.redirect(new URL(profilePath, request.url), 302);
   if (
     link.user.profilePasswordHash &&
     hasProAccess(link.user.subscription, link.user.manualEntitlement)
@@ -75,10 +76,7 @@ export async function GET(
         token,
       )
     )
-      return NextResponse.redirect(
-        new URL(`/${link.user.username ?? ""}`, request.url),
-        302,
-      );
+      return NextResponse.redirect(new URL(profilePath, request.url), 302);
   }
   if (link.passwordHash) {
     const token = request.cookies.get(linkAccessCookieName(id))?.value;

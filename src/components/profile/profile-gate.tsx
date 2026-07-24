@@ -5,9 +5,11 @@ import { Brand } from "~/components/brand";
 export function ProfileGate({
   username,
   hasError,
+  useRootPath,
 }: {
   username: string;
   hasError: boolean;
+  useRootPath: boolean;
 }) {
   return (
     <main className="noise-grid bg-cream grid min-h-dvh place-items-center p-4">
@@ -38,7 +40,9 @@ export function ProfileGate({
           </p>
         )}
         <form
-          action={`/api/profiles/${encodeURIComponent(username)}/unlock`}
+          action={`/api/profiles/${encodeURIComponent(username)}/unlock${
+            useRootPath ? "?return=root" : ""
+          }`}
           method="post"
           className="mt-6"
         >

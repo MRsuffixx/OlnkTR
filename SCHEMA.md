@@ -9,29 +9,29 @@
 
 ## 1. Enums (21)
 
-| Enum | Values | Used by |
-|---|---|---|
-| `BackgroundType` | `SOLID`, `GRADIENT` (default), `IMAGE`, `VIDEO`, `ANIMATED` | `Theme.backgroundType` |
-| `ButtonStyle` | `SOLID`, `OUTLINE`, `GLASS`, `SHADOW` (default), `THREE_D` | `Theme.buttonStyle` |
-| `ButtonShape` | `ROUNDED` (default), `PILL`, `SQUARE` | `Theme.buttonShape` |
-| `FontFamily` | `MODERN`, `FRIENDLY` (default), `EDITORIAL`, `MONO` | `Theme.fontFamily` |
-| `Plan` | `FREE`, `PRO` | `Subscription.plan` |
-| `SubscriptionStatus` | `INCOMPLETE` (default), `TRIALING`, `ACTIVE`, `PAST_DUE`, `UNPAID`, `CANCELED`, `EXPIRED`, `REFUNDED` | `Subscription.status` |
-| `BillingProvider` | `STRIPE`, `IYZICO`, `PAYTR`, `ADYEN` | `Subscription`, `PaymentIntent`, `BillingInvoice`, `WebhookEvent` |
-| `BillingInterval` | `MONTHLY`, `YEARLY` | `Subscription`, `PaymentIntent` |
-| `PaymentIntentStatus` | `PENDING` (default), `PROCESSING`, `CHECKOUT_CREATED`, `SUCCEEDED`, `FAILED`, `CANCELED`, `REFUNDED`, `DISPUTED` | `PaymentIntent.status` |
-| `InvoiceStatus` | `OPEN`, `PAID`, `VOID`, `FAILED`, `REFUNDED` | `BillingInvoice.status` |
-| `WebhookProcessStatus` | `RECEIVED` (default), `PROCESSED`, `FAILED` | `WebhookEvent.status` |
-| `EmbedType` | `LINK` (default), `YOUTUBE`, `SPOTIFY` | `ProfileLink.embedType` |
-| `DomainStatus` | `PENDING` (default), `VERIFIED`, `FAILED` | `CustomDomain.status` |
-| `AnalyticsEventType` | `CLICK`, `VIEW` | `AnalyticsDailyBucket.eventType`, `ClickEvent`/`ProfileViewEvent` are conceptual |
-| `AssetPurpose` | `AVATAR`, `BACKGROUND`, `AUDIO`, `ENTRY_SOUND` | `UploadedAsset.purpose` |
-| `AssetStatus` | `PENDING` (default), `READY`, `DELETE_PENDING`, `DELETED`, `FAILED` | `UploadedAsset.status` |
-| `AccountDeletionStatus` | `PENDING` (default), `PROCESSING`, `RETRY_PENDING`, `COMPLETED` | `AccountDeletionJob.status` |
-| `UserRole` | `USER` (default), `ADMIN` | `User.role` |
-| `AccountStatus` | `ACTIVE` (default), `SUSPENDED`, `BANNED` | `User.accountStatus` |
-| `AdminAuditCategory` | `AUTHORIZATION`, `USER`, `CONTENT`, `BILLING`, `SECURITY` | `AdminAuditLog.category` |
-| `AdminAuditOutcome` | `SUCCESS` (default), `DENIED`, `FAILURE` | `AdminAuditLog.outcome` |
+| Enum                    | Values                                                                                                           | Used by                                                                          |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `BackgroundType`        | `SOLID`, `GRADIENT` (default), `IMAGE`, `VIDEO`, `ANIMATED`                                                      | `Theme.backgroundType`                                                           |
+| `ButtonStyle`           | `SOLID`, `OUTLINE`, `GLASS`, `SHADOW` (default), `THREE_D`                                                       | `Theme.buttonStyle`                                                              |
+| `ButtonShape`           | `ROUNDED` (default), `PILL`, `SQUARE`                                                                            | `Theme.buttonShape`                                                              |
+| `FontFamily`            | `MODERN`, `FRIENDLY` (default), `EDITORIAL`, `MONO`                                                              | `Theme.fontFamily`                                                               |
+| `Plan`                  | `FREE`, `PRO`                                                                                                    | `Subscription.plan`                                                              |
+| `SubscriptionStatus`    | `INCOMPLETE` (default), `TRIALING`, `ACTIVE`, `PAST_DUE`, `UNPAID`, `CANCELED`, `EXPIRED`, `REFUNDED`            | `Subscription.status`                                                            |
+| `BillingProvider`       | `STRIPE`, `IYZICO`, `PAYTR`, `ADYEN`                                                                             | `Subscription`, `PaymentIntent`, `BillingInvoice`, `WebhookEvent`                |
+| `BillingInterval`       | `MONTHLY`, `YEARLY`                                                                                              | `Subscription`, `PaymentIntent`                                                  |
+| `PaymentIntentStatus`   | `PENDING` (default), `PROCESSING`, `CHECKOUT_CREATED`, `SUCCEEDED`, `FAILED`, `CANCELED`, `REFUNDED`, `DISPUTED` | `PaymentIntent.status`                                                           |
+| `InvoiceStatus`         | `OPEN`, `PAID`, `VOID`, `FAILED`, `REFUNDED`                                                                     | `BillingInvoice.status`                                                          |
+| `WebhookProcessStatus`  | `RECEIVED` (default), `PROCESSED`, `FAILED`                                                                      | `WebhookEvent.status`                                                            |
+| `EmbedType`             | `LINK` (default), `YOUTUBE`, `SPOTIFY`                                                                           | `ProfileLink.embedType`                                                          |
+| `DomainStatus`          | `PENDING` (default), `VERIFIED`, `FAILED`                                                                        | `CustomDomain.status`                                                            |
+| `AnalyticsEventType`    | `CLICK`, `VIEW`                                                                                                  | `AnalyticsDailyBucket.eventType`, `ClickEvent`/`ProfileViewEvent` are conceptual |
+| `AssetPurpose`          | `AVATAR`, `BACKGROUND`, `AUDIO`, `ENTRY_SOUND`                                                                   | `UploadedAsset.purpose`                                                          |
+| `AssetStatus`           | `PENDING` (default), `READY`, `DELETE_PENDING`, `DELETED`, `FAILED`                                              | `UploadedAsset.status`                                                           |
+| `AccountDeletionStatus` | `PENDING` (default), `PROCESSING`, `RETRY_PENDING`, `COMPLETED`                                                  | `AccountDeletionJob.status`                                                      |
+| `UserRole`              | `USER` (default), `ADMIN`                                                                                        | `User.role`                                                                      |
+| `AccountStatus`         | `ACTIVE` (default), `SUSPENDED`, `BANNED`                                                                        | `User.accountStatus`                                                             |
+| `AdminAuditCategory`    | `AUTHORIZATION`, `USER`, `CONTENT`, `BILLING`, `SECURITY`                                                        | `AdminAuditLog.category`                                                         |
+| `AdminAuditOutcome`     | `SUCCESS` (default), `DENIED`, `FAILURE`                                                                         | `AdminAuditLog.outcome`                                                          |
 
 ---
 
@@ -39,30 +39,30 @@
 
 ### 2.1 Index
 
-| # | Model | Soft delete | Notable |
-|---|---|---|---|
-| 1 | `User` | `deletionRequestedAt` | core identity; revision-locked |
-| 2 | `Theme` | — | legacy columns + `settings` JSON + `customCss` |
-| 3 | `ProfileLink` | `deletedAt` | `id` is client-supplied UUID |
-| 4 | `ClickEvent` | — | minute-bucketed dedupe key |
-| 5 | `ProfileViewEvent` | — | same dedupe pattern as clicks |
-| 6 | `AnalyticsDailyBucket` | — | rollup for the dashboard |
-| 7 | `Subscription` | — | one per user; provider-customer continuity |
-| 8 | `PaymentIntent` | — | `activeCheckoutKey` + `renewalKey` uniqueness |
-| 9 | `BillingInvoice` | — | paid/refunded ledger entries |
-| 10 | `WebhookEvent` | — | idempotency + attempt tracking |
-| 11 | `CustomDomain` | — | DNS TXT + reclaim window |
-| 12 | `DomainReclaimChallenge` | TTL 30 min | reclaim flow token |
-| 13 | `UploadedAsset` | `status` lifecycle | S3 object + lifecycle |
-| 14 | `AuthIntent` | TTL 15 min | signup reservation |
-| 15 | `RateLimitBucket` | TTL 2 d | DB sliding window |
-| 16 | `AccountDeletionJob` | — | async pipeline |
-| 17 | `UsernameBlocklist` | `enabled` flag | moderation |
-| 18 | `Account` | — | Auth.js standard |
-| 19 | `Session` | — | DB-backed sessions |
-| 20 | `VerificationToken` | TTL | magic-link tokens |
-| 21 | `ManualEntitlement` | `revokedAt` | time-bounded, auditable Pro grant |
-| 22 | `AdminAuditLog` | — | immutable admin/security event ledger |
+| #   | Model                    | Soft delete           | Notable                                        |
+| --- | ------------------------ | --------------------- | ---------------------------------------------- |
+| 1   | `User`                   | `deletionRequestedAt` | core identity; revision-locked                 |
+| 2   | `Theme`                  | —                     | legacy columns + `settings` JSON + `customCss` |
+| 3   | `ProfileLink`            | `deletedAt`           | `id` is client-supplied UUID                   |
+| 4   | `ClickEvent`             | —                     | minute-bucketed dedupe key                     |
+| 5   | `ProfileViewEvent`       | —                     | same dedupe pattern as clicks                  |
+| 6   | `AnalyticsDailyBucket`   | —                     | rollup for the dashboard                       |
+| 7   | `Subscription`           | —                     | one per user; provider-customer continuity     |
+| 8   | `PaymentIntent`          | —                     | `activeCheckoutKey` + `renewalKey` uniqueness  |
+| 9   | `BillingInvoice`         | —                     | paid/refunded ledger entries                   |
+| 10  | `WebhookEvent`           | —                     | idempotency + attempt tracking                 |
+| 11  | `CustomDomain`           | —                     | DNS TXT + reclaim window                       |
+| 12  | `DomainReclaimChallenge` | TTL 30 min            | reclaim flow token                             |
+| 13  | `UploadedAsset`          | `status` lifecycle    | S3 object + lifecycle                          |
+| 14  | `AuthIntent`             | TTL 15 min            | signup reservation                             |
+| 15  | `RateLimitBucket`        | TTL 2 d               | DB sliding window                              |
+| 16  | `AccountDeletionJob`     | —                     | async pipeline                                 |
+| 17  | `UsernameBlocklist`      | `enabled` flag        | moderation                                     |
+| 18  | `Account`                | —                     | Auth.js standard                               |
+| 19  | `Session`                | —                     | DB-backed sessions                             |
+| 20  | `VerificationToken`      | TTL                   | magic-link tokens                              |
+| 21  | `ManualEntitlement`      | `revokedAt`           | time-bounded, auditable Pro grant              |
+| 22  | `AdminAuditLog`          | —                     | immutable admin/security event ledger          |
 
 ### 2.2 User
 
@@ -543,113 +543,141 @@ The custom adapter in `src/server/auth/config.ts` overrides `createUser`, `getUs
 
 ## 3. Soft-Delete & TTL Summary
 
-| Concern | Mechanism | Cleanup |
-|---|---|---|
-| Soft-deleted links | `ProfileLink.deletedAt` | Editor restore only; no cron cleanup needed |
-| Soft-deleted user | `User.deletionRequestedAt` | `AccountDeletionJob` runs `processAccountDeletionJob` |
-| Asset cleanup | `UploadedAsset.status` cycle | `processAccountDeletionJob` + `/api/maintenance` |
-| Auth intent | `AuthIntent.expiresAt` | `/api/maintenance` removes expired intents |
-| Verification token | TTL | Auth.js default + `/api/maintenance` |
-| Domain reclaim challenge | TTL 30 min | `/api/maintenance` |
-| Domain claim window | `CustomDomain.claimExpiresAt` | revalidation cron |
-| Rate limit buckets | TTL 2 days | `/api/maintenance` |
-| Click / view events | Retention 90 days | `/api/maintenance` |
-| Account deletion job | `nextAttemptAt` exponential backoff (2^attempts min, cap 24h) | `/api/maintenance` |
+| Concern                  | Mechanism                                                     | Cleanup                                               |
+| ------------------------ | ------------------------------------------------------------- | ----------------------------------------------------- |
+| Soft-deleted links       | `ProfileLink.deletedAt`                                       | Editor restore only; no cron cleanup needed           |
+| Soft-deleted user        | `User.deletionRequestedAt`                                    | `AccountDeletionJob` runs `processAccountDeletionJob` |
+| Asset cleanup            | `UploadedAsset.status` cycle                                  | `processAccountDeletionJob` + `/api/maintenance`      |
+| Auth intent              | `AuthIntent.expiresAt`                                        | `/api/maintenance` removes expired intents            |
+| Verification token       | TTL                                                           | Auth.js default + `/api/maintenance`                  |
+| Domain reclaim challenge | TTL 30 min                                                    | `/api/maintenance`                                    |
+| Domain claim window      | `CustomDomain.claimExpiresAt`                                 | revalidation cron                                     |
+| Rate limit buckets       | TTL 2 days                                                    | `/api/maintenance`                                    |
+| Click / view events      | Retention 90 days                                             | `/api/maintenance`                                    |
+| Account deletion job     | `nextAttemptAt` exponential backoff (2^attempts min, cap 24h) | `/api/maintenance`                                    |
 
 ---
 
 ## 4. Cascading Rules
 
-| Parent | Child | onDelete |
-|---|---|---|
-| `User` | `Theme`, `ProfileLink`, `ClickEvent`, `ProfileViewEvent`, `Subscription`, `PaymentIntent`, `BillingInvoice`, `CustomDomain`, `DomainReclaimChallenge`, `UploadedAsset`, `Account`, `Session` | `Cascade` |
-| `ProfileLink` | `ClickEvent` | `Cascade` |
-| — | `AccountDeletionJob.userId` | not a FK — survives deletion |
-| — | `AnalyticsDailyBucket.userId` | no FK — manually deleted by `processAccountDeletionJob` |
+| Parent        | Child                                                                                                                                                                                        | onDelete                                                |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `User`        | `Theme`, `ProfileLink`, `ClickEvent`, `ProfileViewEvent`, `Subscription`, `PaymentIntent`, `BillingInvoice`, `CustomDomain`, `DomainReclaimChallenge`, `UploadedAsset`, `Account`, `Session` | `Cascade`                                               |
+| `ProfileLink` | `ClickEvent`                                                                                                                                                                                 | `Cascade`                                               |
+| —             | `AccountDeletionJob.userId`                                                                                                                                                                  | not a FK — survives deletion                            |
+| —             | `AnalyticsDailyBucket.userId`                                                                                                                                                                | no FK — manually deleted by `processAccountDeletionJob` |
 
 ---
 
 ## 5. Zod Schemas (`src/lib/schemas.ts`)
 
 ```ts
-import { z } from "zod"
+import { z } from "zod";
 
 export const usernameInput = z.object({
   username: z.string().min(1).max(64),
-})
+});
 
 export const linkCustomizationSchema = z.object({
   buttonColor: z.string(),
   textColor: z.string(),
-  fontFamily: z.enum(["inherit", "Manrope", "Fraunces", "Inter",
-                      "Montserrat", "Lora", "Roboto Mono"]),
+  fontFamily: z.enum([
+    "inherit",
+    "Manrope",
+    "Fraunces",
+    "Inter",
+    "Montserrat",
+    "Lora",
+    "Roboto Mono",
+  ]),
   iconStyle: z.enum(["favicon", "mono", "hidden"]),
-})
+});
 
-export const workspaceLinkInput = z.object({
-  id: z.uuid(),
-  title: z.string().min(1).max(80),
-  url: z.string().url().optional(),
-  iconUrl: z.string().url().nullable().optional(),
-  enabled: z.boolean(),
-  customization: linkCustomizationSchema,
-  scheduledStart: z.string().datetime({ offset: true }).or(z.literal("")).nullable(),
-  scheduledEnd:   z.string().datetime({ offset: true }).or(z.literal("")).nullable(),
-  passwordProtected: z.boolean(),
-  embedType: z.enum(["LINK", "YOUTUBE", "SPOTIFY"]),
-}).superRefine((val, ctx) => {
-  if (val.scheduledStart && val.scheduledEnd &&
-      new Date(val.scheduledEnd) <= new Date(val.scheduledStart)) {
-    ctx.addIssue({ code: "custom",
-      message: "scheduledEnd must be after scheduledStart",
-      path: ["scheduledEnd"] })
-  }
-})
-
-export const workspaceInput = z.object({
-  revision: z.number().int().min(0),
-  name:     z.string().min(1).max(60),
-  bio:      z.string().max(160),
-  image:    z.string().url().nullable(),
-  theme:    themeInput,                  // legacy Theme columns
-  appearance: appearanceSchemaJson,      // AppearanceSettings root
-  customCss: z.string().max(12_000),
-  links:    z.array(workspaceLinkInput).max(50),
-}).superRefine((val, ctx) => {
-  const ids = new Set<string>()
-  for (const link of val.links) {
-    if (ids.has(link.id)) {
-      ctx.addIssue({ code: "custom",
-        message: "Link IDs must be unique.",
-        path: ["links"] })
-      break
+export const workspaceLinkInput = z
+  .object({
+    id: z.uuid(),
+    title: z.string().min(1).max(80),
+    url: z.string().url().optional(),
+    iconUrl: z.string().url().nullable().optional(),
+    enabled: z.boolean(),
+    customization: linkCustomizationSchema,
+    scheduledStart: z
+      .string()
+      .datetime({ offset: true })
+      .or(z.literal(""))
+      .nullable(),
+    scheduledEnd: z
+      .string()
+      .datetime({ offset: true })
+      .or(z.literal(""))
+      .nullable(),
+    passwordProtected: z.boolean(),
+    embedType: z.enum(["LINK", "YOUTUBE", "SPOTIFY"]),
+  })
+  .superRefine((val, ctx) => {
+    if (
+      val.scheduledStart &&
+      val.scheduledEnd &&
+      new Date(val.scheduledEnd) <= new Date(val.scheduledStart)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "scheduledEnd must be after scheduledStart",
+        path: ["scheduledEnd"],
+      });
     }
-    ids.add(link.id)
-  }
-  const json = JSON.stringify(val.appearance)
-  if (json.length > 32_000) {
-    ctx.addIssue({ code: "custom",
-      message: "Appearance settings exceed 32 000 chars.",
-      path: ["appearance"] })
-  }
-})
+  });
+
+export const workspaceInput = z
+  .object({
+    revision: z.number().int().min(0),
+    name: z.string().min(1).max(60),
+    bio: z.string().max(160),
+    image: z.string().url().nullable(),
+    theme: themeInput, // legacy Theme columns
+    appearance: appearanceSchemaJson, // AppearanceSettings root
+    customCss: z.string().max(12_000),
+    links: z.array(workspaceLinkInput).max(50),
+  })
+  .superRefine((val, ctx) => {
+    const ids = new Set<string>();
+    for (const link of val.links) {
+      if (ids.has(link.id)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Link IDs must be unique.",
+          path: ["links"],
+        });
+        break;
+      }
+      ids.add(link.id);
+    }
+    const json = JSON.stringify(val.appearance);
+    if (json.length > 32_000) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Appearance settings exceed 32 000 chars.",
+        path: ["appearance"],
+      });
+    }
+  });
 
 export const registerIntentInput = z.object({
-  email:    z.email().transform(normalizeEmail),
+  email: z.email().transform(normalizeEmail),
   username: z.string().min(1).max(64),
-})
+});
 
 export const accountProfileInput = z.object({
   revision: z.number().int().min(0),
-  name:     z.string().min(1).max(60),
-  bio:      z.string().max(160),
-  image:    z.string().url().nullable(),
-})
+  name: z.string().min(1).max(60),
+  bio: z.string().max(160),
+  image: z.string().url().nullable(),
+});
 
 export const setLinkPasswordInput = z.object({
-  linkId:   z.uuid(),
+  linkId: z.uuid(),
   password: z.string().min(6).max(72).nullable(),
-})
+});
 ```
 
 ### `AppearanceSettings` summary (`src/lib/appearance.ts`)
@@ -662,15 +690,15 @@ The schema is also the source of `FEATURE_CATALOG` keys (`src/config/feature-cat
 
 ## 6. Migration History
 
-| Timestamp | Name | Highlights |
-|---|---|---|
-| `20260720130000_init_product` | Initial product schema | User + Theme + ProfileLink + ClickEvent + AuthIntent + UsernameBlocklist + Account + Session + VerificationToken + 4 enums |
-| `20260720180000_billing_customization` | Billing + customization | Adds 8 enums + ProfileViewEvent + Subscription + PaymentIntent + BillingInvoice + WebhookEvent + CustomDomain + UploadedAsset; `Theme.settings`, `customCss`; `ProfileLink.customization`, `scheduledStart/End`, `passwordHash`, `embedType` |
-| `20260720230000_payment_state_hardening` | Payment state | Adds `PROCESSING`; backfills `Subscription.providerStartedAt`/`lastProviderEventAt`; normalises legacy rows (`currentPeriodEnd IS NULL → INCOMPLETE`, `≤ now → EXPIRED`); PaymentIntent gains `checkoutPresentation`, `activeCheckoutKey`, `reconciliationAttempts`, `lastReconciledAt` |
-| `20260720231000_identity_security` | Identity + security | Backfills `Theme.settings` JSONB from legacy columns; adds `User.emailNormalized` (case-insensitive duplicate guard); adds `User.usernameChangedAt`, `deletionRequestedAt`; AuthIntent becomes NOT NULL on `emailNormalized`; drops two duplicate indexes; creates `RateLimitBucket`; adds `ProfileLink.accessVersion`/`deletedAt`; creates `AnalyticsDailyBucket`; adds `referrerHost`/`dedupeKey` to events; creates `UploadedAsset.status` + `AssetPurpose`/`AssetStatus`; backfills asset purpose + size; adds CustomDomain `claimExpiresAt`/`nextRevalidationAt`/`failureCount`; creates `DomainReclaimChallenge`; creates `AccountDeletionJob` |
-| `20260724233000_profile_extras` | Profile audio + gate | Adds `AUDIO`/`ENTRY_SOUND` asset purposes and versioned profile-password fields |
-| `20260724234500_align_uploaded_asset_updated_at` | Migration-history alignment | Drops the legacy DB default from Prisma-managed `UploadedAsset.updatedAt`; no row data changes |
-| `20260724120000_admin_control_room` | Admin control room | Adds role/account-state/activity fields, manual Pro entitlements, immutable admin audit events, invoice refund flags, supporting indexes, and cascade-safe relations |
+| Timestamp                                        | Name                        | Highlights                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------------------ | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `20260720130000_init_product`                    | Initial product schema      | User + Theme + ProfileLink + ClickEvent + AuthIntent + UsernameBlocklist + Account + Session + VerificationToken + 4 enums                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `20260720180000_billing_customization`           | Billing + customization     | Adds 8 enums + ProfileViewEvent + Subscription + PaymentIntent + BillingInvoice + WebhookEvent + CustomDomain + UploadedAsset; `Theme.settings`, `customCss`; `ProfileLink.customization`, `scheduledStart/End`, `passwordHash`, `embedType`                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `20260720230000_payment_state_hardening`         | Payment state               | Adds `PROCESSING`; backfills `Subscription.providerStartedAt`/`lastProviderEventAt`; normalises legacy rows (`currentPeriodEnd IS NULL → INCOMPLETE`, `≤ now → EXPIRED`); PaymentIntent gains `checkoutPresentation`, `activeCheckoutKey`, `reconciliationAttempts`, `lastReconciledAt`                                                                                                                                                                                                                                                                                                                                                              |
+| `20260720231000_identity_security`               | Identity + security         | Backfills `Theme.settings` JSONB from legacy columns; adds `User.emailNormalized` (case-insensitive duplicate guard); adds `User.usernameChangedAt`, `deletionRequestedAt`; AuthIntent becomes NOT NULL on `emailNormalized`; drops two duplicate indexes; creates `RateLimitBucket`; adds `ProfileLink.accessVersion`/`deletedAt`; creates `AnalyticsDailyBucket`; adds `referrerHost`/`dedupeKey` to events; creates `UploadedAsset.status` + `AssetPurpose`/`AssetStatus`; backfills asset purpose + size; adds CustomDomain `claimExpiresAt`/`nextRevalidationAt`/`failureCount`; creates `DomainReclaimChallenge`; creates `AccountDeletionJob` |
+| `20260724233000_profile_extras`                  | Profile audio + gate        | Adds `AUDIO`/`ENTRY_SOUND` asset purposes and versioned profile-password fields                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `20260724234500_align_uploaded_asset_updated_at` | Migration-history alignment | Drops the legacy DB default from Prisma-managed `UploadedAsset.updatedAt`; no row data changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `20260724120000_admin_control_room`              | Admin control room          | Adds role/account-state/activity fields, manual Pro entitlements, immutable admin audit events, invoice refund flags, supporting indexes, and cascade-safe relations                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ---
 
@@ -681,36 +709,45 @@ type CheckoutPresentation =
   | { kind: "redirect"; url: string }
   | { kind: "html"; html: string; externalSessionId: string | null }
   | { kind: "iframe"; url: string; externalSessionId: string | null }
-  | { kind: "adyen"; sessionId: string; sessionData: string }
+  | { kind: "adyen"; sessionId: string; sessionData: string };
 
 type BillingEventType =
-  "payment_succeeded" | "payment_failed" | "renewed"
-  | "subscription_updated" | "canceled" | "past_due"
-  | "refunded" | "disputed" | "payment_method_stored"
+  | "payment_succeeded"
+  | "payment_failed"
+  | "renewed"
+  | "subscription_updated"
+  | "canceled"
+  | "past_due"
+  | "refunded"
+  | "disputed"
+  | "payment_method_stored";
 
 interface NormalizedBillingEvent {
-  type: BillingEventType
-  userId?: string
-  paymentIntentId?: string
-  externalEventId: string
-  provider: BillingProvider
-  occurredAt: Date
-  amountMinor?: number
-  currency?: string
-  externalSubscriptionId?: string
-  failureCode?: string
-  failureMessage?: string
-  metadata?: Record<string, unknown>
+  type: BillingEventType;
+  userId?: string;
+  paymentIntentId?: string;
+  externalEventId: string;
+  provider: BillingProvider;
+  occurredAt: Date;
+  amountMinor?: number;
+  currency?: string;
+  externalSubscriptionId?: string;
+  failureCode?: string;
+  failureMessage?: string;
+  metadata?: Record<string, unknown>;
 }
 
 interface PaymentProviderAdapter {
-  id: BillingProvider
-  label: string
-  renewal: "automatic" | "manual"
-  createCheckoutSession(input: CheckoutInput): Promise<CheckoutPresentation>
-  handleWebhook(rawBody: Buffer, headers: Headers): Promise<NormalizedBillingEvent[]>
-  cancelSubscription(s: Subscription): Promise<void>
-  getSubscriptionStatus(s: Subscription): Promise<ProviderSubscriptionStatus>
+  id: BillingProvider;
+  label: string;
+  renewal: "automatic" | "manual";
+  createCheckoutSession(input: CheckoutInput): Promise<CheckoutPresentation>;
+  handleWebhook(
+    rawBody: Buffer,
+    headers: Headers,
+  ): Promise<NormalizedBillingEvent[]>;
+  cancelSubscription(s: Subscription): Promise<void>;
+  getSubscriptionStatus(s: Subscription): Promise<ProviderSubscriptionStatus>;
 }
 ```
 
@@ -720,13 +757,13 @@ These contracts are the only stable surface between the adapters and the rest of
 
 ## 8. Conventions Cheatsheet
 
-| Convention | Value |
-|---|---|
-| Primary keys | `cuid()` (Auth.js uses `cuid` defaults; we follow suit) |
-| Soft delete | `deletedAt DateTime?` |
-| Audit columns | `createdAt`, `updatedAt` (auto-managed by Prisma) |
-| VarChar limits | emails 254, usernames 30, domains 253, key fields 191 (MySQL InnoDB key ceiling), assets 512 |
-| Index prefixes | Compound indexes start with `userId` for per-user scans |
+| Convention                         | Value                                                                                                                                                                                                     |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Primary keys                       | `cuid()` (Auth.js uses `cuid` defaults; we follow suit)                                                                                                                                                   |
+| Soft delete                        | `deletedAt DateTime?`                                                                                                                                                                                     |
+| Audit columns                      | `createdAt`, `updatedAt` (auto-managed by Prisma)                                                                                                                                                         |
+| VarChar limits                     | emails 254, usernames 30, domains 253, key fields 191 (MySQL InnoDB key ceiling), assets 512                                                                                                              |
+| Index prefixes                     | Compound indexes start with `userId` for per-user scans                                                                                                                                                   |
 | Unique constraint for natural keys | On `emailNormalized`, `usernameNormalized`, `objectKey`, `sessionToken`, `verificationToken`, `(provider, externalEventId)`, `(provider, externalSubscriptionId)`, `(eventType, userId, targetKey, date)` |
-| Binary JSON columns | `Json` (Postgres `jsonb`) — always round-trip via superjson on the wire |
-| Per-user FKs | Use `onDelete: Cascade`; the only intentional exception is `AccountDeletionJob` |
+| Binary JSON columns                | `Json` (Postgres `jsonb`) — always round-trip via superjson on the wire                                                                                                                                   |
+| Per-user FKs                       | Use `onDelete: Cascade`; the only intentional exception is `AccountDeletionJob`                                                                                                                           |

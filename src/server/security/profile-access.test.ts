@@ -19,8 +19,6 @@ describe("profile access tokens", () => {
   });
 
   it("uses a sanitized, product-scoped cookie name", () => {
-    expect(profileAccessCookieName("user.$/123")).toBe(
-      "olnk_profile_user123",
-    );
+    expect(profileAccessCookieName("user.$/123")).toBe("olnk_profile_user123");
   });
 });

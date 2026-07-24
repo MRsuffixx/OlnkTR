@@ -234,10 +234,8 @@ export const workspaceRouter = createTRPCRouter({
           const referencedAssets = [
             input.image,
             appearance.background.mediaUrl,
-            appearance.audio.source === "upload"
-              ? appearance.audio.sourceUrl
-              : null,
-            appearance.audio.entryEnabled ? appearance.audio.entryUrl : null,
+            appearance.audio.sourceUrl,
+            appearance.audio.entryUrl,
           ].filter((value): value is string => Boolean(value));
           await tx.uploadedAsset.updateMany({
             where: {

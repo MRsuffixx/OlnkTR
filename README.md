@@ -2,7 +2,6 @@
 
 ![olnk.tr](./public/og.png)
 
-
 ![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-database-4169E1?logo=postgresql&logoColor=white)
@@ -32,17 +31,17 @@ A mobile-first link-in-bio platform for creators, professionals, and small busin
 
 ## Technology stack
 
-| Layer | Technology |
-| --- | --- |
-| Application | Next.js 16, React 19, TypeScript 6 |
-| API and validation | tRPC 11, TanStack Query, Zod 4, SuperJSON |
-| Authentication | Auth.js / NextAuth 5, Prisma adapter, Google OAuth, Nodemailer |
-| Database | PostgreSQL, Prisma 7 |
-| Styling | Tailwind CSS 4 |
-| Interaction | dnd kit, Lucide React |
-| Payments | Stripe, iyzico, PayTR, Adyen |
-| Storage | S3-compatible object storage |
-| Package manager | pnpm 11 |
+| Layer              | Technology                                                     |
+| ------------------ | -------------------------------------------------------------- |
+| Application        | Next.js 16, React 19, TypeScript 6                             |
+| API and validation | tRPC 11, TanStack Query, Zod 4, SuperJSON                      |
+| Authentication     | Auth.js / NextAuth 5, Prisma adapter, Google OAuth, Nodemailer |
+| Database           | PostgreSQL, Prisma 7                                           |
+| Styling            | Tailwind CSS 4                                                 |
+| Interaction        | dnd kit, Lucide React                                          |
+| Payments           | Stripe, iyzico, PayTR, Adyen                                   |
+| Storage            | S3-compatible object storage                                   |
+| Package manager    | pnpm 11                                                        |
 
 ## Getting started
 
@@ -77,15 +76,15 @@ pnpm exec auth secret
 
 Add the generated value to `AUTH_SECRET` in `.env`.
 
-| Variable group | Purpose | Required |
-| --- | --- | --- |
-| `DATABASE_URL` | PostgreSQL connection URL | Yes |
-| `AUTH_SECRET` | Session and token security | Required in production; recommended locally |
-| `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Google OAuth | Required when Google sign-in is enabled |
-| `EMAIL_SERVER`, `EMAIL_FROM` | Passwordless email sign-in | Required when email sign-in is enabled |
-| `NEXT_PUBLIC_APP_URL` | Canonical application URL (required in production) | Required in production |
-| Payment-provider variables | Pro plan checkout and webhooks | Optional |
-| `STORAGE_*` | S3-compatible avatar and background uploads | Optional |
+| Variable group                         | Purpose                                            | Required                                    |
+| -------------------------------------- | -------------------------------------------------- | ------------------------------------------- |
+| `DATABASE_URL`                         | PostgreSQL connection URL                          | Yes                                         |
+| `AUTH_SECRET`                          | Session and token security                         | Required in production; recommended locally |
+| `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Google OAuth                                       | Required when Google sign-in is enabled     |
+| `EMAIL_SERVER`, `EMAIL_FROM`           | Passwordless email sign-in                         | Required when email sign-in is enabled      |
+| `NEXT_PUBLIC_APP_URL`                  | Canonical application URL (required in production) | Required in production                      |
+| Payment-provider variables             | Pro plan checkout and webhooks                     | Optional                                    |
+| `STORAGE_*`                            | S3-compatible avatar and background uploads        | Optional                                    |
 
 For Google OAuth, register these callback URLs:
 
@@ -113,20 +112,20 @@ Open `http://localhost:3000` in a browser.
 
 ## Available commands
 
-| Command | Description |
-| --- | --- |
-| `pnpm dev` | Start the Turbopack development server |
-| `pnpm build` | Create a production build |
-| `pnpm start` | Run the production server |
-| `pnpm check` | Run ESLint and TypeScript checks |
-| `pnpm lint` | Run ESLint with zero warnings allowed |
-| `pnpm typecheck` | Run TypeScript without emitting files |
-| `pnpm format:check` | Check formatting |
-| `pnpm format:write` | Format supported source files |
-| `pnpm db:generate` | Generate the Prisma client |
-| `pnpm db:migrate:dev` | Create or apply development migrations |
-| `pnpm db:migrate` | Apply committed migrations |
-| `pnpm db:studio` | Open Prisma Studio |
+| Command                                      | Description                                           |
+| -------------------------------------------- | ----------------------------------------------------- |
+| `pnpm dev`                                   | Start the Turbopack development server                |
+| `pnpm build`                                 | Create a production build                             |
+| `pnpm start`                                 | Run the production server                             |
+| `pnpm check`                                 | Run ESLint and TypeScript checks                      |
+| `pnpm lint`                                  | Run ESLint with zero warnings allowed                 |
+| `pnpm typecheck`                             | Run TypeScript without emitting files                 |
+| `pnpm format:check`                          | Check formatting                                      |
+| `pnpm format:write`                          | Format supported source files                         |
+| `pnpm db:generate`                           | Generate the Prisma client                            |
+| `pnpm db:migrate:dev`                        | Create or apply development migrations                |
+| `pnpm db:migrate`                            | Apply committed migrations                            |
+| `pnpm db:studio`                             | Open Prisma Studio                                    |
 | `pnpm admin:role <email> --role ADMIN\|USER` | Promote or demote an existing account from the server |
 
 ### Creating the first administrator

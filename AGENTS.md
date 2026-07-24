@@ -18,27 +18,27 @@
 
 ## 2. Stack at a Glance
 
-| Layer | Choice | Version | Notes |
-|---|---|---|---|
-| Runtime | Node.js | `^20.19 \|\| ^22.13 \|\| >=24` | pinned to `22.13.0` via `.node-version` |
-| Package manager | pnpm | `11.9.0` | `verifyDepsBeforeRun: false` |
-| Framework | Next.js (App Router, Turbopack) | `16.2.11` | `serverExternalPackages: ["iyzipay", "@adyen/api-library"]` |
-| UI | React + React DOM | `19.2.8` | |
-| Language | TypeScript | `6.0.3` | `strict`, `noUncheckedIndexedAccess`, `verbatimModuleSyntax` |
-| Styling | Tailwind CSS | `4.3.3` | PostCSS plugin only; design tokens via `@theme` in `globals.css` |
-| ORM | Prisma (`prisma-client` ESM generator) | `7.9.0` | output to `../generated/prisma` (gitignored) |
-| Driver | `@prisma/adapter-pg` + `pg` | `7.9.0` / `8.22.0` | |
-| API | tRPC + TanStack Query | `11.18.0` / `5.101.4` | superjson, httpBatchStreamLink |
-| Auth | Auth.js (NextAuth v5 beta) | `5.0.0-beta.32` | `database` session strategy, Prisma adapter |
-| Email | Nodemailer | `9.0.3` | pinned via `peerDependencyRules` |
-| Validation | Zod | `4.4.3` | all untrusted input |
-| Env validation | `@t3-oss/env-nextjs` | `0.13.11` | `src/env.js` |
-| Storage | AWS SDK v3 (S3-compatible) | `3.1095.0` | `forcePathStyle: true` for R2/MinIO/Backblaze |
-| Payments | Stripe, iyzipay, PayTR, Adyen | `22.3.2` / `2.0.69` / — / `32.0.0` | adapter registry pattern |
-| Drag & drop | `@dnd-kit/*` | core `6.3.1`, sortable `10.0.0` | workspace editor |
-| Icons | `lucide-react` | `1.26.0` | |
-| QR | `qrcode` | `1.5.4` | `/api/qr/[username]` |
-| Testing | Vitest + Playwright + axe-core | `4.1.10` / `1.61.1` / `4.12.1` | |
+| Layer           | Choice                                 | Version                            | Notes                                                            |
+| --------------- | -------------------------------------- | ---------------------------------- | ---------------------------------------------------------------- |
+| Runtime         | Node.js                                | `^20.19 \|\| ^22.13 \|\| >=24`     | pinned to `22.13.0` via `.node-version`                          |
+| Package manager | pnpm                                   | `11.9.0`                           | `verifyDepsBeforeRun: false`                                     |
+| Framework       | Next.js (App Router, Turbopack)        | `16.2.11`                          | `serverExternalPackages: ["iyzipay", "@adyen/api-library"]`      |
+| UI              | React + React DOM                      | `19.2.8`                           |                                                                  |
+| Language        | TypeScript                             | `6.0.3`                            | `strict`, `noUncheckedIndexedAccess`, `verbatimModuleSyntax`     |
+| Styling         | Tailwind CSS                           | `4.3.3`                            | PostCSS plugin only; design tokens via `@theme` in `globals.css` |
+| ORM             | Prisma (`prisma-client` ESM generator) | `7.9.0`                            | output to `../generated/prisma` (gitignored)                     |
+| Driver          | `@prisma/adapter-pg` + `pg`            | `7.9.0` / `8.22.0`                 |                                                                  |
+| API             | tRPC + TanStack Query                  | `11.18.0` / `5.101.4`              | superjson, httpBatchStreamLink                                   |
+| Auth            | Auth.js (NextAuth v5 beta)             | `5.0.0-beta.32`                    | `database` session strategy, Prisma adapter                      |
+| Email           | Nodemailer                             | `9.0.3`                            | pinned via `peerDependencyRules`                                 |
+| Validation      | Zod                                    | `4.4.3`                            | all untrusted input                                              |
+| Env validation  | `@t3-oss/env-nextjs`                   | `0.13.11`                          | `src/env.js`                                                     |
+| Storage         | AWS SDK v3 (S3-compatible)             | `3.1095.0`                         | `forcePathStyle: true` for R2/MinIO/Backblaze                    |
+| Payments        | Stripe, iyzipay, PayTR, Adyen          | `22.3.2` / `2.0.69` / — / `32.0.0` | adapter registry pattern                                         |
+| Drag & drop     | `@dnd-kit/*`                           | core `6.3.1`, sortable `10.0.0`    | workspace editor                                                 |
+| Icons           | `lucide-react`                         | `1.26.0`                           |                                                                  |
+| QR              | `qrcode`                               | `1.5.4`                            | `/api/qr/[username]`                                             |
+| Testing         | Vitest + Playwright + axe-core         | `4.1.10` / `1.61.1` / `4.12.1`     |                                                                  |
 
 ---
 
@@ -96,17 +96,17 @@
 
 ### 4.2 Naming Conventions
 
-| Entity | Convention | Example |
-|---|---|---|
-| Files (components, modules) | kebab-case | `workspace-editor.tsx`, `custom-css.ts` |
-| React components | PascalCase exports | `export function WorkspaceEditor()` |
-| Hooks | camelCase starting with `use` | `useDebouncedCallback` |
-| tRPC procedures | camelCase | `workspace.get`, `billing.createCheckout` |
-| DB models | PascalCase (Prisma) | `User`, `ProfileLink` |
-| Enum values | SCREAMING_SNAKE | `BillingProvider.STRIPE`, `Plan.PRO` |
-| Env variables | SCREAMING_SNAKE | `AUTH_SECRET`, `DATABASE_URL` |
-| CSS variables | kebab-case inside `--...` | `--ink`, `--font-geist` |
-| Cookies | `olnk-*` prefix | `olnk-signup-intent`, `olnk_link_<id>` |
+| Entity                      | Convention                    | Example                                   |
+| --------------------------- | ----------------------------- | ----------------------------------------- |
+| Files (components, modules) | kebab-case                    | `workspace-editor.tsx`, `custom-css.ts`   |
+| React components            | PascalCase exports            | `export function WorkspaceEditor()`       |
+| Hooks                       | camelCase starting with `use` | `useDebouncedCallback`                    |
+| tRPC procedures             | camelCase                     | `workspace.get`, `billing.createCheckout` |
+| DB models                   | PascalCase (Prisma)           | `User`, `ProfileLink`                     |
+| Enum values                 | SCREAMING_SNAKE               | `BillingProvider.STRIPE`, `Plan.PRO`      |
+| Env variables               | SCREAMING_SNAKE               | `AUTH_SECRET`, `DATABASE_URL`             |
+| CSS variables               | kebab-case inside `--...`     | `--ink`, `--font-geist`                   |
+| Cookies                     | `olnk-*` prefix               | `olnk-signup-intent`, `olnk_link_<id>`    |
 
 ### 4.3 Formatting (Prettier)
 
@@ -225,6 +225,7 @@
 All commands run from the repository root. Node version is enforced by `.node-version`.
 
 ### Setup
+
 ```bash
 corepack enable
 pnpm install                 # Honour pnpm-lock.yaml
@@ -237,6 +238,7 @@ pnpm admin:role <email> --role ADMIN|USER  # Trusted-shell role management
 ```
 
 ### Development
+
 ```bash
 pnpm dev                     # next dev (Turbopack), port 3000
 pnpm build                   # Production build
@@ -245,6 +247,7 @@ pnpm preview                 # build + start in one shot
 ```
 
 ### Lint, Type, Format
+
 ```bash
 pnpm check                   # eslint src --max-warnings=0 && tsc --noEmit
 pnpm lint                    # eslint only
@@ -255,6 +258,7 @@ pnpm format:write            # prettier --write
 ```
 
 ### Tests
+
 ```bash
 pnpm test                    # Vitest unit tests
 pnpm test:unit               # alias for above
@@ -263,6 +267,7 @@ RUN_DATABASE_E2E=1 pnpm test:e2e   # also run DB-backed e2e
 ```
 
 ### Health / Audit
+
 ```bash
 pnpm audit --prod --audit-level high   # CI gate
 ```
@@ -339,55 +344,55 @@ pnpm audit --prod --audit-level high   # CI gate
 
 ## 8. Routing Quick Reference
 
-| Route | Auth | Render | Notes |
-|---|---|---|---|
-| `/` | public | RSC, static | Marketing home |
-| `/[username]` | public | RSC, dynamic | The link-in-bio page; `notFound()` if no user |
-| `/go/[id]` | public | route.ts | 302 redirect + `recordLinkClick` (after) |
-| `/unlock/[id]` | public | RSC | Password form; action posts to `/api/links/[id]/unlock` |
-| `/login`, `/register` | public | RSC, dynamic | `(auth)` group layout |
-| `/onboarding` | required | RSC | `requireDashboardSession` + username check |
-| `/dashboard` | required | RSC | `<WorkspaceEditor>` |
-| `/dashboard/analytics` | required | RSC | 30-day hard-coded; router supports 7/30/90 |
-| `/dashboard/billing` | required | RSC | `<BillingSettings>` + `?checkout=&intent=` |
-| `/dashboard/settings` | required | RSC | `<SettingsForm/>` + `<DomainSettings/>` |
-| `/admin` | ADMIN | RSC | Platform overview; `requireAdminSession()` before data |
-| `/admin/users`, `/admin/users/[id]` | ADMIN | RSC | User search, safe detail, audited operations |
-| `/admin/billing`, `/admin/billing/[id]` | ADMIN | RSC | Unified subscription operations |
-| `/admin/analytics` | ADMIN | RSC | Platform metrics and charts |
-| `/admin/system` | ADMIN | RSC | Read-only provider/config visibility |
-| `/admin/audit` | ADMIN | RSC | Immutable audit browser |
-| `/api/auth/[...nextauth]` | n/a | route.ts | Auth.js handlers |
-| `/api/trpc/[trpc]` | n/a | route.ts | tRPC fetch adapter |
-| `/api/webhooks/[provider]` | n/a | route.ts | Universal billing webhook |
-| `/api/billing/iyzico/callback` | n/a | route.ts | iyzico hosted-form return → 303 |
-| `/api/billing/renew` | bearer | route.ts | Adyen recurring cron |
-| `/api/links/[id]/unlock` | n/a | route.ts | Password verification |
-| `/api/profiles/[username]/unlock` | n/a | route.ts | Whole-profile password verification |
-| `/api/profiles/[username]/visits` | n/a | route.ts | Gated aggregate public counter |
-| `/api/maintenance` | bearer | route.ts | Cleanup cron |
-| `/api/qr/[username]` | n/a | route.ts | PNG QR, 1h cache + 24h SWR |
-| `/api/register/intent` | n/a | route.ts | Rate-limited intent reservation |
+| Route                                   | Auth     | Render       | Notes                                                   |
+| --------------------------------------- | -------- | ------------ | ------------------------------------------------------- |
+| `/`                                     | public   | RSC, static  | Marketing home                                          |
+| `/[username]`                           | public   | RSC, dynamic | The link-in-bio page; `notFound()` if no user           |
+| `/go/[id]`                              | public   | route.ts     | 302 redirect + `recordLinkClick` (after)                |
+| `/unlock/[id]`                          | public   | RSC          | Password form; action posts to `/api/links/[id]/unlock` |
+| `/login`, `/register`                   | public   | RSC, dynamic | `(auth)` group layout                                   |
+| `/onboarding`                           | required | RSC          | `requireDashboardSession` + username check              |
+| `/dashboard`                            | required | RSC          | `<WorkspaceEditor>`                                     |
+| `/dashboard/analytics`                  | required | RSC          | 30-day hard-coded; router supports 7/30/90              |
+| `/dashboard/billing`                    | required | RSC          | `<BillingSettings>` + `?checkout=&intent=`              |
+| `/dashboard/settings`                   | required | RSC          | `<SettingsForm/>` + `<DomainSettings/>`                 |
+| `/admin`                                | ADMIN    | RSC          | Platform overview; `requireAdminSession()` before data  |
+| `/admin/users`, `/admin/users/[id]`     | ADMIN    | RSC          | User search, safe detail, audited operations            |
+| `/admin/billing`, `/admin/billing/[id]` | ADMIN    | RSC          | Unified subscription operations                         |
+| `/admin/analytics`                      | ADMIN    | RSC          | Platform metrics and charts                             |
+| `/admin/system`                         | ADMIN    | RSC          | Read-only provider/config visibility                    |
+| `/admin/audit`                          | ADMIN    | RSC          | Immutable audit browser                                 |
+| `/api/auth/[...nextauth]`               | n/a      | route.ts     | Auth.js handlers                                        |
+| `/api/trpc/[trpc]`                      | n/a      | route.ts     | tRPC fetch adapter                                      |
+| `/api/webhooks/[provider]`              | n/a      | route.ts     | Universal billing webhook                               |
+| `/api/billing/iyzico/callback`          | n/a      | route.ts     | iyzico hosted-form return → 303                         |
+| `/api/billing/renew`                    | bearer   | route.ts     | Adyen recurring cron                                    |
+| `/api/links/[id]/unlock`                | n/a      | route.ts     | Password verification                                   |
+| `/api/profiles/[username]/unlock`       | n/a      | route.ts     | Whole-profile password verification                     |
+| `/api/profiles/[username]/visits`       | n/a      | route.ts     | Gated aggregate public counter                          |
+| `/api/maintenance`                      | bearer   | route.ts     | Cleanup cron                                            |
+| `/api/qr/[username]`                    | n/a      | route.ts     | PNG QR, 1h cache + 24h SWR                              |
+| `/api/register/intent`                  | n/a      | route.ts     | Rate-limited intent reservation                         |
 
 ---
 
 ## 9. Where to Find Things
 
-| Need | File |
-|---|---|
-| Add a tRPC procedure | `src/server/api/routers/<name>.ts` (register in `src/server/api/root.ts`) |
-| Add a Zod schema | `src/lib/schemas.ts` |
-| Add an appearance field | `src/lib/appearance.ts` + `src/config/feature-catalog.ts` |
-| Add an env var | `.env.example` + `src/env.js` + `ENVIRONMENT.md` |
-| Add a payment provider | `src/server/payments/types.ts` + `adapters/<name>.ts` + `registry.ts` |
-| Add a feature flag / Pro gate | `src/server/entitlements.ts` + `src/config/feature-catalog.ts` |
-| Add an admin operation | `src/lib/schemas.ts` + `src/server/api/routers/admin/*` + `src/server/admin/audit.ts` |
-| Add a cron job | `src/app/api/maintenance/route.ts` |
-| Modify the public profile | `src/app/[username]/page.tsx` (RSC) + `src/components/profile/*` |
-| Modify the editor | `src/components/dashboard/workspace-editor.tsx` |
-| Modify billing UI | `src/components/dashboard/billing-settings.tsx` |
-| Update CSP headers | `next.config.js` |
-| Update middleware | `src/proxy.ts` |
+| Need                          | File                                                                                  |
+| ----------------------------- | ------------------------------------------------------------------------------------- |
+| Add a tRPC procedure          | `src/server/api/routers/<name>.ts` (register in `src/server/api/root.ts`)             |
+| Add a Zod schema              | `src/lib/schemas.ts`                                                                  |
+| Add an appearance field       | `src/lib/appearance.ts` + `src/config/feature-catalog.ts`                             |
+| Add an env var                | `.env.example` + `src/env.js` + `ENVIRONMENT.md`                                      |
+| Add a payment provider        | `src/server/payments/types.ts` + `adapters/<name>.ts` + `registry.ts`                 |
+| Add a feature flag / Pro gate | `src/server/entitlements.ts` + `src/config/feature-catalog.ts`                        |
+| Add an admin operation        | `src/lib/schemas.ts` + `src/server/api/routers/admin/*` + `src/server/admin/audit.ts` |
+| Add a cron job                | `src/app/api/maintenance/route.ts`                                                    |
+| Modify the public profile     | `src/app/[username]/page.tsx` (RSC) + `src/components/profile/*`                      |
+| Modify the editor             | `src/components/dashboard/workspace-editor.tsx`                                       |
+| Modify billing UI             | `src/components/dashboard/billing-settings.tsx`                                       |
+| Update CSP headers            | `next.config.js`                                                                      |
+| Update middleware             | `src/proxy.ts`                                                                        |
 
 ---
 
@@ -410,24 +415,30 @@ pnpm audit --prod --audit-level high   # CI gate
 ## 11. Emergency Runbooks
 
 ### "Prisma errors after pulling main"
+
 1. `pnpm install` (lockfile may have changed).
 2. `pnpm db:generate` (Prisma client regenerated).
 3. `pnpm db:migrate:dev` (apply any new migrations to your local DB).
 
 ### "Auth login fails — `SessionTokenError` / `PrismaClientKnownRequestError`"
+
 1. Check `DATABASE_URL` in `.env` is reachable.
 2. Confirm migrations applied (`pnpm db:studio` → Session table exists).
 3. Check `AUTH_SECRET` is set (≥ 32 chars in production).
 
 ### "Public profile doesn't reflect editor changes"
+
 - There is **no explicit cache invalidation** after edits (see `ARCHITECTURE.md` §5.4 and `.memory-bank/known_issues.md`). Wait for the default revalidation window or restart `next start`.
 
 ### "Hydration mismatch warnings in dev"
+
 - Almost always the **Dark Reader** browser extension. Disable for `localhost` or use a private window.
 
 ### "CSP blocks a payment iframe"
+
 - Check `next.config.js` `frame-src` and `form-action` directives. Update both the directive and this guide.
 
 ### "Payment webhook returns 401"
+
 - Verify the signature header name and secret per provider (see `src/server/payments/adapters/*`).
 - Ensure the body is read as raw `Buffer` (not parsed JSON) before signature validation.

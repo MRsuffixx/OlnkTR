@@ -13,6 +13,7 @@
 **Decision:** Use the `prisma-client` generator (output to `../generated/prisma`); `import` the client from `generated/prisma/client` (see `src/server/db.ts:4`). Do **not** import from `@prisma/client` (see `AGENTS.md` §5).
 
 **Consequences:**
+
 - Editor/agent pipelines must run `pnpm db:generate` whenever `prisma/schema.prisma` changes.
 - The `generated/` directory is gitignored in production but checked in here for offline static analysis (see `errorsV2.md`).
 - The CI matrix must include `pnpm db:generate` before any check that touches the client (`src/server/db.ts`, all routers, all server modules).
@@ -28,6 +29,7 @@
 **Decision:** Use `strategy: "database"` (see `src/server/auth/config.ts:153`) and store sessions in `Session`. JWT mode is explicitly rejected because it complicates revocation and the `event.signIn` callback already needs DB access.
 
 **Consequences:**
+
 - Every authenticated request hits Postgres once for `getSessionAndUser()`.
 - The Prisma adapter must be configured to look up `Session` by `sessionToken` uniquely, which it does.
 - The dashboard layout relies on `requireDashboardSession()` and `auth()` (cached via `react.cache`); the cost of an extra DB read per request is acceptable for our scale.
@@ -43,6 +45,7 @@
 **Decision:** `sanitizeCustomCss` (`src/server/security/custom-css.ts`) runs every selector through PostCSS and prepends `[data-olnk-profile]` to the rightmost compound. It rejects `@import`, `url(...)`, global selectors (`*`, `html`, `body`), and CSS-escape back-slashes (`\\`).
 
 **Consequences:**
+
 - The CSS is always embedded via `<style>` server-side — never `dangerouslySetInnerHTML` with user input.
 - The CSP `style-src 'self' 'unsafe-inline'` accepts our scoped inline output.
 - Tests in `src/server/security/custom-css.test.ts` lock the behaviour (reject obfuscation, reject `url()`, scope survivors).
@@ -58,6 +61,7 @@
 **Decision:** Every successful `workspace.save` and `account.updateProfile` increments `User.editorRevision`; the client sends the previous value and the server rejects with `CONFLICT` on mismatch. The dashboard surfaces a "taslağı korumak için sayfayı yenile" prompt (see `src/components/dashboard/workspace-editor.tsx`).
 
 **Consequences:**
+
 - Multi-tab editing is safe; the winning tab stays, the losing tab gets clear copy.
 - Refresh is the resolution path; no merge UI is required.
 - 3 routers share the pattern (`workspace.save`, `account.updateProfile`).
@@ -73,6 +77,7 @@
 **Decision:** All appearance lives under `Theme.settings` (Json) and is validated by `appearanceSchema` in `src/lib/appearance.ts`. `resolveAppearanceForPlan(stored, hasPro)` falls back to safe defaults for Pro paths when the user is free. The `FEATURE_CATALOG` in `src/config/feature-catalog.ts` is the single source of truth for path → tier mapping.
 
 **Consequences:**
+
 - Migrating legacy columns to JSON was a one-time, multi-step backfill (migration `20260720231000_identity_security`).
 - The editor preview, the public page, and the unlock screen all reuse the same `parseAppearance()`.
 - Adding a new appearance field is one PR touching `appearance.ts`, `feature-catalog.ts`, and the editor tab.
@@ -88,6 +93,7 @@
 **Decision:** `workspace.save` flips missing links to `enabled: false, deletedAt: new Date()`. The composite index `(userId, deletedAt, position)` keeps the public-page query (`enabled = true AND deletedAt IS NULL`) cheap.
 
 **Consequences:**
+
 - The dashboard can restore a recent delete with another publish round.
 - Click rows (`ClickEvent`) cascade-delete with the `ProfileLink`, so analytics correctly attribute pre-delete clicks then stop.
 
@@ -102,6 +108,7 @@
 **Decision:** `src/server/payments/types.ts` defines a single interface; `src/server/payments/registry.ts` exposes `Map<BillingProvider, PaymentProviderAdapter>`. The universal webhook route `/api/webhooks/[provider]` dispatches by slug and reads the body as a raw `Buffer` to preserve HMAC signature validity.
 
 **Consequences:**
+
 - Adding a provider = implementing the interface + registering in the map. No router changes.
 - Reconciliation (`processBillingEvent`) is provider-agnostic.
 - Tests use exported helpers (`mapStripeSubscriptionStatus`, `normalizeAdyenNotification`, `createIyzicoWebhookSignature`, `createPaytrCallbackHash`).
@@ -117,6 +124,7 @@
 **Decision:** `cancelSubscription` on the PayTR adapter is intentionally a no-op (`src/server/payments/adapters/paytr.ts:186`); `getSubscriptionStatus` marks the subscription `EXPIRED` once `currentPeriodEnd <= now`. RenewalKey idempotency is reserved for future use.
 
 **Consequences:**
+
 - Users see a clear "Term ends on …" card; they are prompted to re-purchase before the term closes.
 - Reconciliation ensures `cancelAtPeriodEnd: true` so the dashboard never shows "active" when PayTR says otherwise.
 
@@ -131,6 +139,7 @@
 **Decision:** Wrap both helpers with `react.cache` so they are request-scoped memoised (`src/server/auth/index.ts:8` and inline on the public page). The server-side tRPC caller is similarly `cache`-wrapped in `src/trpc/server.ts`.
 
 **Consequences:**
+
 - Within one render the auth lookup is at most one DB hit.
 - Webhook routes (which are non-rendering) do not benefit; that's fine.
 - Tests reset mocks to avoid leakage between cases.
@@ -146,6 +155,7 @@
 **Decision:** A global `headers()` hook in `next.config.js` emits the full CSP + `Referrer-Policy` + `X-Content-Type-Options: nosniff`. Per-route headers would drift; `frame-ancestors 'none'` would have to be repeated.
 
 **Consequences:**
+
 - Adding a new iframe integration = updating `frame-src` and `form-action` and the `AGENTS.md` lookup.
 - `script-src` is `unsafe-inline`/`unsafe-eval` in dev only; production keeps `unsafe-inline` for Next's hydration scripts (see `errorsV2.md` for the trade-off discussion).
 
@@ -160,6 +170,7 @@
 **Decision:** `RateLimitBucket` (sha256 hex PK, `count`, `windowStart`, `blockedUntil`). `consumeRateLimit(key, limit, windowMs)` performs a conditional upsert under a Postgres advisory lock and rejects when the count exceeds the limit. TTL cleanup is owned by `/api/maintenance`.
 
 **Consequences:**
+
 - No new infra. Postgres scales fine for our load.
 - Cleanup is required or the table grows. The cron is `Authorization: Bearer <CRON_SECRET>`-guarded.
 - Tests inject their own DB; the table is also reachable to a future Redis swap without an interface change.
@@ -175,6 +186,7 @@
 **Decision:** The middleware resolves the request to a `CustomDomain` row (or one of the canonical hosts), then either passes through, returns the controlled 404/410 HTML, or rewrites `/` → `/{username}` for custom-domain hosts.
 
 **Consequences:**
+
 - The middleware runs on the edge runtime; no DB driver other than Prisma's standard `prisma-client` is used (we instantiate a dedicated client in this file — see source).
 - The controlled 404/410 pages are statically cacheable (`Cache-Control: public, max-age=60`).
 
@@ -189,6 +201,7 @@
 **Decision:** Add `revalidateTag('profile:<username>')` inside `workspace.save` and after image / name / bio changes in `account.updateProfile`. Read-side: wrap `cache(getProfile)` with `unstable_cache(getProfile, ['profile'], { tags: [`profile:<username>`] })`.
 
 **Consequences:**
+
 - Edits propagate to the live page within one revalidate window (currently default).
 - The middleware stays the same.
 - See `.memory-bank/known_issues.md` and `progress.md` §2.
@@ -204,6 +217,7 @@
 **Decision:** `CheckoutInput.billingDetails` is optional in the type but the iyzico and PayTR adapters refuse without it (see `src/server/api/routers/billing.ts:121-125`). The dashboard surfaces the address fields only when an iyzico/PayTR provider is selected.
 
 **Consequences:**
+
 - The billing form has a small QR of conditional fields.
 - Stripe and Adyen purchases continue to skip the form.
 - The interface stays the same; provider-specific quirks are isolated to the adapters.
@@ -219,6 +233,7 @@
 **Decision:** Bot filter via regex on the User-Agent header (`/bot|crawler|spider|headless|preview|facebookexternalhit|whatsapp|telegrambot|discordbot|slurp/i`). Filtered UAs do not record and do not consume a dedupe slot.
 
 **Consequences:**
+
 - Slack/Discord/WhatsApp link previews never inflate the dashboard.
 - The pattern is intentionally permissive; if a new bot slips through, add to the regex.
 - Tests rely on the assumption that `facebookexternalhit` etc. is filtered.
@@ -234,6 +249,7 @@
 **Decision:** All UI strings are Turkish literals; `tr-TR` is hard-coded into formatting (`Intl.NumberFormat("tr-TR")` etc.). Adding i18n is a deliberate future decision and should require an RFC.
 
 **Consequences:**
+
 - Translation cost is zero today.
 - Adding English copy needs explicit approval (see `AGENTS.md` §5.4).
 - Date / number formatting uses the Turkish locale consistently.
@@ -249,6 +265,7 @@
 **Decision:** Production `.gitignore` excludes `generated/`; the working tree includes it temporarily for offline static analysis. CI runs `pnpm db:generate` before any other step.
 
 **Consequences:**
+
 - New contributors must run `pnpm install && pnpm db:generate` before `pnpm dev`.
 - Editing anything inside `generated/` is a build-input violation (see `AGENTS.md` §5).
 
@@ -268,6 +285,7 @@ Troubleshooting offers an explicit public-profile preview; the app does not mint
 another user.
 
 **Consequences:**
+
 - A demotion takes effect on the next server request even if the session remains signed in.
 - Provider revenue and support grants remain distinguishable.
 - Admins cannot invisibly change another user's credentials or payment method.
@@ -288,6 +306,7 @@ the complete strict peer graph. Do not force or silence peer mismatches. Re-eval
 official plugins widen their ranges.
 
 **Consequences:**
+
 - `pnpm peers check` stays clean.
 - `pnpm outdated` intentionally reports only ESLint 10 and TypeScript 7.
 - Framework, runtime, Auth.js, storage, formatting, and lint integration packages remain at
@@ -304,6 +323,7 @@ official plugins widen their ranges.
 **Decision:** Keep presentation settings under `Theme.settings`, add Zod defaults for schema evolution, and tier every new leaf in `FEATURE_CATALOG`. Only query-sensitive security state (`User.profilePasswordHash` and `profileAccessVersion`) becomes relational columns. Provider scripts and canvas code are lazy-loaded after the resolved appearance enables them.
 
 **Consequences:**
+
 - Existing theme JSON parses without being reset.
 - Free downgrades retain stored Pro choices but public rendering uses explicit fallbacks.
 - Whole-profile protection can be enforced before any protected content is rendered and again at `/go/[id]`.

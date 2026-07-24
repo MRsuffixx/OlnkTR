@@ -153,8 +153,7 @@ export function ProfileAudioPlayer({ settings }: { settings: AudioSettings }) {
       validSoundCloudUrl(settings.sourceUrl));
   const hasBackground =
     settings.enabled && settings.source !== "none" && sourceValid;
-  const hasEntry =
-    settings.entryEnabled && validHttpsUrl(settings.entryUrl);
+  const hasEntry = settings.entryEnabled && validHttpsUrl(settings.entryUrl);
 
   useEffect(() => {
     if (!hasBackground) return;
@@ -242,11 +241,7 @@ export function ProfileAudioPlayer({ settings }: { settings: AudioSettings }) {
     sourceValid,
   ]);
 
-  if (
-    dismissed ||
-    (!hasBackground && !hasEntry)
-  )
-    return null;
+  if (dismissed || (!hasBackground && !hasEntry)) return null;
 
   const stopEverything = () => {
     entryAudio.current?.pause();

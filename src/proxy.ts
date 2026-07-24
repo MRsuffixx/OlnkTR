@@ -64,6 +64,19 @@ export async function proxy(request: NextRequest) {
     !entitled
   )
     return controlledResponse(410);
+  const publicRuntimePrefixes = [
+    "/go/",
+    "/unlock/",
+    "/api/links/",
+    "/api/profiles/",
+    "/api/qr/",
+  ];
+  if (
+    publicRuntimePrefixes.some((prefix) =>
+      request.nextUrl.pathname.startsWith(prefix),
+    )
+  )
+    return NextResponse.next();
   if (request.nextUrl.pathname !== "/") return controlledResponse(404);
 
   const url = request.nextUrl.clone();

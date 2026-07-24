@@ -1,9 +1,16 @@
 import { LockKeyhole } from "lucide-react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { cookies, headers } from "next/headers";
+import { notFound, redirect } from "next/navigation";
 
 import { Brand } from "~/components/brand";
+import { isCustomProfileHost } from "~/lib/app-url";
 import { db } from "~/server/db";
+import { hasProAccess } from "~/server/entitlements";
+import {
+  profileAccessCookieName,
+  verifyProfileAccessToken,
+} from "~/server/security/profile-access";
 
 export const metadata = {
   title: "Korumalı bağlantı",
@@ -34,9 +41,38 @@ export default async function UnlockPage({
         ],
       },
     },
-    include: { user: { select: { username: true } } },
+    include: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+          profilePasswordHash: true,
+          profileAccessVersion: true,
+          subscription: true,
+          manualEntitlement: true,
+        },
+      },
+    },
   });
   if (!link?.passwordHash || !link.enabled || link.deletedAt) notFound();
+  const requestHeaders = await headers();
+  const profileHref = isCustomProfileHost(requestHeaders.get("host"))
+    ? "/"
+    : `/${link.user.username ?? ""}`;
+  if (
+    link.user.profilePasswordHash &&
+    hasProAccess(link.user.subscription, link.user.manualEntitlement)
+  ) {
+    const cookieStore = await cookies();
+    if (
+      !verifyProfileAccessToken(
+        link.user.id,
+        link.user.profileAccessVersion,
+        cookieStore.get(profileAccessCookieName(link.user.id))?.value,
+      )
+    )
+      redirect(profileHref);
+  }
   return (
     <main className="noise-grid bg-cream grid min-h-dvh place-items-center p-4">
       <div className="border-ink/10 bg-paper w-full max-w-md rounded-[2rem] border p-7 shadow-[8px_8px_0_#F8C95C]">
@@ -75,7 +111,7 @@ export default async function UnlockPage({
           </button>
         </form>
         <Link
-          href={`/${link.user.username ?? ""}`}
+          href={profileHref}
           className="text-ink/50 mt-5 block text-center text-sm font-bold"
         >
           Profile dön

@@ -16,7 +16,7 @@ import { ShareButton } from "~/components/profile/share-button";
 import { VisitorCounter } from "~/components/profile/visitor-counter";
 import { appearanceBackground } from "~/lib/appearance";
 import { linkCustomizationSchema } from "~/lib/schemas";
-import { getAppOrigin } from "~/lib/app-url";
+import { getAppOrigin, isCustomProfileHost } from "~/lib/app-url";
 import { normalizeUsername } from "~/lib/username";
 import {
   profileAvatarRadius,
@@ -110,6 +110,7 @@ export default async function PublicProfilePage({
         <ProfileGate
           username={profile.username}
           hasError={query.gateError === "1"}
+          useRootPath={isCustomProfileHost(requestHeaders.get("host"))}
         />
       );
   }
@@ -146,16 +147,17 @@ export default async function PublicProfilePage({
   const background = appearanceBackground(appearance);
   const density = profileDensity(appearance.layout.density);
   const visitorCount = appearance.socialProof.enabled
-    ? await getPublicVisitCount(profile.id, appearance.socialProof.metric)
+    ? await getPublicVisitCount(
+        profile.id,
+        appearance.socialProof.metric,
+      ).catch(() => null)
     : null;
 
   return (
     <main
       data-olnk-profile
       className={`relative min-h-dvh overflow-hidden px-4 py-7 ${
-        appearance.audio.enabled || appearance.audio.entryEnabled
-          ? "pb-44"
-          : ""
+        appearance.audio.enabled || appearance.audio.entryEnabled ? "pb-44" : ""
       }`}
       style={{
         ...background,

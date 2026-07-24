@@ -45,6 +45,7 @@
 ```
 
 Auxiliaries that connect from inside the server:
+
 - AWS S3-compatible object storage (avatars, backgrounds, profile audio, entry sounds).
 - Stripe, iyzico, PayTR, Adyen via the adapter registry + universal webhook route.
 - Email via Nodemailer/SMTP for magic links.
@@ -149,15 +150,15 @@ PayTR responds `text/plain OK`; others respond `{ received: true }`.
 
 ### 3.1 tRPC surface (`src/server/api/`)
 
-| Router | Procedures | Notes |
-|---|---|---|
-| `account` | `updateProfile`, `updateUsername`, `delete` | Optimistic locking; deletion triggers async pipeline. |
-| `analytics` | `overview({ days })` | Free: total clicks, daily series, per-link clicks. Pro: views, unique visitors, countries, devices, sources. |
-| `billing` | `overview`, `intentStatus`, `createCheckout`, `cancel`, `sync` | `createCheckout` runs in a Serializable tx with `activeCheckoutKey` dedupe. |
-| `customization` | `domainOverview`, `addDomain`, `verifyDomain`, `beginDomainReclaim`, `completeDomainReclaim`, `removeDomain`, `uploadStatus`, `createUpload`, `finalizeUpload` | Pro-gated where appropriate; rate-limited per IP. |
-| `username` | `check` (public), `checkForAccount`, `claim` | `claim` uses `claimUsername()` (advisory lock). |
-| `workspace` | `get`, `save`, `setLinkPassword` | `save` performs revision-checked upsert + sanitized CSS. |
-| `admin` | `users.*`, `billing.*`, `insights.overview`, `system.overview`, `audit.list` | Nested routers; every leaf is wrapped by `adminProcedure`. |
+| Router          | Procedures                                                                                                                                                     | Notes                                                                                                        |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `account`       | `updateProfile`, `updateUsername`, `delete`                                                                                                                    | Optimistic locking; deletion triggers async pipeline.                                                        |
+| `analytics`     | `overview({ days })`                                                                                                                                           | Free: total clicks, daily series, per-link clicks. Pro: views, unique visitors, countries, devices, sources. |
+| `billing`       | `overview`, `intentStatus`, `createCheckout`, `cancel`, `sync`                                                                                                 | `createCheckout` runs in a Serializable tx with `activeCheckoutKey` dedupe.                                  |
+| `customization` | `domainOverview`, `addDomain`, `verifyDomain`, `beginDomainReclaim`, `completeDomainReclaim`, `removeDomain`, `uploadStatus`, `createUpload`, `finalizeUpload` | Pro-gated where appropriate; rate-limited per IP.                                                            |
+| `username`      | `check` (public), `checkForAccount`, `claim`                                                                                                                   | `claim` uses `claimUsername()` (advisory lock).                                                              |
+| `workspace`     | `get`, `save`, `setLinkPassword`                                                                                                                               | `save` performs revision-checked upsert + sanitized CSS.                                                     |
+| `admin`         | `users.*`, `billing.*`, `insights.overview`, `system.overview`, `audit.list`                                                                                   | Nested routers; every leaf is wrapped by `adminProcedure`.                                                   |
 
 `publicProcedure`, `protectedProcedure`, and `adminProcedure` (`src/server/api/trpc.ts`)
 define the auth boundary. Protected calls reload live account state; admin calls additionally
@@ -175,22 +176,22 @@ The `PaymentProviderAdapter` interface (`src/server/payments/types.ts`) enforces
 
 ```ts
 interface PaymentProviderAdapter {
-  id: BillingProvider
-  label: string
-  renewal: "automatic" | "manual"
-  createCheckoutSession(input: CheckoutInput): Promise<CheckoutPresentation>
-  handleWebhook(rawBody, headers): Promise<NormalizedBillingEvent[]>
-  cancelSubscription(s: Subscription): Promise<void>
-  getSubscriptionStatus(s: Subscription): Promise<ProviderSubscriptionStatus>
+  id: BillingProvider;
+  label: string;
+  renewal: "automatic" | "manual";
+  createCheckoutSession(input: CheckoutInput): Promise<CheckoutPresentation>;
+  handleWebhook(rawBody, headers): Promise<NormalizedBillingEvent[]>;
+  cancelSubscription(s: Subscription): Promise<void>;
+  getSubscriptionStatus(s: Subscription): Promise<ProviderSubscriptionStatus>;
 }
 ```
 
-| Provider | File | Renewal | Checkout | Webhook | Verification |
-|---|---|---|---|---|---|
-| Stripe | `adapters/stripe.ts` | automatic | `redirect` | `stripe.webhooks.constructEvent` | Stripe SDK |
-| iyzico | `adapters/iyzico.ts` | automatic | `html` iframe | `x-iyz-signature-v3` HMAC-SHA256 | `timingSafeEqual` |
-| PayTR | `adapters/paytr.ts` | **manual** | `iframe` (PayTR iFrame token) | `hash` form field | `base64(HMAC-SHA256(merchant_oid+salt+status+total_amount))` |
-| Adyen | `adapters/adyen.ts` | automatic | `adyen` session JSON | `hmacsignature` header | per-item HMAC |
+| Provider | File                 | Renewal    | Checkout                      | Webhook                          | Verification                                                 |
+| -------- | -------------------- | ---------- | ----------------------------- | -------------------------------- | ------------------------------------------------------------ |
+| Stripe   | `adapters/stripe.ts` | automatic  | `redirect`                    | `stripe.webhooks.constructEvent` | Stripe SDK                                                   |
+| iyzico   | `adapters/iyzico.ts` | automatic  | `html` iframe                 | `x-iyz-signature-v3` HMAC-SHA256 | `timingSafeEqual`                                            |
+| PayTR    | `adapters/paytr.ts`  | **manual** | `iframe` (PayTR iFrame token) | `hash` form field                | `base64(HMAC-SHA256(merchant_oid+salt+status+total_amount))` |
+| Adyen    | `adapters/adyen.ts`  | automatic  | `adyen` session JSON          | `hmacsignature` header           | per-item HMAC                                                |
 
 Pricing: `CANONICAL_USD_PRICES = { MONTHLY: 300, YEARLY: 2200 }`. STRIPE/ADYEN quote USD; IYZICO/PAYTR quote TRY (`LOCAL_PRO_MONTHLY_TRY` default `12900`, `LOCAL_PRO_YEARLY_TRY` default `94900`).
 
@@ -235,22 +236,23 @@ Excludes `_next/static`, `_next/image`, `favicon.ico`, `og.png`. For all other r
 2. Otherwise resolve `CustomDomain.domainNormalized`; if none → `404` HTML.
 3. If found but `status !== VERIFIED` or user is not Pro or has no `username` → `410` HTML.
 4. For path `/`, rewrite to `/{username}`.
+5. After the same domain/entitlement check, allow only the public runtime prefixes `/go/`, `/unlock/`, `/api/links/`, `/api/profiles/`, and `/api/qr/`; all dashboard/auth/admin paths still return the controlled 404.
 
 The 404 and 410 responses are `Cache-Control: public, max-age=60` HTML pages.
 
 ### 4.2 Special routes
 
-| Path | Behaviour |
-|---|---|
-| `/api/qr/[username]` | PNG (720px, ink-on-paper), `Cache-Control: public, max-age=3600, stale-while-revalidate=86400`. |
-| `/api/register/intent` | Rate-limited (12/15min/IP, 5/h/email, 10/h/username); sets `olnk-signup-intent` (15 min, `httpOnly`). |
-| `/api/links/[id]/unlock` | Verifies password (scrypt), sets `olnk_link_<id>` cookie (12h). Rate-limited. |
-| `/api/profiles/[username]/unlock` | Verifies a Pro profile password and sets the versioned `olnk_profile_<userId>` cookie (12h). Triple rate-limited. |
-| `/api/profiles/[username]/visits` | Returns only an enabled aggregate public counter; honors the profile gate and rate limits. |
-| `/api/billing/iyzico/callback` | iyzico hosted-form return; 303 to `/dashboard/billing?checkout=…&intent=…`. |
-| `/api/billing/renew` | Bearer `CRON_SECRET`; Adyen recurring charges (≤ 100 per call, idempotent via `renewalKey`). |
-| `/api/maintenance` | Bearer `CRON_SECRET`; cleanup cron (events > 90d, rate buckets > 2d, intents/challenges, assets, deletions, domain revalidations). |
-| `/api/webhooks/[provider]` | Universal billing webhook; raw body preserved; returns plain text for PayTR, JSON for the rest. |
+| Path                              | Behaviour                                                                                                                          |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/qr/[username]`              | PNG (720px, ink-on-paper), `Cache-Control: public, max-age=3600, stale-while-revalidate=86400`.                                    |
+| `/api/register/intent`            | Rate-limited (12/15min/IP, 5/h/email, 10/h/username); sets `olnk-signup-intent` (15 min, `httpOnly`).                              |
+| `/api/links/[id]/unlock`          | Verifies password (scrypt), sets `olnk_link_<id>` cookie (12h). Rate-limited.                                                      |
+| `/api/profiles/[username]/unlock` | Verifies a Pro profile password and sets the versioned `olnk_profile_<userId>` cookie (12h). Triple rate-limited.                  |
+| `/api/profiles/[username]/visits` | Returns only an enabled aggregate public counter; honors the profile gate and rate limits.                                         |
+| `/api/billing/iyzico/callback`    | iyzico hosted-form return; 303 to `/dashboard/billing?checkout=…&intent=…`.                                                        |
+| `/api/billing/renew`              | Bearer `CRON_SECRET`; Adyen recurring charges (≤ 100 per call, idempotent via `renewalKey`).                                       |
+| `/api/maintenance`                | Bearer `CRON_SECRET`; cleanup cron (events > 90d, rate buckets > 2d, intents/challenges, assets, deletions, domain revalidations). |
+| `/api/webhooks/[provider]`        | Universal billing webhook; raw body preserved; returns plain text for PayTR, JSON for the rest.                                    |
 
 ---
 
@@ -288,28 +290,28 @@ The 404 and 410 responses are `Cache-Control: public, max-age=60` HTML pages.
 
 ## 6. External Integrations
 
-| Service | Purpose | SDK / approach | Where |
-|---|---|---|---|
-| **Google OAuth** | Provider sign-in | `next-auth/providers/google` | `src/server/auth/config.ts` |
-| **Nodemailer / SMTP** | Magic-link emails | `next-auth/providers/nodemailer`, `maxAge: 10*60` | `src/server/auth/config.ts` |
-| **Stripe** | Subscriptions + webhooks | `stripe@22`, `maxNetworkRetries: 2`, `constructEvent` | `src/server/payments/adapters/stripe.ts` |
-| **iyzico** | Turkish card + subscriptions | `iyzipay@2.0.69` (serverExternalPackages), `subscriptionCheckoutForm.initialize`, hosted HTML | `src/server/payments/adapters/iyzico.ts` |
-| **PayTR** | Turkish iFrame, no card storage | Manual HTTP + HMAC of `merchant_oid+salt+status+total_amount` | `src/server/payments/adapters/paytr.ts` |
-| **Adyen** | Global recurring + Drop-in | `@adyen/api-library@32` (HMAC), `@adyen/adyen-web@6.41` (Drop-in client only) | `src/server/payments/adapters/adyen.ts` + `src/components/dashboard/adyen-checkout.tsx` |
-| **AWS S3-compatible storage** | Avatars + backgrounds | `@aws-sdk/client-s3` + presigner, `forcePathStyle: true` | `src/server/storage.ts` |
-| **DNS** | Custom domain verification | `_olnk.<domain>` TXT lookup (provider-agnostic) | `src/server/domains.ts`, `src/server/api/routers/customization.ts` |
-| **Auth.js / NextAuth** | Auth core + adapters | `next-auth@5.0.0-beta.32`, `@auth/prisma-adapter@2.11.3` | `src/server/auth/*` |
-| **Vercel** (optional) | Hosting | HTTP headers via `x-vercel-forwarded-for` | via `env.TRUSTED_IP_HEADER` |
-| **Cloudflare** (optional) | CDN | HTTP headers via `cf-connecting-ip` | via `env.TRUSTED_IP_HEADER` |
+| Service                       | Purpose                         | SDK / approach                                                                                | Where                                                                                   |
+| ----------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| **Google OAuth**              | Provider sign-in                | `next-auth/providers/google`                                                                  | `src/server/auth/config.ts`                                                             |
+| **Nodemailer / SMTP**         | Magic-link emails               | `next-auth/providers/nodemailer`, `maxAge: 10*60`                                             | `src/server/auth/config.ts`                                                             |
+| **Stripe**                    | Subscriptions + webhooks        | `stripe@22`, `maxNetworkRetries: 2`, `constructEvent`                                         | `src/server/payments/adapters/stripe.ts`                                                |
+| **iyzico**                    | Turkish card + subscriptions    | `iyzipay@2.0.69` (serverExternalPackages), `subscriptionCheckoutForm.initialize`, hosted HTML | `src/server/payments/adapters/iyzico.ts`                                                |
+| **PayTR**                     | Turkish iFrame, no card storage | Manual HTTP + HMAC of `merchant_oid+salt+status+total_amount`                                 | `src/server/payments/adapters/paytr.ts`                                                 |
+| **Adyen**                     | Global recurring + Drop-in      | `@adyen/api-library@32` (HMAC), `@adyen/adyen-web@6.41` (Drop-in client only)                 | `src/server/payments/adapters/adyen.ts` + `src/components/dashboard/adyen-checkout.tsx` |
+| **AWS S3-compatible storage** | Avatars + backgrounds           | `@aws-sdk/client-s3` + presigner, `forcePathStyle: true`                                      | `src/server/storage.ts`                                                                 |
+| **DNS**                       | Custom domain verification      | `_olnk.<domain>` TXT lookup (provider-agnostic)                                               | `src/server/domains.ts`, `src/server/api/routers/customization.ts`                      |
+| **Auth.js / NextAuth**        | Auth core + adapters            | `next-auth@5.0.0-beta.32`, `@auth/prisma-adapter@2.11.3`                                      | `src/server/auth/*`                                                                     |
+| **Vercel** (optional)         | Hosting                         | HTTP headers via `x-vercel-forwarded-for`                                                     | via `env.TRUSTED_IP_HEADER`                                                             |
+| **Cloudflare** (optional)     | CDN                             | HTTP headers via `cf-connecting-ip`                                                           | via `env.TRUSTED_IP_HEADER`                                                             |
 
 ### 6.1 Webhook contracts
 
-| Provider | URL | Headers / body | Response |
-|---|---|---|---|
-| Stripe | `https://<host>/api/webhooks/stripe` | `stripe-signature`, raw body | `200 {received: true}` |
-| iyzico | `https://<host>/api/webhooks/iyzico` | `x-iyz-signature-v3` | `200 {received: true}` |
-| PayTR | `https://<host>/api/webhooks/paytr` | form-encoded `hash` | `200 text/plain OK` |
-| Adyen | `https://<host>/api/webhooks/adyen` | `hmacsignature` | `200 {received: true}` |
+| Provider | URL                                  | Headers / body               | Response               |
+| -------- | ------------------------------------ | ---------------------------- | ---------------------- |
+| Stripe   | `https://<host>/api/webhooks/stripe` | `stripe-signature`, raw body | `200 {received: true}` |
+| iyzico   | `https://<host>/api/webhooks/iyzico` | `x-iyz-signature-v3`         | `200 {received: true}` |
+| PayTR    | `https://<host>/api/webhooks/paytr`  | form-encoded `hash`          | `200 text/plain OK`    |
+| Adyen    | `https://<host>/api/webhooks/adyen`  | `hmacsignature`              | `200 {received: true}` |
 
 On `401` from any provider: `WebhookVerificationError`. On `500`: a generic error is returned and the event is left `RECEIVED` for replay (provider dashboards cover recovery).
 
@@ -321,23 +323,23 @@ On `401` from any provider: `WebhookVerificationError`. On `500`: a generic erro
 
 ## 7. Security Boundary Summary
 
-| Concern | Mitigation | Where |
-|---|---|---|
-| SQL injection | Parameterised queries only (Prisma) | `src/server/db.ts` |
-| XSS in user HTML | No `dangerouslySetInnerHTML` except for sanitized CSS output | `src/server/security/custom-css.ts` |
-| Cross-site request forgery | Auth.js + Next server actions + origin checks (CSP `frame-ancestors 'none'`) | `next.config.js`, `src/auth` |
-| Click fraud | Minute-bucketed dedupe keys, rate limits, bot filter | `src/server/analytics/ingest.ts` |
-| Password leak | scrypt (not bcrypt), rate-limited unlock endpoint | `src/server/security/link-password.ts` |
-| Brute-force unlock | DB-backed sliding window | `src/server/security/rate-limit.ts` |
-| CSS injection | PostCSS scoping + escape-strip | `src/server/security/custom-css.ts` |
-| Host spoofing | Host-based middleware allows only canonical + verified custom domains | `src/proxy.ts` |
-| Payment signature replay | sha256 `payloadHash` + `(provider, externalEventId)` uniqueness | `src/server/payments/service.ts` |
-| Payment provider event ordering | `isStale` check on `lastProviderEventAt` | `src/server/payments/service.ts` |
-| Provider switch races | Refuse entitlement transfer mid-flight | `src/server/payments/service.ts` |
-| Race-condition username claims | `pg_advisory_xact_lock` + DB unique index | `src/server/identity/claim-username.ts` |
-| Admin privilege escalation | Live database role check on every RSC page and RPC execution | `require-admin-session.ts`, `adminProcedure` |
-| Sensitive admin operations | Typed confirmation, reason, immutable audit snapshot, dedicated rate limit | `src/server/api/routers/admin/*` |
-| Impersonation abuse | No impersonated session; troubleshooting is scoped to public-profile preview | `/admin/users/[id]` |
+| Concern                         | Mitigation                                                                   | Where                                        |
+| ------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------- |
+| SQL injection                   | Parameterised queries only (Prisma)                                          | `src/server/db.ts`                           |
+| XSS in user HTML                | No `dangerouslySetInnerHTML` except for sanitized CSS output                 | `src/server/security/custom-css.ts`          |
+| Cross-site request forgery      | Auth.js + Next server actions + origin checks (CSP `frame-ancestors 'none'`) | `next.config.js`, `src/auth`                 |
+| Click fraud                     | Minute-bucketed dedupe keys, rate limits, bot filter                         | `src/server/analytics/ingest.ts`             |
+| Password leak                   | scrypt (not bcrypt), rate-limited unlock endpoint                            | `src/server/security/link-password.ts`       |
+| Brute-force unlock              | DB-backed sliding window                                                     | `src/server/security/rate-limit.ts`          |
+| CSS injection                   | PostCSS scoping + escape-strip                                               | `src/server/security/custom-css.ts`          |
+| Host spoofing                   | Host-based middleware allows only canonical + verified custom domains        | `src/proxy.ts`                               |
+| Payment signature replay        | sha256 `payloadHash` + `(provider, externalEventId)` uniqueness              | `src/server/payments/service.ts`             |
+| Payment provider event ordering | `isStale` check on `lastProviderEventAt`                                     | `src/server/payments/service.ts`             |
+| Provider switch races           | Refuse entitlement transfer mid-flight                                       | `src/server/payments/service.ts`             |
+| Race-condition username claims  | `pg_advisory_xact_lock` + DB unique index                                    | `src/server/identity/claim-username.ts`      |
+| Admin privilege escalation      | Live database role check on every RSC page and RPC execution                 | `require-admin-session.ts`, `adminProcedure` |
+| Sensitive admin operations      | Typed confirmation, reason, immutable audit snapshot, dedicated rate limit   | `src/server/api/routers/admin/*`             |
+| Impersonation abuse             | No impersonated session; troubleshooting is scoped to public-profile preview | `/admin/users/[id]`                          |
 
 ---
 
@@ -353,15 +355,15 @@ On `401` from any provider: `WebhookVerificationError`. On `500`: a generic erro
 
 ## 9. Where to Extend Safely
 
-| Adding | Touch these files |
-|---|---|
-| A new tRPC procedure | `src/server/api/routers/<name>.ts`, `src/server/api/root.ts`, `src/lib/schemas.ts`, this doc |
-| A new Prisma model | `prisma/schema.prisma`, create a migration, `SCHEMA.md` |
-| A new env var | `.env.example`, `src/env.js`, `ENVIRONMENT.md` |
-| A new payment provider | `src/server/payments/types.ts`, `adapters/<provider>.ts`, `registry.ts`, `pricing.ts`, `service.ts` (only if behaviour diverges) |
-| A new appearance field | `src/lib/appearance.ts`, `src/config/feature-catalog.ts`, `src/components/dashboard/appearance-editor.tsx` |
-| A new middleware behaviour | `src/proxy.ts`, `next.config.js` (for headers) |
-| A new cron job | `src/app/api/maintenance/route.ts` |
-| A new admin operation | `src/lib/schemas.ts`, `src/server/api/routers/admin/*`, `src/server/admin/audit.ts` |
+| Adding                     | Touch these files                                                                                                                |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| A new tRPC procedure       | `src/server/api/routers/<name>.ts`, `src/server/api/root.ts`, `src/lib/schemas.ts`, this doc                                     |
+| A new Prisma model         | `prisma/schema.prisma`, create a migration, `SCHEMA.md`                                                                          |
+| A new env var              | `.env.example`, `src/env.js`, `ENVIRONMENT.md`                                                                                   |
+| A new payment provider     | `src/server/payments/types.ts`, `adapters/<provider>.ts`, `registry.ts`, `pricing.ts`, `service.ts` (only if behaviour diverges) |
+| A new appearance field     | `src/lib/appearance.ts`, `src/config/feature-catalog.ts`, `src/components/dashboard/appearance-editor.tsx`                       |
+| A new middleware behaviour | `src/proxy.ts`, `next.config.js` (for headers)                                                                                   |
+| A new cron job             | `src/app/api/maintenance/route.ts`                                                                                               |
+| A new admin operation      | `src/lib/schemas.ts`, `src/server/api/routers/admin/*`, `src/server/admin/audit.ts`                                              |
 
 See `AGENTS.md` §9 for the canonical lookup.

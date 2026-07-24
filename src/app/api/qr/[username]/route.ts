@@ -1,5 +1,6 @@
 import QRCode from "qrcode";
 
+import { isCustomProfileHost } from "~/lib/app-url";
 import { normalizeUsername } from "~/lib/username";
 import { db } from "~/server/db";
 
@@ -14,7 +15,12 @@ export async function GET(
   });
   if (!account?.username) return new Response(null, { status: 404 });
 
-  const profileUrl = new URL(`/${account.username}`, request.url).toString();
+  const profileUrl = new URL(
+    isCustomProfileHost(request.headers.get("host"))
+      ? "/"
+      : `/${account.username}`,
+    request.url,
+  ).toString();
   const buffer = await QRCode.toBuffer(profileUrl, {
     type: "png",
     width: 720,

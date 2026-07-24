@@ -17,13 +17,15 @@ import {
 import { consumeRateLimit } from "~/server/security/rate-limit";
 import { readRequestText } from "~/server/security/request-body";
 
-function profilePath(username: string) {
-  return `/${encodeURIComponent(username)}`;
+function profilePath(request: Request, username: string) {
+  return new URL(request.url).searchParams.get("return") === "root"
+    ? "/"
+    : `/${encodeURIComponent(username)}`;
 }
 
 function rejected(request: Request, username: string, retryAfter?: number) {
   const response = NextResponse.redirect(
-    new URL(`${profilePath(username)}?gateError=1`, request.url),
+    new URL(`${profilePath(request, username)}?gateError=1`, request.url),
     303,
   );
   if (retryAfter) response.headers.set("Retry-After", String(retryAfter));
@@ -101,7 +103,7 @@ export async function POST(
   }
 
   const response = NextResponse.redirect(
-    new URL(profilePath(profile.username), request.url),
+    new URL(profilePath(request, profile.username), request.url),
     303,
   );
   response.cookies.set(

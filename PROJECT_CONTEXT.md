@@ -11,6 +11,7 @@
 `olnk.tr` is a **mobile-first link-in-bio platform** built primarily for **Turkish-speaking creators, professionals, and small businesses**. Each user receives a public profile at `olnk.tr/[username]` where they publish links, personalise their appearance, share a QR code, and view audience engagement. The project is a private `0.2.0` release in active stabilisation on the `codex/stabilize-upgrades-fixes` branch.
 
 ### Feature pillars
+
 - **Authentication:** Google OAuth and passwordless email via Nodemailer (Auth.js v5 / NextAuth `database` session strategy).
 - **Public profiles:** mobile-optimised, real-time preview in the editor.
 - **Editable links:** drag-and-drop reorder, per-link icon, scheduling, password protection, YouTube and Spotify embeds, click recording.
@@ -24,11 +25,13 @@
   charts, provider-health visibility, time-bounded manual Pro grants, and immutable audit.
 
 ### Target audience
+
 - Turkish-speaking creators (influencers, podcasters, YouTubers).
 - Freelancers and small business owners.
 - Anyone who wants a fast, branded single-link landing page in Turkish.
 
 ### Business goals
+
 - Free tier with sensible defaults; Pro tier unlocks appearance customisation, scheduling, password protection, embeds, custom domains, advanced analytics.
 - License keeps the source open while requiring attribution for monetised deployments (no revenue share, no source-disclosure requirement).
 - Native Turkish copy throughout the product; no i18n abstraction.
@@ -37,41 +40,42 @@
 
 ## 2. Tech Stack
 
-| Layer | Choice | Version | Role |
-|---|---|---|---|
-| Runtime | Node.js | `^20.19 \|\| ^22.13 \|\| >=24` (pinned `22.13.0`) | LTS node |
-| Package manager | pnpm | `11.9.0` | Workspace + peer override management |
-| Framework | Next.js (App Router, Turbopack) | `16.2.11` | RSC + server actions + middleware |
-| UI | React + React DOM | `19.2.8` | Concurrent rendering |
-| Language | TypeScript | `6.0.3` | strict + verbatimModuleSyntax + noUncheckedIndexedAccess |
-| Styling | Tailwind CSS | `4.3.3` | PostCSS plugin only; tokens via `@theme` |
-| ORM | Prisma (`prisma-client` ESM gen) | `7.9.0` | Output to `generated/prisma` |
-| DB driver | `@prisma/adapter-pg` + `pg` | `7.9.0` / `8.22.0` | Postgres connection pool |
-| DB | PostgreSQL | 17 (CI) | Migrations + advisory locks |
-| API | tRPC + TanStack Query | `11.18.0` / `5.101.4` | End-to-end typed RPC + cache |
-| Wire format | superjson | `2.2.6` | Date / Map / Set / BigInt round-trip |
-| Auth | Auth.js (NextAuth v5 beta) | `5.0.0-beta.32` | Server-rendered OAuth + magic link |
-| Auth adapter | `@auth/prisma-adapter` | `2.11.3` | Adapter normalisation extension in `src/server/auth/config.ts` |
-| Email | Nodemailer | `9.0.3` | pinned via peer rules |
-| Validation | Zod | `4.4.3` | All untrusted input |
-| Env validation | `@t3-oss/env-nextjs` | `0.13.11` | `src/env.js` |
-| Storage | AWS SDK v3 (S3-compatible) | `3.1095.0` | Presigned PUTs, head + delete |
-| Payments — Stripe | `stripe` | `22.3.2` | Subscriptions + webhooks |
-| Payments — iyzico | `iyzipay` | `2.0.69` | serverExternalPackages; ambient `.d.ts` |
-| Payments — PayTR | (HTTP) | — | Manual iframe + HMAC |
-| Payments — Adyen | `@adyen/api-library` | `32.0.0` | HMAC validator + API |
-| Adyen Web | `@adyen/adyen-web` | `6.41.0` | Drop-in UI (client only) |
-| Drag & drop | `@dnd-kit/core` / `sortable` / `utilities` | `6.3.1` / `10.0.0` / `3.2.2` | Editor reorder |
-| Icons | `lucide-react` | `1.26.0` | Throughout UI |
-| QR | `qrcode` | `1.5.4` | `/api/qr/[username]` |
-| Analytics parser | none | — | rolling window + dedupe handled in code |
-| Logging | none | — | `console.*` + Prisma query log in dev |
-| Testing — Unit | Vitest | `4.1.10` | `src/**/*.test.ts` |
-| Testing — E2E | Playwright | `1.61.1` | `tests/e2e/*.spec.ts` (port 3100) |
-| Accessibility | `@axe-core/playwright` | `4.12.1` | Playwright a11y assertions |
-| Dev tools | ESLint / Prettier / typescript-eslint | `9.39.5` / `3.9.6` / `8.65.0` | `--max-warnings=0` gate |
+| Layer             | Choice                                     | Version                                           | Role                                                           |
+| ----------------- | ------------------------------------------ | ------------------------------------------------- | -------------------------------------------------------------- |
+| Runtime           | Node.js                                    | `^20.19 \|\| ^22.13 \|\| >=24` (pinned `22.13.0`) | LTS node                                                       |
+| Package manager   | pnpm                                       | `11.9.0`                                          | Workspace + peer override management                           |
+| Framework         | Next.js (App Router, Turbopack)            | `16.2.11`                                         | RSC + server actions + middleware                              |
+| UI                | React + React DOM                          | `19.2.8`                                          | Concurrent rendering                                           |
+| Language          | TypeScript                                 | `6.0.3`                                           | strict + verbatimModuleSyntax + noUncheckedIndexedAccess       |
+| Styling           | Tailwind CSS                               | `4.3.3`                                           | PostCSS plugin only; tokens via `@theme`                       |
+| ORM               | Prisma (`prisma-client` ESM gen)           | `7.9.0`                                           | Output to `generated/prisma`                                   |
+| DB driver         | `@prisma/adapter-pg` + `pg`                | `7.9.0` / `8.22.0`                                | Postgres connection pool                                       |
+| DB                | PostgreSQL                                 | 17 (CI)                                           | Migrations + advisory locks                                    |
+| API               | tRPC + TanStack Query                      | `11.18.0` / `5.101.4`                             | End-to-end typed RPC + cache                                   |
+| Wire format       | superjson                                  | `2.2.6`                                           | Date / Map / Set / BigInt round-trip                           |
+| Auth              | Auth.js (NextAuth v5 beta)                 | `5.0.0-beta.32`                                   | Server-rendered OAuth + magic link                             |
+| Auth adapter      | `@auth/prisma-adapter`                     | `2.11.3`                                          | Adapter normalisation extension in `src/server/auth/config.ts` |
+| Email             | Nodemailer                                 | `9.0.3`                                           | pinned via peer rules                                          |
+| Validation        | Zod                                        | `4.4.3`                                           | All untrusted input                                            |
+| Env validation    | `@t3-oss/env-nextjs`                       | `0.13.11`                                         | `src/env.js`                                                   |
+| Storage           | AWS SDK v3 (S3-compatible)                 | `3.1095.0`                                        | Presigned PUTs, head + delete                                  |
+| Payments — Stripe | `stripe`                                   | `22.3.2`                                          | Subscriptions + webhooks                                       |
+| Payments — iyzico | `iyzipay`                                  | `2.0.69`                                          | serverExternalPackages; ambient `.d.ts`                        |
+| Payments — PayTR  | (HTTP)                                     | —                                                 | Manual iframe + HMAC                                           |
+| Payments — Adyen  | `@adyen/api-library`                       | `32.0.0`                                          | HMAC validator + API                                           |
+| Adyen Web         | `@adyen/adyen-web`                         | `6.41.0`                                          | Drop-in UI (client only)                                       |
+| Drag & drop       | `@dnd-kit/core` / `sortable` / `utilities` | `6.3.1` / `10.0.0` / `3.2.2`                      | Editor reorder                                                 |
+| Icons             | `lucide-react`                             | `1.26.0`                                          | Throughout UI                                                  |
+| QR                | `qrcode`                                   | `1.5.4`                                           | `/api/qr/[username]`                                           |
+| Analytics parser  | none                                       | —                                                 | rolling window + dedupe handled in code                        |
+| Logging           | none                                       | —                                                 | `console.*` + Prisma query log in dev                          |
+| Testing — Unit    | Vitest                                     | `4.1.10`                                          | `src/**/*.test.ts`                                             |
+| Testing — E2E     | Playwright                                 | `1.61.1`                                          | `tests/e2e/*.spec.ts` (port 3100)                              |
+| Accessibility     | `@axe-core/playwright`                     | `4.12.1`                                          | Playwright a11y assertions                                     |
+| Dev tools         | ESLint / Prettier / typescript-eslint      | `9.39.5` / `3.9.6` / `8.65.0`                     | `--max-warnings=0` gate                                        |
 
 ### CI/CD
+
 - **GitHub Actions** (`.github/workflows/ci.yml`) on `push` to `main` and on every `pull_request`.
 - Ubuntu + Node `22.13` + pnpm `11.9` + Postgres 17 service container.
 - Steps: install → generate → migrate → check (lint+tsc) → test → audit → build → playwright install → e2e.
@@ -300,16 +304,16 @@
 
 ### 4.2 Naming
 
-| Asset | Pattern |
-|---|---|
-| Component file | `kebab-case.tsx` |
-| Component export | `PascalCase` |
-| tRPC procedure | `camelCase` |
-| DB model | `PascalCase` |
-| Enum value | `SCREAMING_SNAKE` |
-| Env variable | `SCREAMING_SNAKE` |
-| CSS variable | `--kebab-case` |
-| Cookie name | `olnk-...` |
+| Asset            | Pattern           |
+| ---------------- | ----------------- |
+| Component file   | `kebab-case.tsx`  |
+| Component export | `PascalCase`      |
+| tRPC procedure   | `camelCase`       |
+| DB model         | `PascalCase`      |
+| Enum value       | `SCREAMING_SNAKE` |
+| Env variable     | `SCREAMING_SNAKE` |
+| CSS variable     | `--kebab-case`    |
+| Cookie name      | `olnk-...`        |
 
 ### 4.3 UI primitives
 

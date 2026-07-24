@@ -8,6 +8,7 @@
 ## 1. Current Status
 
 ### 1.1 Shipped and Working (Free Tier)
+
 - Public profile at `olnk.tr/[username]` (RSC) with background, avatar, bio, links, and brand chip.
 - Google OAuth and Nodemailer magic-link sign-in.
 - Username claim with `pg_advisory_xact_lock` + DB unique constraint as authority.
@@ -31,6 +32,7 @@
   trusted-shell role management.
 
 ### 1.2 Shipped and Working (Pro Tier)
+
 - All Pro-only appearance paths (Crown icon + lock).
 - Custom CSS via postcss-based `sanitizeCustomCss` scoped to `[data-olnk-profile]`.
 - YouTube and Spotify embeds (`profileEmbedUrl`).
@@ -50,6 +52,7 @@
 - Near-live distinct visitor counter and retro digital style.
 
 ### 1.3 Quality Gates (Green)
+
 - `pnpm check` (ESLint + tsc, `--max-warnings=0`).
 - `pnpm test` (Vitest unit, including payment provider fixtures, sanitizers, entitlement resolution).
 - `pnpm audit --prod --audit-level high`.
@@ -62,18 +65,19 @@
 
 > Items currently being worked on; promote to §1.1/1.2 once merged.
 
-| Task | Owner context | Notes |
-|---|---|---|
-| **Public profile cache invalidation** (known gap) | stabilisation | Add `revalidateTag` after `workspace.save` + `account.updateProfile` so the editor's preview matches the live page without re-deploying. |
-| **Live checkout result overlay** | stabilisation | The `/dashboard/billing?checkout=…&intent=…` states already pass to `<BillingSettings/>`; refine the success / failure copy and link to the updated settings panel. |
-| **PayTR local-mode pricing display** | stabilisation | `LOCAL_PRO_*_TRY` defaults to `12900` / `94900`; verify against the production PayTR dashboard before launch. |
-| **Mobile profile editor** | planning | Editor is currently desktop-first; long-term goal is a feature-parity mobile experience. |
+| Task                                              | Owner context | Notes                                                                                                                                                               |
+| ------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Public profile cache invalidation** (known gap) | stabilisation | Add `revalidateTag` after `workspace.save` + `account.updateProfile` so the editor's preview matches the live page without re-deploying.                            |
+| **Live checkout result overlay**                  | stabilisation | The `/dashboard/billing?checkout=…&intent=…` states already pass to `<BillingSettings/>`; refine the success / failure copy and link to the updated settings panel. |
+| **PayTR local-mode pricing display**              | stabilisation | `LOCAL_PRO_*_TRY` defaults to `12900` / `94900`; verify against the production PayTR dashboard before launch.                                                       |
+| **Mobile profile editor**                         | planning      | Editor is currently desktop-first; long-term goal is a feature-parity mobile experience.                                                                            |
 
 ---
 
 ## 3. Backlog / Roadmap
 
 ### 3.1 Reliability & Operations
+
 - [ ] **Cache invalidation on edit** — `revalidateTag('profile:<username>')` in `workspace.save` and after `account.updateProfile` (which changes `image` / `name` / `bio`).
 - [ ] **Web vitals on the public profile** — track LCP/CLS as design-time telemetry (no SDK; manual sampling).
 - [ ] **Background-job queue** — out-of-process worker (e.g. Inngest, BullMQ, or `pg-boss`) for high-volume recurring billing. Today, billing events are reconciled inside the HTTP request thread.
@@ -81,6 +85,7 @@
 - [ ] **Health check route** — `/api/health` returning DB + storage round-trip latencies.
 
 ### 3.2 Features
+
 - [ ] **Subscription upgrade from `/dashboard`** — right now "Upgrade" always opens the provider chooser. Consider one-click upgrade for returning users.
 - [ ] **Email change verification** — currently `emailNormalized` is updated on every sign-in; add a confirmation step.
 - [ ] **Two-factor auth (TOTP)** — Auth.js core supports it; wiring it would lock the dashboard.
@@ -89,11 +94,13 @@
 - [ ] **Theme marketplace** — shareable appearance presets by URL, opt-in.
 
 ### 3.3 Design
+
 - [ ] **Replacement for Iowan Old Style** — the serif stack is constrained to Apple platforms; document the fall-back behaviour for Android/Linux.
 - [ ] **Spacing tokens** — beyond the existing `spacing.density` choice, consider adding named tokens (`sm | md | lg`) to the appearance schema.
 - [ ] **Dark mode for the dashboard** — the public profile already supports it via appearance; the dashboard does not.
 
 ### 3.4 Refactors (Technical Debt)
+
 - [ ] **Reduce `workspace-editor.tsx` size** — 829 lines; candidate splits: `SortableLink`, `drainLoop`, `revokeHelpers`.
 - [ ] **Reduce `appearance-editor.tsx` size** — 897 lines; candidate splits: per-tab files under `appearance-editor/<tab>.tsx`.
 - [ ] **`processBillingEvent` complexity** — 390 lines; consider extracting the per-event-type handlers into separate functions/tables.
@@ -105,12 +112,12 @@
 
 > Tracked and resolved via `.memory-bank/known_issues.md`. Add an entry there for every non-trivial fix.
 
-| # | Symptom | Severity | Status |
-|---|---|---|---|
-| 1 | Editor preview may diverge from public page (no explicit cache invalidation) | Medium | Open — see Backlog §3.1 |
-| 2 | PayTR `cancelSubscription` is intentionally a no-op; users must complete the term manually | Behavioural | Documented (see `src/server/payments/adapters/paytr.ts:186`) |
-| 3 | Dark Reader extension causes hydration warnings on `<html>` and `<svg>` | Cosmetic (dev only) | Documented (see `AGENTS.md §11`) |
-| 4 | `next dev` shows `scroll-behavior: smooth` warning until we apply `data-scroll-behavior="smooth"` (the current `globals.css` `scroll-behavior: smooth` rule still triggers Next's router-level scanner) | Cosmetic | Open — small fix in `globals.css` + `layout.tsx` |
+| #   | Symptom                                                                                                                                                                                                 | Severity            | Status                                                       |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------ |
+| 1   | Editor preview may diverge from public page (no explicit cache invalidation)                                                                                                                            | Medium              | Open — see Backlog §3.1                                      |
+| 2   | PayTR `cancelSubscription` is intentionally a no-op; users must complete the term manually                                                                                                              | Behavioural         | Documented (see `src/server/payments/adapters/paytr.ts:186`) |
+| 3   | Dark Reader extension causes hydration warnings on `<html>` and `<svg>`                                                                                                                                 | Cosmetic (dev only) | Documented (see `AGENTS.md §11`)                             |
+| 4   | `next dev` shows `scroll-behavior: smooth` warning until we apply `data-scroll-behavior="smooth"` (the current `globals.css` `scroll-behavior: smooth` rule still triggers Next's router-level scanner) | Cosmetic            | Open — small fix in `globals.css` + `layout.tsx`             |
 
 ---
 
@@ -123,6 +130,7 @@
 - Added mouse particles, Matrix rain, 3B tilt, CRT, glitch, and scanline effects as independent lazy chunks with reduced-motion and tab-visibility controls.
 - Added a server-enforced Pro whole-profile gate; protected bio/theme/link data is not rendered before a throttled scrypt check, and `/go/[id]` re-verifies access.
 - Added honest all-time/today/five-minute counters. Profile views now dedupe the same visitor for 30 minutes.
+- Fixed custom-domain public runtime routing for redirects, link/profile unlocks, counters, and QR; dashboard/auth paths remain closed.
 - Applied `20260724233000_profile_extras` and a data-safe migration-history alignment for `UploadedAsset.updatedAt`; `prisma migrate dev` is back in sync.
 - Added schema-evolution, entitlement fallback, and profile-token tests.
 
@@ -143,6 +151,7 @@
   Playwright desktop/mobile access checks all pass.
 
 ### 2026-07-21 — Stabilization (HEAD `433f4fb`)
+
 - **chore(config): use port 3100 and disable implicit dep installs** (`433f4fb`) — Playwright webserver switched from `pnpm dev` to `pnpm start`, port 3000 → 3100, webserver timeout 120 s → 180 s, `verifyDepsBeforeRun: false`.
 - **refactor(dashboard): centralize session checks with `requireDashboardSession`** (`8914c2c`) — replaces 4 copies of the auth check.
 - **test: make database e2e tests opt-in via env flag** (`c454dd3`) — `RUN_DATABASE_E2E=1` gates the 404 DB-backed assertion.
@@ -175,6 +184,7 @@
 - **chore(deps): upgrade to latest supported TypeScript** (`ded1459`).
 
 ### 2026-07-20 — Schema migrations
+
 - `20260720231000_identity_security` — final, four-migration sequence complete.
 
 Earlier migrations and feature commits are summarised in `errorsV2.md` (internal audit, 39 KB).
@@ -183,14 +193,14 @@ Earlier migrations and feature commits are summarised in `errorsV2.md` (internal
 
 ## 6. Verification Matrix (per-PR)
 
-| Concern | Command |
-|---|---|
-| Lint + types | `pnpm check` |
-| Tests | `pnpm test` |
-| Audit | `pnpm audit --prod --audit-level high` |
-| Build | `pnpm build` |
-| E2E (DB) | `RUN_DATABASE_E2E=1 pnpm test:e2e` |
-| Format | `pnpm format:check` |
-| Migration | `pnpm db:migrate:dev --name <descriptive>` |
+| Concern      | Command                                    |
+| ------------ | ------------------------------------------ |
+| Lint + types | `pnpm check`                               |
+| Tests        | `pnpm test`                                |
+| Audit        | `pnpm audit --prod --audit-level high`     |
+| Build        | `pnpm build`                               |
+| E2E (DB)     | `RUN_DATABASE_E2E=1 pnpm test:e2e`         |
+| Format       | `pnpm format:check`                        |
+| Migration    | `pnpm db:migrate:dev --name <descriptive>` |
 
 See `AGENTS.md` §7 for the exact workflow.

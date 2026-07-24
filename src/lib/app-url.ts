@@ -10,3 +10,19 @@ export function getAppOrigin() {
   }
   return new URL(env.NEXT_PUBLIC_APP_URL).origin;
 }
+
+export function isCustomProfileHost(hostHeader: string | null) {
+  const hostname = (hostHeader ?? "").split(":")[0]?.toLowerCase() ?? "";
+  if (!hostname) return false;
+  const canonical = new URL(getAppOrigin()).hostname;
+  return !(
+    hostname === canonical ||
+    hostname ===
+      (canonical.startsWith("www.")
+        ? canonical.slice(4)
+        : `www.${canonical}`) ||
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname.endsWith(".vercel.app")
+  );
+}
