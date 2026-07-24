@@ -9,6 +9,7 @@ import { cache } from "react";
 import { Brand } from "~/components/brand";
 import { ProfileEffects } from "~/components/profile/profile-effects";
 import { ProfileBackgroundVideo } from "~/components/profile/profile-background-video";
+import { ProfileAudioPlayer } from "~/components/profile/profile-audio-player";
 import { ProfileGate } from "~/components/profile/profile-gate";
 import { ShareButton } from "~/components/profile/share-button";
 import { VisitorCounter } from "~/components/profile/visitor-counter";
@@ -177,6 +178,9 @@ export default async function PublicProfilePage({
         <div className="olnk-gradient-motion absolute inset-0" />
       )}
       <ProfileEffects effects={appearance.effects} />
+      {(appearance.audio.enabled || appearance.audio.entryEnabled) && (
+        <ProfileAudioPlayer settings={appearance.audio} />
+      )}
       <div
         className="relative mx-auto flex min-h-[calc(100dvh-3.5rem)] w-full flex-col"
         style={{ maxWidth: appearance.layout.contentWidth }}

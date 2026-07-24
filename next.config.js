@@ -12,8 +12,8 @@ const config = {
   async headers() {
     const scriptPolicy =
       process.env.NODE_ENV === "development"
-        ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-        : "script-src 'self' 'unsafe-inline'";
+        ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://open.spotify.com https://w.soundcloud.com"
+        : "script-src 'self' 'unsafe-inline' https://open.spotify.com https://w.soundcloud.com";
     const contentSecurityPolicy = [
       "default-src 'self'",
       scriptPolicy,
@@ -22,7 +22,7 @@ const config = {
       "media-src 'self' blob: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://*.adyen.com",
-      "frame-src https://www.paytr.com https://*.iyzipay.com https://*.iyzico.com https://www.youtube-nocookie.com https://open.spotify.com",
+      "frame-src https://www.paytr.com https://*.iyzipay.com https://*.iyzico.com https://www.youtube-nocookie.com https://open.spotify.com https://w.soundcloud.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self' https://www.paytr.com https://*.iyzipay.com https://*.iyzico.com",
