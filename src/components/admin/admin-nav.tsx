@@ -37,7 +37,7 @@ export function AdminNav({ horizontal = false }: { horizontal?: boolean }) {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center gap-3 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold transition ${
+            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold whitespace-nowrap transition ${
               active
                 ? "bg-paper text-ink"
                 : "text-paper/70 hover:bg-paper/10 hover:text-paper"
@@ -49,13 +49,11 @@ export function AdminNav({ horizontal = false }: { horizontal?: boolean }) {
         );
       })}
       <div
-        className={
-          horizontal ? "bg-ink/15 mx-2 w-px" : "bg-paper/15 my-3 h-px"
-        }
+        className={horizontal ? "bg-ink/15 mx-2 w-px" : "bg-paper/15 my-3 h-px"}
       />
       <Link
         href="/dashboard"
-        className={`flex items-center gap-3 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold ${
+        className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold whitespace-nowrap ${
           horizontal
             ? "text-ink/70 hover:bg-cream hover:text-ink"
             : "text-paper/70 hover:bg-paper/10 hover:text-paper"

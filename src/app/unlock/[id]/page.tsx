@@ -19,10 +19,20 @@ export default async function UnlockPage({
 }) {
   const { id } = await params;
   const query = await searchParams;
+  const now = new Date();
   const link = await db.profileLink.findFirst({
     where: {
       id,
-      user: { accountStatus: "ACTIVE", deletionRequestedAt: null },
+      user: {
+        deletionRequestedAt: null,
+        OR: [
+          { accountStatus: "ACTIVE" },
+          {
+            accountStatus: "SUSPENDED",
+            accountStatusExpiresAt: { lte: now },
+          },
+        ],
+      },
     },
     include: { user: { select: { username: true } } },
   });

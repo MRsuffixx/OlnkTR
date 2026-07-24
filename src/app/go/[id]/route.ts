@@ -12,13 +12,23 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+  const now = new Date();
   const link = await db.profileLink.findFirst({
     where: {
       id,
       enabled: true,
       deletedAt: null,
       url: { not: "" },
-      user: { accountStatus: "ACTIVE", deletionRequestedAt: null },
+      user: {
+        deletionRequestedAt: null,
+        OR: [
+          { accountStatus: "ACTIVE" },
+          {
+            accountStatus: "SUSPENDED",
+            accountStatusExpiresAt: { lte: now },
+          },
+        ],
+      },
     },
     include: { user: { select: { username: true } } },
   });
@@ -27,7 +37,6 @@ export async function GET(
     return NextResponse.redirect(new URL("/", request.url), 302);
   }
 
-  const now = new Date();
   const scheduledOut =
     (link.scheduledStart !== null && link.scheduledStart > now) ||
     (link.scheduledEnd !== null && link.scheduledEnd <= now);

@@ -16,7 +16,10 @@ export function AdminBarChart({
   const height = 220;
   const padding = 28;
   const max = Math.max(1, ...data.map((item) => item.value));
-  const barWidth = Math.max(2, (width - padding * 2) / Math.max(1, data.length));
+  const barWidth = Math.max(
+    2,
+    (width - padding * 2) / Math.max(1, data.length),
+  );
   return (
     <figure>
       <figcaption className="font-black">{title}</figcaption>
@@ -38,8 +41,7 @@ export function AdminBarChart({
               className="stroke-ink/20"
             />
             {data.map((item, index) => {
-              const barHeight =
-                (item.value / max) * (height - padding * 2 - 8);
+              const barHeight = (item.value / max) * (height - padding * 2 - 8);
               return (
                 <rect
                   key={`${item.label}-${index}`}

@@ -12,13 +12,7 @@ import { api } from "~/trpc/server";
 
 export const metadata = { title: "Sistem" };
 
-function Status({
-  enabled,
-  label,
-}: {
-  enabled: boolean;
-  label: string;
-}) {
+function Status({ enabled, label }: { enabled: boolean; label: string }) {
   return (
     <div className="flex items-center justify-between gap-4 py-3">
       <span className="font-bold">{label}</span>
@@ -117,7 +111,7 @@ export default async function AdminSystemPage() {
             </div>
             <div>
               <dt className="text-ink/70 text-xs font-bold">Kanonik adres</dt>
-              <dd className="mt-1 break-all font-mono">{system.appOrigin}</dd>
+              <dd className="mt-1 font-mono break-all">{system.appOrigin}</dd>
             </div>
           </dl>
         </article>

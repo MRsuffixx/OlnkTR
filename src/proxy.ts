@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { getAppOrigin } from "~/lib/app-url";
+import { canPublishAccount } from "~/server/auth/account-access";
 import { db } from "~/server/db";
 import { hasProAccess } from "~/server/entitlements";
 
@@ -43,6 +44,8 @@ export async function proxy(request: NextRequest) {
         select: {
           username: true,
           accountStatus: true,
+          accountStatusExpiresAt: true,
+          deletionRequestedAt: true,
           subscription: true,
           manualEntitlement: true,
         },
@@ -56,7 +59,7 @@ export async function proxy(request: NextRequest) {
   );
   if (
     domain.status !== "VERIFIED" ||
-    domain.user.accountStatus !== "ACTIVE" ||
+    !canPublishAccount(domain.user) ||
     !domain.user.username ||
     !entitled
   )

@@ -22,9 +22,7 @@ export default async function AdminLayout({
       <div className="bg-cream min-h-dvh lg:grid lg:grid-cols-[250px_1fr]">
         <aside className="bg-ink text-paper hidden min-h-dvh p-5 lg:sticky lg:top-0 lg:block lg:h-dvh">
           <Brand />
-          <p className="text-paper/60 mt-2 text-xs">
-            {session.user.email}
-          </p>
+          <p className="text-paper/60 mt-2 text-xs">{session.user.email}</p>
           <div className="mt-8">
             <AdminNav />
           </div>

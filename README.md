@@ -126,6 +126,20 @@ Open `http://localhost:3000` in a browser.
 | `pnpm db:migrate:dev` | Create or apply development migrations |
 | `pnpm db:migrate` | Apply committed migrations |
 | `pnpm db:studio` | Open Prisma Studio |
+| `pnpm admin:role <email> --role ADMIN\|USER` | Promote or demote an existing account from the server |
+
+### Creating the first administrator
+
+Admin access is never granted through a public API or dashboard toggle. Run the
+database-backed command from a trusted server or deployment shell:
+
+```bash
+pnpm admin:role owner@example.com --role ADMIN
+```
+
+The account must already exist. Demotion uses `--role USER`; demoting the last admin is
+refused unless `--force-last-admin` is supplied deliberately. Every change is written to
+the immutable admin audit log.
 
 ## Project structure
 

@@ -120,7 +120,9 @@ export default async function AdminUsersPage({
                   <tr key={user.id} className="hover:bg-cream/40">
                     <td className="px-5 py-4">
                       <strong className="block">
-                        {user.username ? `@${user.username}` : "Kullanıcı adı yok"}
+                        {user.username
+                          ? `@${user.username}`
+                          : "Kullanıcı adı yok"}
                       </strong>
                       <span className="text-ink/70 text-xs">{user.email}</span>
                     </td>
@@ -139,7 +141,8 @@ export default async function AdminUsersPage({
                       </span>
                     </td>
                     <td className="text-ink/70 text-xs">
-                      {user._count.links} bağlantı · {user._count.clicks} tıklama
+                      {user._count.links} bağlantı · {user._count.clicks}{" "}
+                      tıklama
                     </td>
                     <td className="text-ink/70 text-xs">
                       {user.lastActiveAt

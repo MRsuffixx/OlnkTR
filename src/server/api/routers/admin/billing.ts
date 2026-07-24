@@ -18,12 +18,7 @@ import {
 import { adminProcedure, createTRPCRouter } from "~/server/api/trpc";
 import { getPaymentProvider } from "~/server/payments/registry";
 
-const ACTIVE_STATUSES = [
-  "ACTIVE",
-  "TRIALING",
-  "PAST_DUE",
-  "CANCELED",
-] as const;
+const ACTIVE_STATUSES = ["ACTIVE", "TRIALING", "PAST_DUE", "CANCELED"] as const;
 const ADJUSTABLE_STATUSES = new Set<SubscriptionStatus>(ACTIVE_STATUSES);
 
 function subscriptionTarget(subscription: {

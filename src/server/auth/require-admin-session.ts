@@ -3,10 +3,7 @@ import "server-only";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
-import {
-  adminActorLabel,
-  recordAdminAudit,
-} from "~/server/admin/audit";
+import { adminActorLabel, recordAdminAudit } from "~/server/admin/audit";
 import { auth } from "~/server/auth";
 import {
   canAccessAccount,

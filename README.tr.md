@@ -123,6 +123,20 @@ Tarayıcıda `http://localhost:3000` adresini açın.
 | `pnpm db:migrate:dev` | Geliştirme geçişlerini oluşturur veya uygular |
 | `pnpm db:migrate` | Sürümlenmiş geçişleri uygular |
 | `pnpm db:studio` | Prisma Studio'yu açar |
+| `pnpm admin:role <e-posta> --role ADMIN\|USER` | Mevcut bir hesabı sunucudan yönetici yapar veya yetkisini kaldırır |
+
+### İlk yöneticiyi oluşturma
+
+Yönetici yetkisi genel bir API ya da panel düğmesiyle verilmez. Güvenilir bir sunucu veya
+dağıtım kabuğunda veritabanına doğrudan bağlanan komutu çalıştırın:
+
+```bash
+pnpm admin:role sahip@example.com --role ADMIN
+```
+
+Hesap önceden var olmalıdır. Yetkiyi kaldırmak için `--role USER` kullanılır; son
+yöneticinin yetkisini kaldırma işlemi, bilinçli olarak `--force-last-admin` verilmedikçe
+reddedilir. Her değişiklik değiştirilemez yönetici denetim günlüğüne yazılır.
 
 ## Proje yapısı
 

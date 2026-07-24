@@ -26,7 +26,9 @@ export default async function AdminAnalyticsPage() {
       <section className="mt-6 grid gap-3 sm:grid-cols-3">
         <article className="bg-paper border-ink/10 rounded-2xl border p-5">
           <p className="text-ink/70 text-xs font-bold">Son 30 gün kayıt</p>
-          <p className="mt-2 text-3xl font-black">{platform.growth.signups30}</p>
+          <p className="mt-2 text-3xl font-black">
+            {platform.growth.signups30}
+          </p>
         </article>
         <article className="bg-paper border-ink/10 rounded-2xl border p-5">
           <p className="text-ink/70 text-xs font-bold">Önceki 30 gün</p>
@@ -87,7 +89,9 @@ export default async function AdminAnalyticsPage() {
 
       <section className="mt-6 grid gap-6 xl:grid-cols-2">
         <article className="bg-paper border-ink/10 overflow-hidden rounded-3xl border">
-          <h2 className="p-5 text-xl font-black">En çok görüntülenen profiller</h2>
+          <h2 className="p-5 text-xl font-black">
+            En çok görüntülenen profiller
+          </h2>
           {platform.topProfiles.length === 0 ? (
             <p className="text-ink/70 p-10 text-center text-sm">Veri yok.</p>
           ) : (
@@ -118,7 +122,9 @@ export default async function AdminAnalyticsPage() {
           )}
         </article>
         <article className="bg-paper border-ink/10 overflow-hidden rounded-3xl border">
-          <h2 className="p-5 text-xl font-black">En çok tıklanan bağlantılar</h2>
+          <h2 className="p-5 text-xl font-black">
+            En çok tıklanan bağlantılar
+          </h2>
           {platform.topLinks.length === 0 ? (
             <p className="text-ink/70 p-10 text-center text-sm">Veri yok.</p>
           ) : (

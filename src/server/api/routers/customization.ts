@@ -338,10 +338,7 @@ export const customizationRouter = createTRPCRouter({
             _sum: { sizeBytes: true },
           }),
         ]);
-        const quota = hasProAccess(
-          user?.subscription,
-          user?.manualEntitlement,
-        )
+        const quota = hasProAccess(user?.subscription, user?.manualEntitlement)
           ? 250 * 1024 * 1024
           : 10 * 1024 * 1024;
         if ((used._sum.sizeBytes ?? 0) + input.sizeBytes > quota)

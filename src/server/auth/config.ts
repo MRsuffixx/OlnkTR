@@ -7,10 +7,7 @@ import { cookies } from "next/headers";
 
 import { env } from "~/env";
 import { normalizeEmail } from "~/lib/email";
-import {
-  adminActorLabel,
-  recordAdminAudit,
-} from "~/server/admin/audit";
+import { adminActorLabel, recordAdminAudit } from "~/server/admin/audit";
 import {
   canAccessAccount,
   getAccountAccess,
@@ -20,6 +17,7 @@ import {
   claimUsername,
   UsernameUnavailableError,
 } from "~/server/identity/claim-username";
+import { consumeRateLimit } from "~/server/security/rate-limit";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -167,7 +165,39 @@ export const authConfig = {
   callbacks: {
     signIn: async ({ user }) => {
       if (!user.id) return true;
-      return canAccessAccount(await getAccountAccess(user.id));
+      const account = await getAccountAccess(user.id);
+      if (account?.role === "ADMIN") {
+        const rate = await consumeRateLimit({
+          key: `admin-auth:${account.id}`,
+          limit: 20,
+          windowMs: 15 * 60 * 1000,
+          blockMs: 30 * 60 * 1000,
+        });
+        if (!rate.allowed) {
+          await recordAdminAudit({
+            actorUserId: account.id,
+            actorLabel: adminActorLabel(account),
+            category: "AUTHORIZATION",
+            action: "ADMIN_SIGN_IN_RATE_LIMIT",
+            outcome: "DENIED",
+            reason: "Yönetici oturum açma hız sınırı aşıldı.",
+            metadata: { retryAfterSeconds: rate.retryAfterSeconds },
+          });
+          return false;
+        }
+        if (!canAccessAccount(account)) {
+          await recordAdminAudit({
+            actorUserId: account.id,
+            actorLabel: adminActorLabel(account),
+            category: "AUTHORIZATION",
+            action: "ADMIN_SIGN_IN_DENIED",
+            outcome: "DENIED",
+            reason: "Yönetici hesabı etkin değil.",
+          });
+          return false;
+        }
+      }
+      return canAccessAccount(account);
     },
     session: async ({ session, user }) => {
       const account = await db.user.findUnique({

@@ -81,11 +81,15 @@ export function AdminWorkspaceEditor({ user }: { user: UserDetail }) {
 
   function updateLink(
     id: string,
-    update: (link: WorkspaceInput["links"][number]) => WorkspaceInput["links"][number],
+    update: (
+      link: WorkspaceInput["links"][number],
+    ) => WorkspaceInput["links"][number],
   ) {
     setWorkspace((current) => ({
       ...current,
-      links: current.links.map((link) => (link.id === id ? update(link) : link)),
+      links: current.links.map((link) =>
+        link.id === id ? update(link) : link,
+      ),
     }));
   }
 
@@ -107,7 +111,8 @@ export function AdminWorkspaceEditor({ user }: { user: UserDetail }) {
         <div>
           <h2 className="text-2xl font-black">Profil ve içerik düzenleyici</h2>
           <p className="text-ink/70 mt-1 text-sm">
-            Profil, tema ve {changedLinkCount} bağlantı tek revizyonla kaydedilir.
+            Profil, tema ve {changedLinkCount} bağlantı tek revizyonla
+            kaydedilir.
           </p>
         </div>
         <button
@@ -135,7 +140,9 @@ export function AdminWorkspaceEditor({ user }: { user: UserDetail }) {
                   customCss: result.sanitizedCustomCss,
                 }));
                 setReason("");
-                setNotice("Değişiklikler kaydedildi ve denetim günlüğüne işlendi.");
+                setNotice(
+                  "Değişiklikler kaydedildi ve denetim günlüğüne işlendi.",
+                );
               })
               .catch((error: unknown) =>
                 setNotice(
@@ -156,7 +163,10 @@ export function AdminWorkspaceEditor({ user }: { user: UserDetail }) {
         </button>
       </div>
       {notice && (
-        <p role="status" className="bg-cream mt-4 rounded-xl p-3 text-sm font-bold">
+        <p
+          role="status"
+          className="bg-cream mt-4 rounded-xl p-3 text-sm font-bold"
+        >
           {notice}
         </p>
       )}
@@ -344,9 +354,7 @@ export function AdminWorkspaceEditor({ user }: { user: UserDetail }) {
                         updateLink(link.id, (current) => ({
                           ...current,
                           embedType: event.target.value as
-                            | "LINK"
-                            | "YOUTUBE"
-                            | "SPOTIFY",
+                            "LINK" | "YOUTUBE" | "SPOTIFY",
                         }))
                       }
                       className="input mt-1 w-full"
@@ -399,7 +407,8 @@ export function AdminWorkspaceEditor({ user }: { user: UserDetail }) {
                   </label>
                   {link.passwordProtected && (
                     <span className="text-xs font-bold text-amber-800">
-                      Parola koruması etkin; parola özeti yöneticiye gösterilmez.
+                      Parola koruması etkin; parola özeti yöneticiye
+                      gösterilmez.
                     </span>
                   )}
                 </div>
@@ -421,8 +430,8 @@ export function AdminWorkspaceEditor({ user }: { user: UserDetail }) {
                   ...current,
                   theme: {
                     ...current.theme,
-                    backgroundType: event.target.value as
-                      WorkspaceInput["theme"]["backgroundType"],
+                    backgroundType: event.target
+                      .value as WorkspaceInput["theme"]["backgroundType"],
                   },
                 }))
               }
@@ -470,9 +479,9 @@ export function AdminWorkspaceEditor({ user }: { user: UserDetail }) {
           </label>
           {(
             [
-            ["buttonColor", "Düğme rengi"],
-            ["textColor", "Metin rengi"],
-            ["accentColor", "Vurgu rengi"],
+              ["buttonColor", "Düğme rengi"],
+              ["textColor", "Metin rengi"],
+              ["accentColor", "Vurgu rengi"],
             ] as const
           ).map(([field, label]) => (
             <label key={field} className="text-xs font-bold">
@@ -498,7 +507,7 @@ export function AdminWorkspaceEditor({ user }: { user: UserDetail }) {
 
       <div className="border-ink/10 mt-7 grid gap-4 border-t pt-6 lg:grid-cols-2">
         <label className="text-sm font-bold">
-          Yapılandırılmış görünüm JSON'u
+          Yapılandırılmış görünüm JSON&apos;u
           <textarea
             value={appearanceText}
             onChange={(event) => setAppearanceText(event.target.value)}

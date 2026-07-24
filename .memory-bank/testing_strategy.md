@@ -36,8 +36,8 @@ Colocation keeps tests close to the module they exercise and easy to discover. N
 | File | Tests | What it locks |
 |---|---|---|
 | `src/lib/profile-rendering.test.ts` | 3 | `outline` button preserves color/border/transparent background; every offered font maps to `var(--font-…)`; Spotify and YouTube URL transformations. |
-| `src/lib/schemas.test.ts` | 2 | Duplicate link ids rejected; 50 links accepted, 51st rejected. |
-| `src/server/entitlements.test.ts` | 3 (parameterised) | `hasProAccess` requires future `currentPeriodEnd`; closed for `INCOMPLETE/UNPAID/EXPIRED/REFUNDED`; `resolveAppearanceForPlan(stored, false)` deterministically locks Pro paths. |
+| `src/lib/schemas.test.ts` | 3 | Duplicate link ids rejected; 50 links accepted, 51st rejected; temporary admin suspensions require a future expiry. |
+| `src/server/entitlements.test.ts` | 4 (parameterised) | Provider entitlement status/period rules, deterministic free fallbacks, and active/expired/revoked/future manual grants. |
 | `src/server/payments/adapters/providers.test.ts` | 4 | `mapStripeSubscriptionStatus` always returns non-Pro for unknown; declined Adyen authorisation becomes `payment_failed`/`UNPAID`; iyzico v3 signature fixture; PayTR callback hash fixture. |
 | `src/server/security/custom-css.test.ts` | 3 | Safe selectors scoped to `[data-olnk-profile]`; CSS-escape obfuscation rejected; global selectors and `url(...)` stripped. |
 
@@ -66,6 +66,7 @@ Run: `RUN_DATABASE_E2E=1 pnpm test:e2e`. Without the env flag, DB-backed tests a
 `tests/e2e/public-accessibility.spec.ts` covers:
 - `/`, `/login`, `/register`: axe-core scan for `wcag2a/2aa/21aa` with no serious/critical violations.
 - `/dashboard/billing?checkout=return&intent=untrusted`: unauthenticated visitor is redirected to `/login`.
+- `/admin/users`: unauthenticated visitors are redirected before admin data renders.
 - `/this-profile-does-not-exist-404`: `404` response and the `"Bu adres henüz kimsenin değil."` copy. **Gated by `RUN_DATABASE_E2E=1`**; CI sets this flag.
 
 ---

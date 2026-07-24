@@ -66,10 +66,20 @@ export async function POST(
   if (!password || password.length < 6 || password.length > 72)
     return rejected(request, id);
 
+  const now = new Date();
   const link = await db.profileLink.findFirst({
     where: {
       id,
-      user: { accountStatus: "ACTIVE", deletionRequestedAt: null },
+      user: {
+        deletionRequestedAt: null,
+        OR: [
+          { accountStatus: "ACTIVE" },
+          {
+            accountStatus: "SUSPENDED",
+            accountStatusExpiresAt: { lte: now },
+          },
+        ],
+      },
     },
   });
   if (!link?.passwordHash || !link.enabled || link.deletedAt)

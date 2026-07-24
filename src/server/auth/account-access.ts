@@ -52,9 +52,27 @@ export function canAccessAccount(
   account: AccountAccessRecord | null | undefined,
 ): account is AccountAccessRecord {
   return Boolean(
+    account?.accountStatus === "ACTIVE" && !account.deletionRequestedAt,
+  );
+}
+
+export function canPublishAccount(
+  account:
+    | Pick<
+        AccountAccessRecord,
+        "accountStatus" | "accountStatusExpiresAt" | "deletionRequestedAt"
+      >
+    | null
+    | undefined,
+  now = new Date(),
+) {
+  return Boolean(
     account &&
-      account.accountStatus === "ACTIVE" &&
-      !account.deletionRequestedAt,
+    !account.deletionRequestedAt &&
+    (account.accountStatus === "ACTIVE" ||
+      (account.accountStatus === "SUSPENDED" &&
+        account.accountStatusExpiresAt !== null &&
+        account.accountStatusExpiresAt <= now)),
   );
 }
 

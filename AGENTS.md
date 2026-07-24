@@ -66,8 +66,8 @@
 ├── tsconfig.json                 # strict + `~/*` alias
 ├── next.config.js                # CSP, serverExternalPackages, env side-effect
 ├── prisma.config.ts              # Prisma datasource URL
-├── prisma/schema.prisma          # 21 models, 15 enums
-├── prisma/migrations/            # 4 migrations — DO NOT edit applied ones
+├── prisma/schema.prisma          # 22 models, 21 enums
+├── prisma/migrations/            # 5 migrations — DO NOT edit applied ones
 ├── eslint.config.js              # flat config; `--max-warnings=0`
 ├── prettier.config.js            # `prettier-plugin-tailwindcss` only
 ├── vitest.config.ts              # aliases ~ and server-only, node env
@@ -173,6 +173,10 @@
 
 - **Auth:** server-side checks via `protectedProcedure` (tRPC) and `requireDashboardSession()` (RSC).
 - **Sessions:** `database` strategy; `Session.sessionToken` is unique.
+- **Admin RBAC:** `adminProcedure` and `requireAdminSession()` reload `User.role` and
+  account state from PostgreSQL on every operation/page request.
+- **Admin audit:** sensitive actions require typed confirmation and persist immutable
+  `AdminAuditLog` snapshots; provider secrets and payment-method identifiers stay server-only.
 - **CSRF:** Next.js + Auth.js defaults.
 - **Rate limit:** DB-backed sliding window via `consumeRateLimit()` (see `src/server/security/rate-limit.ts`).
 - **Trusted IP:** `env.TRUSTED_IP_HEADER` (none | cf-connecting-ip | x-vercel-forwarded-for | x-forwarded-for | x-real-ip). Default `none` = no country recorded.
@@ -229,6 +233,7 @@ pnpm db:migrate:dev          # Apply migrations + create new one in dev
 pnpm db:push                 # Dev-only schema sync (no migration)
 pnpm db:migrate              # Deploy migrations (CI / production)
 pnpm db:studio               # Prisma Studio
+pnpm admin:role <email> --role ADMIN|USER  # Trusted-shell role management
 ```
 
 ### Development
@@ -346,6 +351,12 @@ pnpm audit --prod --audit-level high   # CI gate
 | `/dashboard/analytics` | required | RSC | 30-day hard-coded; router supports 7/30/90 |
 | `/dashboard/billing` | required | RSC | `<BillingSettings>` + `?checkout=&intent=` |
 | `/dashboard/settings` | required | RSC | `<SettingsForm/>` + `<DomainSettings/>` |
+| `/admin` | ADMIN | RSC | Platform overview; `requireAdminSession()` before data |
+| `/admin/users`, `/admin/users/[id]` | ADMIN | RSC | User search, safe detail, audited operations |
+| `/admin/billing`, `/admin/billing/[id]` | ADMIN | RSC | Unified subscription operations |
+| `/admin/analytics` | ADMIN | RSC | Platform metrics and charts |
+| `/admin/system` | ADMIN | RSC | Read-only provider/config visibility |
+| `/admin/audit` | ADMIN | RSC | Immutable audit browser |
 | `/api/auth/[...nextauth]` | n/a | route.ts | Auth.js handlers |
 | `/api/trpc/[trpc]` | n/a | route.ts | tRPC fetch adapter |
 | `/api/webhooks/[provider]` | n/a | route.ts | Universal billing webhook |
@@ -368,6 +379,7 @@ pnpm audit --prod --audit-level high   # CI gate
 | Add an env var | `.env.example` + `src/env.js` + `ENVIRONMENT.md` |
 | Add a payment provider | `src/server/payments/types.ts` + `adapters/<name>.ts` + `registry.ts` |
 | Add a feature flag / Pro gate | `src/server/entitlements.ts` + `src/config/feature-catalog.ts` |
+| Add an admin operation | `src/lib/schemas.ts` + `src/server/api/routers/admin/*` + `src/server/admin/audit.ts` |
 | Add a cron job | `src/app/api/maintenance/route.ts` |
 | Modify the public profile | `src/app/[username]/page.tsx` (RSC) + `src/components/profile/*` |
 | Modify the editor | `src/components/dashboard/workspace-editor.tsx` |

@@ -112,8 +112,7 @@ export const adminInsightsRouter = createTRPCRouter({
     for (const bucket of activityBuckets) {
       const item = byDate.get(utcDay(bucket.date));
       if (!item) continue;
-      if (bucket.eventType === "CLICK")
-        item.clicks += bucket._sum.count ?? 0;
+      if (bucket.eventType === "CLICK") item.clicks += bucket._sum.count ?? 0;
       else item.views += bucket._sum.count ?? 0;
     }
     const proIds = new Set([
@@ -209,7 +208,9 @@ export const adminInsightsRouter = createTRPCRouter({
         },
       }),
     ]);
-    const profileMap = new Map(profiles.map((profile) => [profile.id, profile]));
+    const profileMap = new Map(
+      profiles.map((profile) => [profile.id, profile]),
+    );
     const linkMap = new Map(links.map((link) => [link.id, link]));
     return {
       growth: {

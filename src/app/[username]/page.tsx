@@ -23,6 +23,7 @@ import {
 } from "~/lib/profile-rendering";
 import { db } from "~/server/db";
 import { recordProfileView } from "~/server/analytics/ingest";
+import { canPublishAccount } from "~/server/auth/account-access";
 import { hasProAccess, resolveAppearanceForPlan } from "~/server/entitlements";
 
 const getProfile = cache((username: string) =>
@@ -47,7 +48,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { username } = await params;
   const profile = await getProfile(username);
-  if (!profile?.username || profile.accountStatus !== "ACTIVE")
+  if (!profile?.username || !canPublishAccount(profile))
     return { title: "Profil bulunamadı" };
   const title = profile.name ?? `@${profile.username}`;
   const description = profile.bio || `${title} bağlantılarını olnk'te keşfet.`;
@@ -72,11 +73,8 @@ export default async function PublicProfilePage({
 }) {
   const { username } = await params;
   const profile = await getProfile(username);
-  if (!profile?.username || profile.accountStatus !== "ACTIVE") notFound();
-  const pro = hasProAccess(
-    profile.subscription,
-    profile.manualEntitlement,
-  );
+  if (!profile?.username || !canPublishAccount(profile)) notFound();
+  const pro = hasProAccess(profile.subscription, profile.manualEntitlement);
   const appearance = resolveAppearanceForPlan(
     profile.theme?.settings,
     pro,

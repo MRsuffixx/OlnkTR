@@ -117,10 +117,7 @@ export const workspaceRouter = createTRPCRouter({
         },
       });
       if (!current) throw new TRPCError({ code: "NOT_FOUND" });
-      const pro = hasProAccess(
-        current.subscription,
-        current.manualEntitlement,
-      );
+      const pro = hasProAccess(current.subscription, current.manualEntitlement);
       const appearance = mergePermittedAppearance(
         input.appearance,
         current.theme?.settings,

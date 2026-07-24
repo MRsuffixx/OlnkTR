@@ -9,11 +9,7 @@ import { api } from "~/trpc/react";
 
 type Detail = NonNullable<RouterOutputs["admin"]["billing"]["detail"]>;
 
-export function AdminSubscriptionActions({
-  detail,
-}: {
-  detail: Detail;
-}) {
+export function AdminSubscriptionActions({ detail }: { detail: Detail }) {
   const router = useRouter();
   const [days, setDays] = useState(30);
   const [notice, setNotice] = useState<string | null>(null);
@@ -28,7 +24,10 @@ export function AdminSubscriptionActions({
   return (
     <>
       {notice && (
-        <p role="status" className="bg-yellow/30 mb-4 rounded-xl p-3 text-sm font-bold">
+        <p
+          role="status"
+          className="bg-yellow/30 mb-4 rounded-xl p-3 text-sm font-bold"
+        >
           {notice}
         </p>
       )}

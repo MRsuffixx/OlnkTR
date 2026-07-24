@@ -1,7 +1,7 @@
 # PROJECT_CONTEXT.md — olnk.tr Project Blueprint
 
 > Project: **olnk.tr** · Package: `olnk-tr` v0.2.0 · Private.
-> Branch: `codex/stabilize-upgrades-fixes` · HEAD: `433f4fb`.
+> Branch: `codex/stabilize-upgrades-fixes`.
 > License: **olnk.tr Monetized Attribution License 1.0 (OMAL 1.0)** — source-available, not OSI-approved.
 
 ---
@@ -20,6 +20,8 @@
 - **Storage:** S3-compatible object storage (R2 / MinIO / Backblaze supported) for avatars and backgrounds.
 - **Custom domains:** Pro-gated. DNS TXT verification via `_olnk.<domain>`. Reclaim-challenge flow for previously owned domains.
 - **Account deletion:** async pipeline (`AccountDeletionJob`) with exponential backoff; cascades through all User-related tables.
+- **Admin operations:** database-authoritative RBAC, user and billing operations, platform
+  charts, provider-health visibility, time-bounded manual Pro grants, and immutable audit.
 
 ### Target audience
 - Turkish-speaking creators (influencers, podcasters, YouTubers).
@@ -116,13 +118,14 @@
 ├── start-database.sh               # T3 starter legacy script
 │
 ├── prisma/
-│   ├── schema.prisma               # 511 lines · 21 models · 15 enums
+│   ├── schema.prisma               # 22 models · 21 enums
 │   └── migrations/
 │       ├── migration_lock.toml
 │       ├── 20260720130000_init_product/
 │       ├── 20260720180000_billing_customization/
 │       ├── 20260720230000_payment_state_hardening/
-│       └── 20260720231000_identity_security/
+│       ├── 20260720231000_identity_security/
+│       └── 20260724120000_admin_control_room/
 │
 ├── src/
 │   ├── env.js                      # T3 env: server + client + runtime

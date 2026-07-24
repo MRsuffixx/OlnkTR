@@ -40,8 +40,8 @@ export function AdminUserControls({ user }: { user: UserDetail }) {
 
   const manualActive = Boolean(
     user.manualEntitlement &&
-      !user.manualEntitlement.revokedAt &&
-      user.manualEntitlement.expiresAt > new Date(),
+    !user.manualEntitlement.revokedAt &&
+    user.manualEntitlement.expiresAt > new Date(),
   );
 
   return (
@@ -64,7 +64,10 @@ export function AdminUserControls({ user }: { user: UserDetail }) {
       </section>
 
       {notice && (
-        <p role="status" className="bg-yellow/30 rounded-2xl p-4 text-sm font-bold">
+        <p
+          role="status"
+          className="bg-yellow/30 rounded-2xl p-4 text-sm font-bold"
+        >
           {notice}
         </p>
       )}
@@ -132,9 +135,7 @@ export function AdminUserControls({ user }: { user: UserDetail }) {
           <select
             value={status}
             onChange={(event) =>
-              setStatus(
-                event.target.value as "ACTIVE" | "SUSPENDED" | "BANNED",
-              )
+              setStatus(event.target.value as "ACTIVE" | "SUSPENDED" | "BANNED")
             }
             className="input mt-1 w-full"
           >

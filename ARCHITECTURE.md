@@ -1,6 +1,6 @@
 # ARCHITECTURE.md — olnk.tr System Design
 
-> Last updated against HEAD `433f4fb` on `codex/stabilize-upgrades-fixes`.
+> Maintained on `codex/stabilize-upgrades-fixes`.
 > This document maps modules, data flow, integrations, and the cross-cutting concerns that every contributor must understand before changing the system.
 
 ---
@@ -127,6 +127,19 @@ processBillingEvent(provider, event, rawBody)
 
 PayTR responds `text/plain OK`; others respond `{ received: true }`.
 
+### 2.6 Admin control room (`/admin/*`)
+
+1. Every RSC page calls `requireAdminSession()` before issuing its server-side tRPC query.
+2. Every RPC uses `adminProcedure`, which independently reloads the user's current role and
+   account state, applies the dedicated admin rate limit, and rejects stale/revoked sessions.
+3. Sensitive mutations require a reason plus typed confirmation and append an
+   `AdminAuditLog` row in the same transaction whenever the operation is local.
+4. Billing cancellation calls the existing provider adapter; success and failure are both
+   audited. Provider secrets, payment-method IDs, and raw webhook payloads never cross the
+   admin API boundary.
+5. Troubleshooting uses an explicit public-profile preview. The system deliberately does
+   not mint an impersonated user session.
+
 ---
 
 ## 3. Core Modules & Services
@@ -141,8 +154,11 @@ PayTR responds `text/plain OK`; others respond `{ received: true }`.
 | `customization` | `domainOverview`, `addDomain`, `verifyDomain`, `beginDomainReclaim`, `completeDomainReclaim`, `removeDomain`, `uploadStatus`, `createUpload`, `finalizeUpload` | Pro-gated where appropriate; rate-limited per IP. |
 | `username` | `check` (public), `checkForAccount`, `claim` | `claim` uses `claimUsername()` (advisory lock). |
 | `workspace` | `get`, `save`, `setLinkPassword` | `save` performs revision-checked upsert + sanitized CSS. |
+| `admin` | `users.*`, `billing.*`, `insights.overview`, `system.overview`, `audit.list` | Nested routers; every leaf is wrapped by `adminProcedure`. |
 
-`publicProcedure` and `protectedProcedure` (`src/server/api/trpc.ts`) define the auth boundary. `protectedProcedure` throws `UNAUTHORIZED` with the Turkish message `"Oturum açmanız gerekiyor."`.
+`publicProcedure`, `protectedProcedure`, and `adminProcedure` (`src/server/api/trpc.ts`)
+define the auth boundary. Protected calls reload live account state; admin calls additionally
+reload the database role and use a distinct rate-limit/audit path.
 
 ### 3.2 Auth (`src/server/auth/`)
 
@@ -313,6 +329,9 @@ On `401` from any provider: `WebhookVerificationError`. On `500`: a generic erro
 | Payment provider event ordering | `isStale` check on `lastProviderEventAt` | `src/server/payments/service.ts` |
 | Provider switch races | Refuse entitlement transfer mid-flight | `src/server/payments/service.ts` |
 | Race-condition username claims | `pg_advisory_xact_lock` + DB unique index | `src/server/identity/claim-username.ts` |
+| Admin privilege escalation | Live database role check on every RSC page and RPC execution | `require-admin-session.ts`, `adminProcedure` |
+| Sensitive admin operations | Typed confirmation, reason, immutable audit snapshot, dedicated rate limit | `src/server/api/routers/admin/*` |
+| Impersonation abuse | No impersonated session; troubleshooting is scoped to public-profile preview | `/admin/users/[id]` |
 
 ---
 
@@ -337,5 +356,6 @@ On `401` from any provider: `WebhookVerificationError`. On `500`: a generic erro
 | A new appearance field | `src/lib/appearance.ts`, `src/config/feature-catalog.ts`, `src/components/dashboard/appearance-editor.tsx` |
 | A new middleware behaviour | `src/proxy.ts`, `next.config.js` (for headers) |
 | A new cron job | `src/app/api/maintenance/route.ts` |
+| A new admin operation | `src/lib/schemas.ts`, `src/server/api/routers/admin/*`, `src/server/admin/audit.ts` |
 
 See `AGENTS.md` §9 for the canonical lookup.

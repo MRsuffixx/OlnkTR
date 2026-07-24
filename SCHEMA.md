@@ -1,13 +1,13 @@
 # SCHEMA.md — Data Layer Reference
 
-> Source of truth: `prisma/schema.prisma` (511 lines, 21 models, 15 enums).
+> Source of truth: `prisma/schema.prisma` (22 models, 21 enums).
 > Generator: `prisma-client` (ESM) → `../generated/prisma`.
 > Datasource: PostgreSQL.
-> Migrations: 4 (2026-07-20 13:00 → 2026-07-20 23:10). Never edit applied migrations.
+> Migrations: 5 (2026-07-20 13:00 → 2026-07-24 12:00). Never edit applied migrations.
 
 ---
 
-## 1. Enums (15)
+## 1. Enums (21)
 
 | Enum | Values | Used by |
 |---|---|---|
@@ -28,12 +28,14 @@
 | `AssetPurpose` | `AVATAR`, `BACKGROUND` | `UploadedAsset.purpose` |
 | `AssetStatus` | `PENDING` (default), `READY`, `DELETE_PENDING`, `DELETED`, `FAILED` | `UploadedAsset.status` |
 | `AccountDeletionStatus` | `PENDING` (default), `PROCESSING`, `RETRY_PENDING`, `COMPLETED` | `AccountDeletionJob.status` |
-
-> Note: there are 17 enum names listed above (15 source plus status variants counted differently). The official count is 15.
+| `UserRole` | `USER` (default), `ADMIN` | `User.role` |
+| `AccountStatus` | `ACTIVE` (default), `SUSPENDED`, `BANNED` | `User.accountStatus` |
+| `AdminAuditCategory` | `AUTHORIZATION`, `USER`, `CONTENT`, `BILLING`, `SECURITY` | `AdminAuditLog.category` |
+| `AdminAuditOutcome` | `SUCCESS` (default), `DENIED`, `FAILURE` | `AdminAuditLog.outcome` |
 
 ---
 
-## 2. Models (21)
+## 2. Models (22)
 
 ### 2.1 Index
 
@@ -59,9 +61,8 @@
 | 18 | `Account` | — | Auth.js standard |
 | 19 | `Session` | — | DB-backed sessions |
 | 20 | `VerificationToken` | TTL | magic-link tokens |
-| 21 | `RateLimitBucket` | TTL | (already counted above) |
-
-> The actual count is 21; the table above lists each in one row.
+| 21 | `ManualEntitlement` | `revokedAt` | time-bounded, auditable Pro grant |
+| 22 | `AdminAuditLog` | — | immutable admin/security event ledger |
 
 ### 2.2 User
 
@@ -519,6 +520,24 @@ The custom adapter in `src/server/auth/config.ts` overrides `createUser`, `getUs
 
 ---
 
+### 2.11 Admin access, manual entitlements, and audit
+
+- `User.role` is the database authority for RBAC; authenticated requests never trust a
+  role cached only in the browser or session payload.
+- `User.accountStatus` controls dashboard, API, public-profile, redirect, and custom-domain
+  access. Temporary suspensions carry `accountStatusExpiresAt`; expired suspensions resolve
+  as active and are normalised on the next authenticated access.
+- `ManualEntitlement` grants Pro independently of a payment provider. Active access requires
+  `startsAt <= now < expiresAt` and `revokedAt IS NULL`; provider subscriptions are never
+  fabricated for support grants.
+- `AdminAuditLog` stores actor/target snapshots, category, action, outcome, reason, metadata,
+  and a one-way hash of trusted client identity. Foreign keys use `SetNull`, so the record
+  survives account deletion.
+- `BillingInvoice.refundFlag*` is an operational flag only. It never claims that a remote
+  provider refund succeeded.
+
+---
+
 ## 3. Soft-Delete & TTL Summary
 
 | Concern | Mechanism | Cleanup |
@@ -646,6 +665,7 @@ The schema is also the source of `FEATURE_CATALOG` keys (`src/config/feature-cat
 | `20260720180000_billing_customization` | Billing + customization | Adds 8 enums + ProfileViewEvent + Subscription + PaymentIntent + BillingInvoice + WebhookEvent + CustomDomain + UploadedAsset; `Theme.settings`, `customCss`; `ProfileLink.customization`, `scheduledStart/End`, `passwordHash`, `embedType` |
 | `20260720230000_payment_state_hardening` | Payment state | Adds `PROCESSING`; backfills `Subscription.providerStartedAt`/`lastProviderEventAt`; normalises legacy rows (`currentPeriodEnd IS NULL → INCOMPLETE`, `≤ now → EXPIRED`); PaymentIntent gains `checkoutPresentation`, `activeCheckoutKey`, `reconciliationAttempts`, `lastReconciledAt` |
 | `20260720231000_identity_security` | Identity + security | Backfills `Theme.settings` JSONB from legacy columns; adds `User.emailNormalized` (case-insensitive duplicate guard); adds `User.usernameChangedAt`, `deletionRequestedAt`; AuthIntent becomes NOT NULL on `emailNormalized`; drops two duplicate indexes; creates `RateLimitBucket`; adds `ProfileLink.accessVersion`/`deletedAt`; creates `AnalyticsDailyBucket`; adds `referrerHost`/`dedupeKey` to events; creates `UploadedAsset.status` + `AssetPurpose`/`AssetStatus`; backfills asset purpose + size; adds CustomDomain `claimExpiresAt`/`nextRevalidationAt`/`failureCount`; creates `DomainReclaimChallenge`; creates `AccountDeletionJob` |
+| `20260724120000_admin_control_room` | Admin control room | Adds role/account-state/activity fields, manual Pro entitlements, immutable admin audit events, invoice refund flags, supporting indexes, and cascade-safe relations |
 
 ---
 

@@ -199,16 +199,11 @@ export const adminUsersRouter = createTRPCRouter({
         pageCount: Math.max(1, Math.ceil(total / input.pageSize)),
         users: users.map((user) => ({
           ...user,
-          hasPro: hasProAccess(
-            user.subscription,
-            user.manualEntitlement,
-          ),
+          hasPro: hasProAccess(user.subscription, user.manualEntitlement),
           proSource:
-            user.manualEntitlement &&
-            hasProAccess(null, user.manualEntitlement)
+            user.manualEntitlement && hasProAccess(null, user.manualEntitlement)
               ? ("MANUAL" as const)
-              : user.subscription &&
-                  hasProAccess(user.subscription)
+              : user.subscription && hasProAccess(user.subscription)
                 ? ("PROVIDER" as const)
                 : ("FREE" as const),
         })),
@@ -241,7 +236,23 @@ export const adminUsersRouter = createTRPCRouter({
           lastLoginAt: true,
           lastActiveAt: true,
           theme: true,
-          subscription: true,
+          subscription: {
+            select: {
+              id: true,
+              plan: true,
+              provider: true,
+              status: true,
+              billingInterval: true,
+              amountMinor: true,
+              currency: true,
+              currentPeriodStart: true,
+              currentPeriodEnd: true,
+              cancelAtPeriodEnd: true,
+              canceledAt: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+          },
           manualEntitlement: true,
           links: {
             where: { deletedAt: null },
@@ -315,7 +326,14 @@ export const adminUsersRouter = createTRPCRouter({
         links: user.links.map(({ passwordHash, ...link }) => ({
           ...link,
           passwordProtected: Boolean(passwordHash),
-          customization: linkCustomizationSchema.parse(link.customization),
+          customization: linkCustomizationSchema
+            .catch({
+              buttonColor: null,
+              textColor: null,
+              fontFamily: "inherit",
+              iconStyle: "favicon",
+            })
+            .parse(link.customization),
           scheduledStart: link.scheduledStart?.toISOString() ?? null,
           scheduledEnd: link.scheduledEnd?.toISOString() ?? null,
         })),
@@ -429,16 +447,15 @@ export const adminUsersRouter = createTRPCRouter({
           data: {
             name: input.workspace.name,
             bio: input.workspace.bio,
-            image: input.workspace.image?.length
-              ? input.workspace.image
-              : null,
+            image: input.workspace.image?.length ? input.workspace.image : null,
             editorRevision: { increment: 1 },
           },
         });
         if (updated.count !== 1)
           throw new TRPCError({
             code: "CONFLICT",
-            message: "Profil başka bir oturumda değiştirildi. Sayfayı yenileyin.",
+            message:
+              "Profil başka bir oturumda değiştirildi. Sayfayı yenileyin.",
           });
 
         await tx.theme.upsert({
@@ -524,10 +541,7 @@ export const adminUsersRouter = createTRPCRouter({
     .input(adminAccountStatusInput)
     .mutation(async ({ ctx, input }) => {
       const now = new Date();
-      if (
-        input.status === "SUSPENDED" &&
-        new Date(input.expiresAt!) <= now
-      )
+      if (input.status === "SUSPENDED" && new Date(input.expiresAt!) <= now)
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Uzaklaştırma bitişi gelecekte olmalı.",
@@ -548,7 +562,8 @@ export const adminUsersRouter = createTRPCRouter({
         if (target.role === "ADMIN")
           throw new TRPCError({
             code: "FORBIDDEN",
-            message: "Yönetici hesaplarının durumu yalnızca sunucu CLI'ından değiştirilebilir.",
+            message:
+              "Yönetici hesaplarının durumu yalnızca sunucu CLI'ından değiştirilebilir.",
           });
         await tx.user.update({
           where: { id: target.id },
@@ -557,9 +572,7 @@ export const adminUsersRouter = createTRPCRouter({
             accountStatusReason:
               input.status === "ACTIVE" ? null : input.reason,
             accountStatusExpiresAt:
-              input.status === "SUSPENDED"
-                ? new Date(input.expiresAt!)
-                : null,
+              input.status === "SUSPENDED" ? new Date(input.expiresAt!) : null,
           },
         });
         if (input.status !== "ACTIVE")

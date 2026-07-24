@@ -62,12 +62,10 @@ describe("subscription entitlements", () => {
       revokedAt: null,
     };
     expect(hasProAccess(null, active, now)).toBe(true);
-    expect(
-      hasProAccess(null, { ...active, expiresAt: now }, now),
-    ).toBe(false);
-    expect(
-      hasProAccess(null, { ...active, revokedAt: new Date() }, now),
-    ).toBe(false);
+    expect(hasProAccess(null, { ...active, expiresAt: now }, now)).toBe(false);
+    expect(hasProAccess(null, { ...active, revokedAt: new Date() }, now)).toBe(
+      false,
+    );
     expect(
       hasProAccess(
         null,

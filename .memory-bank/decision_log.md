@@ -251,3 +251,24 @@
 **Consequences:**
 - New contributors must run `pnpm install && pnpm db:generate` before `pnpm dev`.
 - Editing anything inside `generated/` is a build-input violation (see `AGENTS.md` §5).
+
+---
+
+## ADR-018 — Binary RBAC, manual entitlements, and no session impersonation
+
+**Date:** 2026-07-24
+**Status:** Accepted
+**Context:** Operations need broad control without turning client navigation or stale session
+claims into a security boundary.
+
+**Decision:** Ship `USER` and `ADMIN` only. `adminProcedure` and
+`requireAdminSession()` reload live database role/account state for every operation. Support
+Pro access is a time-bounded `ManualEntitlement`, not a fake provider subscription.
+Troubleshooting offers an explicit public-profile preview; the app does not mint sessions as
+another user.
+
+**Consequences:**
+- A demotion takes effect on the next server request even if the session remains signed in.
+- Provider revenue and support grants remain distinguishable.
+- Admins cannot invisibly change another user's credentials or payment method.
+- A future moderator role requires a capability matrix, not another ad-hoc role check.

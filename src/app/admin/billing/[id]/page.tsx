@@ -70,13 +70,13 @@ export default async function AdminSubscriptionDetailPage({
         <dl className="mt-4 grid gap-4 text-sm md:grid-cols-2">
           <div>
             <dt className="text-ink/70 text-xs font-bold">Müşteri</dt>
-            <dd className="mt-1 break-all font-mono">
+            <dd className="mt-1 font-mono break-all">
               {subscription.providerCustomerId ?? "—"}
             </dd>
           </div>
           <div>
             <dt className="text-ink/70 text-xs font-bold">Abonelik</dt>
-            <dd className="mt-1 break-all font-mono">
+            <dd className="mt-1 font-mono break-all">
               {subscription.providerSubscriptionId ?? "—"}
             </dd>
           </div>
@@ -104,7 +104,8 @@ export default async function AdminSubscriptionDetailPage({
                   {intent.amountMinor / 100} {intent.currency}
                 </span>
                 <span className="text-ink/70">
-                  {intent.failureCode ?? intent.createdAt.toLocaleString("tr-TR")}
+                  {intent.failureCode ??
+                    intent.createdAt.toLocaleString("tr-TR")}
                 </span>
               </div>
             ))}
