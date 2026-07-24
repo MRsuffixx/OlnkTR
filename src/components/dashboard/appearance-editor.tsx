@@ -849,7 +849,7 @@ export function AppearanceEditor({
               options={[
                 ["total", "Tüm zamanlar"],
                 ["today", "Bugün"],
-                ["live", "Son 5 dakika"],
+                ["live", "Son 30 dakika"],
               ]}
             />
             <Choice

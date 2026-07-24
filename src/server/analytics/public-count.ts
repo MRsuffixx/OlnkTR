@@ -17,7 +17,7 @@ export async function getPublicVisitCount(
   now = new Date(),
 ) {
   if (metric === "live") {
-    const activeSince = new Date(now.getTime() - 5 * 60 * 1000);
+    const activeSince = new Date(now.getTime() - 30 * 60 * 1000);
     const [result] = await db.$queryRaw<Array<{ count: bigint }>>(
       Prisma.sql`
         SELECT COUNT(DISTINCT "visitorHash")::bigint AS "count"

@@ -1,11 +1,26 @@
 import { describe, expect, it } from "vitest";
 
+import { FEATURE_CATALOG } from "~/config/feature-catalog";
 import { DEFAULT_APPEARANCE } from "~/lib/appearance";
 import { hasProAccess, resolveAppearanceForPlan } from "~/server/entitlements";
 
 const now = new Date("2026-07-20T12:00:00.000Z");
 
+function appearanceLeafPaths(value: unknown, prefix = ""): string[] {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    return [prefix];
+  return Object.entries(value).flatMap(([key, child]) =>
+    appearanceLeafPaths(child, prefix ? `${prefix}.${key}` : key),
+  );
+}
+
 describe("subscription entitlements", () => {
+  it("assigns a tier and fallback policy to every appearance property", () => {
+    expect(Object.keys(FEATURE_CATALOG).sort()).toEqual(
+      appearanceLeafPaths(DEFAULT_APPEARANCE).sort(),
+    );
+  });
+
   it.each(["ACTIVE", "TRIALING", "PAST_DUE", "CANCELED"] as const)(
     "requires a future period end for %s",
     (status) => {

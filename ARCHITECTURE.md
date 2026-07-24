@@ -63,7 +63,7 @@ Auxiliaries that connect from inside the server:
 5. `hasProAccess()` and `resolveAppearanceForPlan()` lock Pro paths.
 6. A Pro whole-profile gate verifies a versioned HttpOnly HMAC cookie before bio, theme, or link UI is rendered. `/go/[id]` repeats this check.
 7. `recordProfileView()` is scheduled via `next/server`'s `after()` — non-blocking; the response returns immediately.
-8. Optional public counters read honest daily buckets or a five-minute distinct pseudonymous count.
+8. Optional public counters read honest daily buckets or a rolling 30-minute distinct pseudonymous count aligned with view deduplication.
 9. Spotify/SoundCloud APIs and canvas effect chunks load only when the resolved appearance enables them. Audio always starts from an explicit visitor gesture.
 10. **Caching note:** no `revalidate` is exported. Updates do not explicitly invalidate. See `.memory-bank/known_issues.md`.
 

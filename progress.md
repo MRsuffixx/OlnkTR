@@ -129,7 +129,7 @@
 - Added gesture-first Spotify/SoundCloud/direct-file playback, Pro entry sounds, one-tap stop/mute, and lazy provider scripts.
 - Added mouse particles, Matrix rain, 3B tilt, CRT, glitch, and scanline effects as independent lazy chunks with reduced-motion and tab-visibility controls.
 - Added a server-enforced Pro whole-profile gate; protected bio/theme/link data is not rendered before a throttled scrypt check, and `/go/[id]` re-verifies access.
-- Added honest all-time/today/five-minute counters. Profile views now dedupe the same visitor for 30 minutes.
+- Added honest all-time/today/rolling-30-minute counters. Profile views dedupe the same visitor for the same 30-minute window.
 - Fixed custom-domain public runtime routing for redirects, link/profile unlocks, counters, and QR; dashboard/auth paths remain closed.
 - Applied `20260724233000_profile_extras` and a data-safe migration-history alignment for `UploadedAsset.updatedAt`; `prisma migrate dev` is back in sync.
 - Added schema-evolution, entitlement fallback, and profile-token tests.

@@ -8,7 +8,7 @@ type SocialProof = AppearanceSettings["socialProof"];
 
 function defaultLabel(metric: SocialProof["metric"]) {
   if (metric === "today") return "bugün ziyaret";
-  if (metric === "live") return "son 5 dakikada";
+  if (metric === "live") return "son 30 dakikada";
   return "toplam ziyaret";
 }
 

@@ -203,7 +203,7 @@ export function ProfilePreview({
             (appearance.socialProof.metric === "today"
               ? "bugün ziyaret"
               : appearance.socialProof.metric === "live"
-                ? "son 5 dakikada"
+                ? "son 30 dakikada"
                 : "toplam ziyaret")}
         </p>
       )}
