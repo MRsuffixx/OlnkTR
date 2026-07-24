@@ -21,10 +21,13 @@ const items = [
   { href: "/admin/audit", label: "Denetim", icon: ScrollText },
 ] as const;
 
-export function AdminNav() {
+export function AdminNav({ horizontal = false }: { horizontal?: boolean }) {
   const pathname = usePathname();
   return (
-    <nav className="flex flex-col gap-1" aria-label="Yönetici menüsü">
+    <nav
+      className={horizontal ? "flex flex-row gap-1" : "flex flex-col gap-1"}
+      aria-label="Yönetici menüsü"
+    >
       {items.map((item) => {
         const active =
           item.href === "/admin"
@@ -34,7 +37,7 @@ export function AdminNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition ${
+            className={`flex items-center gap-3 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold transition ${
               active
                 ? "bg-paper text-ink"
                 : "text-paper/70 hover:bg-paper/10 hover:text-paper"
@@ -45,10 +48,18 @@ export function AdminNav() {
           </Link>
         );
       })}
-      <div className="bg-paper/15 my-3 h-px" />
+      <div
+        className={
+          horizontal ? "bg-ink/15 mx-2 w-px" : "bg-paper/15 my-3 h-px"
+        }
+      />
       <Link
         href="/dashboard"
-        className="text-paper/70 hover:bg-paper/10 hover:text-paper flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold"
+        className={`flex items-center gap-3 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold ${
+          horizontal
+            ? "text-ink/70 hover:bg-cream hover:text-ink"
+            : "text-paper/70 hover:bg-paper/10 hover:text-paper"
+        }`}
       >
         <ArrowLeft className="size-4" />
         Kullanıcı paneli

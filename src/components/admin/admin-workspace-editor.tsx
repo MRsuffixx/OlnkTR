@@ -468,16 +468,18 @@ export function AdminWorkspaceEditor({ user }: { user: UserDetail }) {
             />
             olnk markasını göster
           </label>
-          {[
+          {(
+            [
             ["buttonColor", "Düğme rengi"],
             ["textColor", "Metin rengi"],
             ["accentColor", "Vurgu rengi"],
-          ].map(([field, label]) => (
+            ] as const
+          ).map(([field, label]) => (
             <label key={field} className="text-xs font-bold">
               {label}
               <input
                 type="color"
-                value={workspace.theme[field as keyof typeof workspace.theme] as string}
+                value={workspace.theme[field]}
                 onChange={(event) =>
                   setWorkspace((current) => ({
                     ...current,

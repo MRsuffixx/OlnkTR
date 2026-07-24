@@ -41,7 +41,7 @@ export default async function AdminLayout({
           </header>
           <div className="border-ink/10 bg-paper overflow-x-auto border-b px-3 py-2 lg:hidden">
             <div className="min-w-max">
-              <AdminNav />
+              <AdminNav horizontal />
             </div>
           </div>
           {children}
