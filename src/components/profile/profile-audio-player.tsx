@@ -259,6 +259,12 @@ export function ProfileAudioPlayer({ settings }: { settings: AudioSettings }) {
       stopEverything();
       return;
     }
+    if (muted) {
+      setMuted(false);
+      controller.current?.setVolume?.(volume);
+      if (directAudio.current) directAudio.current.muted = false;
+      if (entryAudio.current) entryAudio.current.muted = false;
+    }
     if (hasEntry && !entryHasPlayed) {
       const element = entryAudio.current;
       if (element) {
@@ -278,6 +284,7 @@ export function ProfileAudioPlayer({ settings }: { settings: AudioSettings }) {
   const toggleMute = () => {
     const next = !muted;
     setMuted(next);
+    if (entryAudio.current) entryAudio.current.muted = next;
     if (settings.source === "spotify") {
       if (next) controller.current?.pause();
       else controller.current?.play();
@@ -325,7 +332,7 @@ export function ProfileAudioPlayer({ settings }: { settings: AudioSettings }) {
           preload="metadata"
           onEnded={() => {
             setEntryPlaying(false);
-            beginBackground();
+            if (!muted) beginBackground();
           }}
           onError={() => setError("Giriş sesi yüklenemedi.")}
         />
