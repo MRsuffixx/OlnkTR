@@ -56,6 +56,7 @@
 
 | Task | Owner context | Notes |
 |---|---|---|
+| **Admin control room** | current build | Add database-authoritative RBAC, immutable audit events, user/subscription operations, platform analytics, provider visibility, and the server-only role-management CLI. |
 | **Public profile cache invalidation** (known gap) | stabilisation | Add `revalidateTag` after `workspace.save` + `account.updateProfile` so the editor's preview matches the live page without re-deploying. |
 | **Live checkout result overlay** | stabilisation | The `/dashboard/billing?checkout=…&intent=…` states already pass to `<BillingSettings/>`; refine the success / failure copy and link to the updated settings panel. |
 | **PayTR local-mode pricing display** | stabilisation | `LOCAL_PRO_*_TRY` defaults to `12900` / `94900`; verify against the production PayTR dashboard before launch. |

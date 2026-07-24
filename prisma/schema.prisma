@@ -126,6 +126,31 @@ enum AccountDeletionStatus {
   COMPLETED
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+}
+
+enum AdminAuditCategory {
+  AUTHORIZATION
+  USER
+  CONTENT
+  BILLING
+  SECURITY
+}
+
+enum AdminAuditOutcome {
+  SUCCESS
+  DENIED
+  FAILURE
+}
+
 model User {
   id                 String    @id @default(cuid())
   name               String?
@@ -139,6 +164,12 @@ model User {
   onboardedAt        DateTime?
   usernameChangedAt  DateTime?
   deletionRequestedAt DateTime?
+  role               UserRole     @default(USER)
+  accountStatus      AccountStatus @default(ACTIVE)
+  accountStatusReason String?      @db.VarChar(500)
+  accountStatusExpiresAt DateTime?
+  lastLoginAt        DateTime?
+  lastActiveAt       DateTime?
   editorRevision     Int       @default(0)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
@@ -155,8 +186,17 @@ model User {
   customDomains  CustomDomain[]
   domainReclaimChallenges DomainReclaimChallenge[]
   assets         UploadedAsset[]
+  manualEntitlement ManualEntitlement? @relation("ManualEntitlementUser")
+  manualEntitlementsGranted ManualEntitlement[] @relation("ManualEntitlementGrantor")
+  adminAuditEvents AdminAuditLog[] @relation("AdminAuditActor")
+  adminTargetAuditEvents AdminAuditLog[] @relation("AdminAuditTarget")
+  refundFlags BillingInvoice[] @relation("BillingInvoiceRefundFlagger")
 
   @@index([usernameNormalized])
+  @@index([role, accountStatus])
+  @@index([accountStatus, accountStatusExpiresAt])
+  @@index([createdAt])
+  @@index([lastActiveAt])
 }
 
 model Theme {
@@ -333,13 +373,18 @@ model BillingInvoice {
   periodEnd         DateTime?
   invoiceUrl        String?         @db.VarChar(2048)
   paidAt            DateTime?
+  refundFlaggedAt   DateTime?
+  refundFlagReason  String?         @db.VarChar(500)
+  refundFlaggedById String?
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refundFlaggedBy User? @relation("BillingInvoiceRefundFlagger", fields: [refundFlaggedById], references: [id], onDelete: SetNull)
 
   @@unique([provider, providerInvoiceId])
   @@index([userId, createdAt])
+  @@index([refundFlaggedAt])
 }
 
 model WebhookEvent {
@@ -457,6 +502,49 @@ model AccountDeletionJob {
   updatedAt       DateTime              @updatedAt
 
   @@index([status, nextAttemptAt])
+}
+
+model ManualEntitlement {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  startsAt    DateTime  @default(now())
+  expiresAt   DateTime
+  reason      String    @db.VarChar(500)
+  grantedById String?
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user      User  @relation("ManualEntitlementUser", fields: [userId], references: [id], onDelete: Cascade)
+  grantedBy User? @relation("ManualEntitlementGrantor", fields: [grantedById], references: [id], onDelete: SetNull)
+
+  @@index([expiresAt, revokedAt])
+  @@index([grantedById, createdAt])
+}
+
+model AdminAuditLog {
+  id               String             @id @default(cuid())
+  actorUserId      String?
+  actorLabel       String             @db.VarChar(254)
+  targetUserId     String?
+  targetEmail      String?            @db.VarChar(254)
+  targetUsername   String?            @db.VarChar(30)
+  category         AdminAuditCategory
+  action           String             @db.VarChar(80)
+  outcome          AdminAuditOutcome  @default(SUCCESS)
+  reason           String?            @db.VarChar(500)
+  metadata         Json               @default("{}")
+  requestIpHash    String?            @db.VarChar(64)
+  createdAt        DateTime           @default(now())
+
+  actor User? @relation("AdminAuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  target User? @relation("AdminAuditTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([targetUserId, createdAt])
+  @@index([category, action, createdAt])
+  @@index([outcome, createdAt])
 }
 
 model UsernameBlocklist {

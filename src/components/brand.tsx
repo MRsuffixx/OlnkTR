@@ -16,7 +16,7 @@ export function Brand({
         aria-hidden="true"
         className="bg-orange text-paper relative grid size-8 place-items-center rounded-[11px] shadow-[3px_3px_0_#17211b]"
       >
-        o
+        O
       </span>
       {!compact && <span className="text-[1.35rem]">olnk</span>}
       <span className="sr-only">olnk ana sayfa</span>

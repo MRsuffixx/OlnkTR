@@ -1,6 +1,9 @@
 import "server-only";
 
-import type { Subscription } from "../../generated/prisma/client";
+import type {
+  ManualEntitlement,
+  Subscription,
+} from "../../generated/prisma/client";
 import {
   CAPABILITY_CATALOG,
   FEATURE_CATALOG,
@@ -27,8 +30,21 @@ export function hasProAccess(
     | Pick<Subscription, "plan" | "status" | "currentPeriodEnd">
     | null
     | undefined,
-  now = new Date(),
+  manualOrNow:
+    | Pick<ManualEntitlement, "startsAt" | "expiresAt" | "revokedAt">
+    | Date
+    | null = null,
+  at = new Date(),
 ) {
+  const now = manualOrNow instanceof Date ? manualOrNow : at;
+  const manual = manualOrNow instanceof Date ? null : manualOrNow;
+  if (
+    manual &&
+    !manual.revokedAt &&
+    manual.startsAt <= now &&
+    manual.expiresAt > now
+  )
+    return true;
   if (
     subscription?.plan !== "PRO" ||
     !ENTITLED_STATUSES.has(subscription.status)
@@ -40,12 +56,16 @@ export function hasProAccess(
 }
 
 export async function getUserEntitlements(userId: string) {
-  const subscription = await db.subscription.findUnique({ where: { userId } });
-  const pro = hasProAccess(subscription);
+  const [subscription, manualEntitlement] = await Promise.all([
+    db.subscription.findUnique({ where: { userId } }),
+    db.manualEntitlement.findUnique({ where: { userId } }),
+  ]);
+  const pro = hasProAccess(subscription, manualEntitlement);
   return {
     plan: pro ? ("pro" as const) : ("free" as const),
     pro,
     subscription,
+    manualEntitlement,
   };
 }
 
