@@ -120,7 +120,9 @@ if (
       throw error;
     }
   } catch (error) {
-    console.error(error instanceof Error ? error.message : "Rol değiştirilemedi.");
+    console.error(
+      error instanceof Error ? error.message : "Rol değiştirilemedi.",
+    );
     process.exitCode = 1;
   } finally {
     client.release();
