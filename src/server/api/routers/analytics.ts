@@ -15,8 +15,8 @@ export const analyticsRouter = createTRPCRouter({
       since.setUTCHours(0, 0, 0, 0);
       since.setUTCDate(since.getUTCDate() - input.days + 1);
 
-      const [links, dailyCounts, clickTotals, subscription] = await Promise.all(
-        [
+      const [links, dailyCounts, clickTotals, userEntitlement] =
+        await Promise.all([
           ctx.db.profileLink.findMany({
             where: { userId: ctx.session.user.id, deletedAt: null },
             orderBy: { position: "asc" },
@@ -37,12 +37,15 @@ export const analyticsRouter = createTRPCRouter({
             where: { userId: ctx.session.user.id, eventType: "CLICK" },
             _sum: { count: true },
           }),
-          ctx.db.subscription.findUnique({
-            where: { userId: ctx.session.user.id },
+          ctx.db.user.findUnique({
+            where: { id: ctx.session.user.id },
+            select: { subscription: true, manualEntitlement: true },
           }),
-        ],
+        ]);
+      const pro = hasProAccess(
+        userEntitlement?.subscription,
+        userEntitlement?.manualEntitlement,
       );
-      const pro = hasProAccess(subscription);
       const totalByLink = new Map(
         clickTotals.map((row) => [row.targetKey, row._sum.count ?? 0]),
       );

@@ -31,6 +31,7 @@ const getProfile = cache((username: string) =>
     include: {
       theme: true,
       subscription: true,
+      manualEntitlement: true,
       links: {
         where: { enabled: true, deletedAt: null, url: { not: "" } },
         orderBy: { position: "asc" },
@@ -46,7 +47,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { username } = await params;
   const profile = await getProfile(username);
-  if (!profile?.username) return { title: "Profil bulunamadı" };
+  if (!profile?.username || profile.accountStatus !== "ACTIVE")
+    return { title: "Profil bulunamadı" };
   const title = profile.name ?? `@${profile.username}`;
   const description = profile.bio || `${title} bağlantılarını olnk'te keşfet.`;
   return {
@@ -70,8 +72,11 @@ export default async function PublicProfilePage({
 }) {
   const { username } = await params;
   const profile = await getProfile(username);
-  if (!profile?.username) notFound();
-  const pro = hasProAccess(profile.subscription);
+  if (!profile?.username || profile.accountStatus !== "ACTIVE") notFound();
+  const pro = hasProAccess(
+    profile.subscription,
+    profile.manualEntitlement,
+  );
   const appearance = resolveAppearanceForPlan(
     profile.theme?.settings,
     pro,

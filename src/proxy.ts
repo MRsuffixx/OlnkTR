@@ -38,11 +38,28 @@ export async function proxy(request: NextRequest) {
 
   const domain = await db.customDomain.findUnique({
     where: { domainNormalized: hostname },
-    include: { user: { select: { username: true, subscription: true } } },
+    include: {
+      user: {
+        select: {
+          username: true,
+          accountStatus: true,
+          subscription: true,
+          manualEntitlement: true,
+        },
+      },
+    },
   });
   if (!domain) return controlledResponse(404);
-  const entitled = hasProAccess(domain.user.subscription);
-  if (domain.status !== "VERIFIED" || !domain.user.username || !entitled)
+  const entitled = hasProAccess(
+    domain.user.subscription,
+    domain.user.manualEntitlement,
+  );
+  if (
+    domain.status !== "VERIFIED" ||
+    domain.user.accountStatus !== "ACTIVE" ||
+    !domain.user.username ||
+    !entitled
+  )
     return controlledResponse(410);
   if (request.nextUrl.pathname !== "/") return controlledResponse(404);
 

@@ -26,8 +26,16 @@ const domainSchema = z
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 async function requireFeature(userId: string, feature: CapabilityKey) {
-  const subscription = await db.subscription.findUnique({ where: { userId } });
-  if (!canUseFeature(hasProAccess(subscription), feature))
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { subscription: true, manualEntitlement: true },
+  });
+  if (
+    !canUseFeature(
+      hasProAccess(user?.subscription, user?.manualEntitlement),
+      feature,
+    )
+  )
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Bu özellik Pro planında kullanılabilir.",
@@ -36,16 +44,20 @@ async function requireFeature(userId: string, feature: CapabilityKey) {
 
 export const customizationRouter = createTRPCRouter({
   domainOverview: protectedProcedure.query(async ({ ctx }) => {
-    const [subscription, domains] = await Promise.all([
-      ctx.db.subscription.findUnique({
-        where: { userId: ctx.session.user.id },
+    const [user, domains] = await Promise.all([
+      ctx.db.user.findUnique({
+        where: { id: ctx.session.user.id },
+        select: { subscription: true, manualEntitlement: true },
       }),
       ctx.db.customDomain.findMany({
         where: { userId: ctx.session.user.id },
         orderBy: { createdAt: "desc" },
       }),
     ]);
-    return { hasPro: hasProAccess(subscription), domains };
+    return {
+      hasPro: hasProAccess(user?.subscription, user?.manualEntitlement),
+      domains,
+    };
   }),
 
   addDomain: protectedProcedure
@@ -313,9 +325,10 @@ export const customizationRouter = createTRPCRouter({
         await tx.$executeRaw(
           Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`asset:${ctx.session.user.id}`}, 0))`,
         );
-        const [subscription, used] = await Promise.all([
-          tx.subscription.findUnique({
-            where: { userId: ctx.session.user.id },
+        const [user, used] = await Promise.all([
+          tx.user.findUnique({
+            where: { id: ctx.session.user.id },
+            select: { subscription: true, manualEntitlement: true },
           }),
           tx.uploadedAsset.aggregate({
             where: {
@@ -325,7 +338,10 @@ export const customizationRouter = createTRPCRouter({
             _sum: { sizeBytes: true },
           }),
         ]);
-        const quota = hasProAccess(subscription)
+        const quota = hasProAccess(
+          user?.subscription,
+          user?.manualEntitlement,
+        )
           ? 250 * 1024 * 1024
           : 10 * 1024 * 1024;
         if ((used._sum.sizeBytes ?? 0) + input.sizeBytes > quota)

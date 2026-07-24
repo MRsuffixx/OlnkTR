@@ -19,8 +19,11 @@ export default async function UnlockPage({
 }) {
   const { id } = await params;
   const query = await searchParams;
-  const link = await db.profileLink.findUnique({
-    where: { id },
+  const link = await db.profileLink.findFirst({
+    where: {
+      id,
+      user: { accountStatus: "ACTIVE", deletionRequestedAt: null },
+    },
     include: { user: { select: { username: true } } },
   });
   if (!link?.passwordHash || !link.enabled || link.deletedAt) notFound();

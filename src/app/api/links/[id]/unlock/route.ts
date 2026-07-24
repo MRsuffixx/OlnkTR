@@ -66,7 +66,12 @@ export async function POST(
   if (!password || password.length < 6 || password.length > 72)
     return rejected(request, id);
 
-  const link = await db.profileLink.findUnique({ where: { id } });
+  const link = await db.profileLink.findFirst({
+    where: {
+      id,
+      user: { accountStatus: "ACTIVE", deletionRequestedAt: null },
+    },
+  });
   if (!link?.passwordHash || !link.enabled || link.deletedAt)
     return rejected(request, id);
   try {

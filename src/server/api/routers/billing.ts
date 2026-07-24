@@ -57,8 +57,11 @@ const checkoutPresentationSchema = z.discriminatedUnion("kind", [
 
 export const billingRouter = createTRPCRouter({
   overview: protectedProcedure.query(async ({ ctx }) => {
-    const [subscription, invoices] = await Promise.all([
+    const [subscription, manualEntitlement, invoices] = await Promise.all([
       ctx.db.subscription.findUnique({
+        where: { userId: ctx.session.user.id },
+      }),
+      ctx.db.manualEntitlement.findUnique({
         where: { userId: ctx.session.user.id },
       }),
       ctx.db.billingInvoice.findMany({
@@ -72,11 +75,12 @@ export const billingRouter = createTRPCRouter({
       monthly: priceForProvider(provider.id, "MONTHLY"),
       yearly: priceForProvider(provider.id, "YEARLY"),
     }));
-    const hasPro = hasProAccess(subscription);
+    const hasPro = hasProAccess(subscription, manualEntitlement);
     return {
       hasPro,
       plan: hasPro ? ("PRO" as const) : ("FREE" as const),
       subscription,
+      manualEntitlement,
       providers,
       invoices,
       checkoutAvailable: providers.length > 0,
@@ -86,7 +90,7 @@ export const billingRouter = createTRPCRouter({
   intentStatus: protectedProcedure
     .input(z.object({ intentId: z.string().min(1).max(191) }))
     .query(async ({ ctx, input }) => {
-      const [intent, subscription] = await Promise.all([
+      const [intent, subscription, manualEntitlement] = await Promise.all([
         ctx.db.paymentIntent.findFirst({
           where: { id: input.intentId, userId: ctx.session.user.id },
           select: {
@@ -101,6 +105,9 @@ export const billingRouter = createTRPCRouter({
         ctx.db.subscription.findUnique({
           where: { userId: ctx.session.user.id },
         }),
+        ctx.db.manualEntitlement.findUnique({
+          where: { userId: ctx.session.user.id },
+        }),
       ]);
       if (!intent)
         throw new TRPCError({
@@ -109,7 +116,7 @@ export const billingRouter = createTRPCRouter({
         });
       return {
         intent,
-        hasPro: hasProAccess(subscription),
+        hasPro: hasProAccess(subscription, manualEntitlement),
         subscriptionStatus: subscription?.status ?? null,
       };
     }),
@@ -131,7 +138,7 @@ export const billingRouter = createTRPCRouter({
           async (tx) => {
             const user = await tx.user.findUnique({
               where: { id: ctx.session.user.id },
-              include: { subscription: true },
+              include: { subscription: true, manualEntitlement: true },
             });
             if (!user?.email)
               throw new TRPCError({
@@ -139,7 +146,7 @@ export const billingRouter = createTRPCRouter({
                 message: "Ödeme için doğrulanmış e-posta adresi gerekli.",
               });
             const email = user.email;
-            if (hasProAccess(user.subscription))
+            if (hasProAccess(user.subscription, user.manualEntitlement))
               throw new TRPCError({
                 code: "CONFLICT",
                 message: "Pro aboneliğiniz zaten etkin.",
