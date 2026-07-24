@@ -40,5 +40,7 @@ test("unknown public profile uses the product 404", async ({ page }) => {
   );
   const response = await page.goto("/this-profile-does-not-exist-404");
   expect(response?.status()).toBe(404);
-  await expect(page.getByText("Bu adres henüz kimsenin değil.")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Bu adres burada değil." }),
+  ).toBeVisible();
 });
