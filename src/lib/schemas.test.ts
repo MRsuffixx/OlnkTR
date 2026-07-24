@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { DEFAULT_APPEARANCE } from "~/lib/appearance";
-import { workspaceInput } from "~/lib/schemas";
+import { adminAccountStatusInput, workspaceInput } from "~/lib/schemas";
 
 function link(id: string) {
   return {
@@ -57,5 +57,37 @@ describe("workspace payload validation", () => {
       workspaceInput.safeParse(workspace(links.slice(0, 50))).success,
     ).toBe(true);
     expect(workspaceInput.safeParse(workspace(links)).success).toBe(false);
+  });
+});
+
+describe("admin action validation", () => {
+  const base = {
+    userId: "tz4a98xxat96iws9zmbrgj3a",
+    reason: "Destek talebi doğrulandı.",
+    confirmation: "kullanici",
+  };
+
+  it("requires an expiry only for temporary suspension", () => {
+    expect(
+      adminAccountStatusInput.safeParse({
+        ...base,
+        status: "SUSPENDED",
+        expiresAt: null,
+      }).success,
+    ).toBe(false);
+    expect(
+      adminAccountStatusInput.safeParse({
+        ...base,
+        status: "SUSPENDED",
+        expiresAt: "2026-08-01T12:00:00.000Z",
+      }).success,
+    ).toBe(true);
+    expect(
+      adminAccountStatusInput.safeParse({
+        ...base,
+        status: "BANNED",
+        expiresAt: "2026-08-01T12:00:00.000Z",
+      }).success,
+    ).toBe(false);
   });
 });

@@ -55,6 +55,28 @@ describe("subscription entitlements", () => {
     }
   });
 
+  it("honors only active, unrevoked manual grants", () => {
+    const active = {
+      startsAt: new Date("2026-07-19T12:00:00.000Z"),
+      expiresAt: new Date("2026-07-21T12:00:00.000Z"),
+      revokedAt: null,
+    };
+    expect(hasProAccess(null, active, now)).toBe(true);
+    expect(
+      hasProAccess(null, { ...active, expiresAt: now }, now),
+    ).toBe(false);
+    expect(
+      hasProAccess(null, { ...active, revokedAt: new Date() }, now),
+    ).toBe(false);
+    expect(
+      hasProAccess(
+        null,
+        { ...active, startsAt: new Date("2026-07-21T12:00:00.000Z") },
+        now,
+      ),
+    ).toBe(false);
+  });
+
   it("keeps Pro settings stored but applies deterministic Free fallbacks", () => {
     const stored = structuredClone(DEFAULT_APPEARANCE);
     stored.background.mode = "video";

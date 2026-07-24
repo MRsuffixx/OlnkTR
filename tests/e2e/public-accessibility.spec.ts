@@ -25,6 +25,14 @@ test("private billing route redirects unauthenticated visitors", async ({
   await expect(page).toHaveURL(/\/login$/);
 });
 
+test("admin routes redirect unauthenticated visitors before rendering data", async ({
+  page,
+}) => {
+  await page.goto("/admin/users", { waitUntil: "domcontentloaded" });
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(page.getByText("Kullanıcılar", { exact: true })).toHaveCount(0);
+});
+
 test("unknown public profile uses the product 404", async ({ page }) => {
   test.skip(
     process.env.RUN_DATABASE_E2E !== "1",
