@@ -45,7 +45,7 @@
 ```
 
 Auxiliaries that connect from inside the server:
-- AWS S3-compatible object storage (avatars, backgrounds).
+- AWS S3-compatible object storage (avatars, backgrounds, profile audio, entry sounds).
 - Stripe, iyzico, PayTR, Adyen via the adapter registry + universal webhook route.
 - Email via Nodemailer/SMTP for magic links.
 
@@ -60,9 +60,11 @@ Auxiliaries that connect from inside the server:
 3. `cache(getProfile)` (request-scoped memo) looks up `db.user.findUnique({ where: { usernameNormalized } })` plus `theme`, `subscription`, and active links.
 4. If `username` is missing → `notFound()`.
 5. `hasProAccess()` and `resolveAppearanceForPlan()` lock Pro paths.
-6. `recordProfileView()` is scheduled via `next/server`'s `after()` — non-blocking; the response returns immediately.
-7. RSC stream includes the optional YouTube/Spotify iframe (Pro), a JSON-LD `<script>`, optional custom CSS via `<style>` after `sanitizeCustomCss`.
-8. **Caching note:** no `revalidate` is exported. Updates do not explicitly invalidate. See `.memory-bank/known_issues.md`.
+6. A Pro whole-profile gate verifies a versioned HttpOnly HMAC cookie before bio, theme, or link UI is rendered. `/go/[id]` repeats this check.
+7. `recordProfileView()` is scheduled via `next/server`'s `after()` — non-blocking; the response returns immediately.
+8. Optional public counters read honest daily buckets or a five-minute distinct pseudonymous count.
+9. Spotify/SoundCloud APIs and canvas effect chunks load only when the resolved appearance enables them. Audio always starts from an explicit visitor gesture.
+10. **Caching note:** no `revalidate` is exported. Updates do not explicitly invalidate. See `.memory-bank/known_issues.md`.
 
 ### 2.2 Dashboard (`/dashboard/*`)
 
@@ -105,6 +107,7 @@ For signup with Google without a prior reservation, `signIn` rejects `UsernameUn
 1. `/go/[id]` (`route.ts`) resolves the link, returns a 302 to the external URL.
 2. `recordLinkClick()` is invoked via `next/server`'s `after()` — non-blocking; click metrics and 90-day retention are unaffected by client latency.
 3. If the link is password-protected, the link URL is only returned when a valid `olnk_link_<id>` cookie (HMAC, 12h, `accessVersion`-bound) is presented.
+4. If the owning profile is Pro and profile-gated, `/go/[id]` also requires the valid `olnk_profile_<userId>` cookie.
 
 ### 2.5 Billing webhook
 
@@ -197,7 +200,7 @@ Pricing: `CANONICAL_USD_PRICES = { MONTHLY: 300, YEARLY: 2200 }`. STRIPE/ADYEN q
 
 - Bot filter: a regex of common UAs (`/bot|crawler|spider|headless|preview|.../`).
 - `visitorHash = HMAC-SHA256("client|userAgent", AUTH_SECRET)`.
-- Dedupe key per minute to avoid double counts.
+- Profile views dedupe per visitor/profile in 30-minute windows; clicks use 10-second windows.
 - Single transaction: insert the event + upsert the daily bucket.
 - Rate limits: 300/hour per client, 30/hour per `(userId, client)`.
 - Country only recorded when `TRUSTED_IP_HEADER` is `cf-connecting-ip` or `x-vercel-forwarded-for` (default `none` → country is `null`).
@@ -211,13 +214,14 @@ Pricing: `CANONICAL_USD_PRICES = { MONTHLY: 300, YEARLY: 2200 }`. STRIPE/ADYEN q
 - `custom-css.ts` — PostCSS pipeline that scopes every selector to `[data-olnk-profile]`, drops `@import`, strips `url(...)`, rejects global selectors and `\\` escapes.
 - `link-password.ts` — scrypt with concurrency cap during verification.
 - `link-access.ts` — HMAC-signed 12h unlock cookie, versioned against `ProfileLink.accessVersion`.
+- `profile-access.ts` — separate HMAC-signed 12h whole-profile cookie, versioned against `User.profileAccessVersion`.
 - `rate-limit.ts` — DB-backed sliding window keyed by sha256 hex; uses `pg_advisory_xact_lock`-style conditional upsert.
 - `client-identity.ts` — `getTrustedClientAddress` honours `TRUSTED_IP_HEADER`; `getTrustedCountry` reads the matching header.
 - `request-body.ts` — streaming reader with a hard size cap.
 
 ### 3.7 Storage (`src/server/storage.ts`)
 
-S3-compatible via `@aws-sdk/client-s3` with `forcePathStyle: true` (R2/MinIO/Backblaze friendly). `region: env.STORAGE_REGION ?? "auto"`. If any of `STORAGE_ENDPOINT / BUCKET / ACCESS_KEY_ID / SECRET_ACCESS_KEY / PUBLIC_URL` is missing, `getStorageConfig()` returns `null` and the client displays the "https adres kullanın" fallback. Allowed mime types: `jpeg|png|webp|gif|mp4|webm`.
+S3-compatible via `@aws-sdk/client-s3` with `forcePathStyle: true` (R2/MinIO/Backblaze friendly). `region: env.STORAGE_REGION ?? "auto"`. If any of `STORAGE_ENDPOINT / BUCKET / ACCESS_KEY_ID / SECRET_ACCESS_KEY / PUBLIC_URL` is missing, `getStorageConfig()` returns `null` and the client displays the "https adres kullanın" fallback. Allowed mime types: `jpeg|png|webp|gif|mp4|webm|mpeg audio|mp4 audio|ogg|wav`. Audio is Pro-only; entry sounds are capped at 2 MB and profile audio at 25 MB.
 
 ---
 
@@ -241,6 +245,8 @@ The 404 and 410 responses are `Cache-Control: public, max-age=60` HTML pages.
 | `/api/qr/[username]` | PNG (720px, ink-on-paper), `Cache-Control: public, max-age=3600, stale-while-revalidate=86400`. |
 | `/api/register/intent` | Rate-limited (12/15min/IP, 5/h/email, 10/h/username); sets `olnk-signup-intent` (15 min, `httpOnly`). |
 | `/api/links/[id]/unlock` | Verifies password (scrypt), sets `olnk_link_<id>` cookie (12h). Rate-limited. |
+| `/api/profiles/[username]/unlock` | Verifies a Pro profile password and sets the versioned `olnk_profile_<userId>` cookie (12h). Triple rate-limited. |
+| `/api/profiles/[username]/visits` | Returns only an enabled aggregate public counter; honors the profile gate and rate limits. |
 | `/api/billing/iyzico/callback` | iyzico hosted-form return; 303 to `/dashboard/billing?checkout=…&intent=…`. |
 | `/api/billing/renew` | Bearer `CRON_SECRET`; Adyen recurring charges (≤ 100 per call, idempotent via `renewalKey`). |
 | `/api/maintenance` | Bearer `CRON_SECRET`; cleanup cron (events > 90d, rate buckets > 2d, intents/challenges, assets, deletions, domain revalidations). |

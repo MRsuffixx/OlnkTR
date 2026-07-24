@@ -3,7 +3,7 @@
 > Source of truth: `prisma/schema.prisma` (22 models, 21 enums).
 > Generator: `prisma-client` (ESM) → `../generated/prisma`.
 > Datasource: PostgreSQL.
-> Migrations: 5 (2026-07-20 13:00 → 2026-07-24 12:00). Never edit applied migrations.
+> Migrations: 7 (2026-07-20 13:00 → 2026-07-24 23:45). Never edit applied migrations.
 
 ---
 
@@ -25,7 +25,7 @@
 | `EmbedType` | `LINK` (default), `YOUTUBE`, `SPOTIFY` | `ProfileLink.embedType` |
 | `DomainStatus` | `PENDING` (default), `VERIFIED`, `FAILED` | `CustomDomain.status` |
 | `AnalyticsEventType` | `CLICK`, `VIEW` | `AnalyticsDailyBucket.eventType`, `ClickEvent`/`ProfileViewEvent` are conceptual |
-| `AssetPurpose` | `AVATAR`, `BACKGROUND` | `UploadedAsset.purpose` |
+| `AssetPurpose` | `AVATAR`, `BACKGROUND`, `AUDIO`, `ENTRY_SOUND` | `UploadedAsset.purpose` |
 | `AssetStatus` | `PENDING` (default), `READY`, `DELETE_PENDING`, `DELETED`, `FAILED` | `UploadedAsset.status` |
 | `AccountDeletionStatus` | `PENDING` (default), `PROCESSING`, `RETRY_PENDING`, `COMPLETED` | `AccountDeletionJob.status` |
 | `UserRole` | `USER` (default), `ADMIN` | `User.role` |
@@ -80,6 +80,8 @@ model User {
   onboardedAt         DateTime?
   usernameChangedAt   DateTime?
   deletionRequestedAt DateTime?
+  profilePasswordHash String?   @db.VarChar(256)
+  profileAccessVersion Int      @default(0)
   editorRevision      Int       @default(0)
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
@@ -103,6 +105,7 @@ model User {
 
 - `emailNormalized` and `usernameNormalized` are populated by `src/lib/email.ts` and `src/lib/username.ts` respectively; both must stay aligned with the migration backfill logic in `20260720231000_identity_security`.
 - `editorRevision` is bumped on every successful `workspace.save` / `account.updateProfile` for optimistic locking.
+- `profilePasswordHash` uses the same scrypt format as link gates. Rotating or removing it bumps `profileAccessVersion`, invalidating every `olnk_profile_<userId>` access cookie.
 
 ### 2.3 Theme
 
@@ -231,7 +234,7 @@ model AnalyticsDailyBucket {
 }
 ```
 
-- `dedupeKey` is `HMAC("view:<userId>:<visitorHash>:<minute-epoch>", AUTH_SECRET)` (and similarly for clicks). Used to swallow P2002 collisions idempotently.
+- Profile-view `dedupeKey` uses a 30-minute epoch so reloads from the same pseudonymous visitor do not inflate the public counter. Clicks keep a 10-second window. P2002 collisions are swallowed idempotently.
 - `country` is set only when `TRUSTED_IP_HEADER` matches a supported provider.
 - Daily buckets are upserted in the same transaction as the event insert; the dashboard queries the bucket for fast series rendering.
 
@@ -651,7 +654,7 @@ export const setLinkPasswordInput = z.object({
 
 ### `AppearanceSettings` summary (`src/lib/appearance.ts`)
 
-A deeply-typed Zod schema with six groups: `background` (`type`, `value`, `preset`), `buttons` (`style`, `shape`, `color`, `textColor`), `typography` (`font`, `weight`, `letterSpacing`), `layout` (`density`, `linksTop`, `bioPlacement`, `avatarRadius`), `effects` (`cursor`, `particles`, `trail`, `ripple`), `advanced` (`removeBranding`, `detailedAnalytics`, `customCssEnabled`, `customCss`).
+A deeply-typed Zod schema with eight groups: `background`, `buttons`, `typography`, `layout`, `effects`, `audio`, `socialProof`, and `advanced`. New fields carry Zod defaults so stored pre-Part-5 theme JSON remains valid. Every leaf path is tiered in `FEATURE_CATALOG`; direct audio, entry sounds, canvas/CRT effects, live/retro counters, and player skins fail closed to deterministic Free values.
 
 The schema is also the source of `FEATURE_CATALOG` keys (`src/config/feature-catalog.ts`). Pro-only paths are gated by `tier: "pro"` plus optional `proValues` lists.
 
@@ -665,6 +668,8 @@ The schema is also the source of `FEATURE_CATALOG` keys (`src/config/feature-cat
 | `20260720180000_billing_customization` | Billing + customization | Adds 8 enums + ProfileViewEvent + Subscription + PaymentIntent + BillingInvoice + WebhookEvent + CustomDomain + UploadedAsset; `Theme.settings`, `customCss`; `ProfileLink.customization`, `scheduledStart/End`, `passwordHash`, `embedType` |
 | `20260720230000_payment_state_hardening` | Payment state | Adds `PROCESSING`; backfills `Subscription.providerStartedAt`/`lastProviderEventAt`; normalises legacy rows (`currentPeriodEnd IS NULL → INCOMPLETE`, `≤ now → EXPIRED`); PaymentIntent gains `checkoutPresentation`, `activeCheckoutKey`, `reconciliationAttempts`, `lastReconciledAt` |
 | `20260720231000_identity_security` | Identity + security | Backfills `Theme.settings` JSONB from legacy columns; adds `User.emailNormalized` (case-insensitive duplicate guard); adds `User.usernameChangedAt`, `deletionRequestedAt`; AuthIntent becomes NOT NULL on `emailNormalized`; drops two duplicate indexes; creates `RateLimitBucket`; adds `ProfileLink.accessVersion`/`deletedAt`; creates `AnalyticsDailyBucket`; adds `referrerHost`/`dedupeKey` to events; creates `UploadedAsset.status` + `AssetPurpose`/`AssetStatus`; backfills asset purpose + size; adds CustomDomain `claimExpiresAt`/`nextRevalidationAt`/`failureCount`; creates `DomainReclaimChallenge`; creates `AccountDeletionJob` |
+| `20260724233000_profile_extras` | Profile audio + gate | Adds `AUDIO`/`ENTRY_SOUND` asset purposes and versioned profile-password fields |
+| `20260724234500_align_uploaded_asset_updated_at` | Migration-history alignment | Drops the legacy DB default from Prisma-managed `UploadedAsset.updatedAt`; no row data changes |
 | `20260724120000_admin_control_room` | Admin control room | Adds role/account-state/activity fields, manual Pro entitlements, immutable admin audit events, invoice refund flags, supporting indexes, and cascade-safe relations |
 
 ---

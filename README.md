@@ -23,8 +23,9 @@ A mobile-first link-in-bio platform for creators, professionals, and small busin
 - **Username safety:** Reserved-route checks, Turkish-aware normalization, obfuscation-resistant moderation, and a database-managed blocklist.
 - **Public profiles:** Fast server-rendered pages with canonical URLs, Open Graph metadata, structured data, responsive layouts, and downloadable QR codes.
 - **Profile editor:** A split-screen dashboard with a live phone preview, click-to-edit controls, drag-and-drop ordering, and revision-aware autosave.
-- **Appearance controls:** Custom backgrounds, typography, button styles, layouts, visual effects, per-link styling, and optional custom CSS.
+- **Appearance controls:** Custom backgrounds, typography, button styles, layouts, lazy canvas/retro effects, audio, honest visitor counters, per-link styling, and optional custom CSS.
 - **Link controls:** Scheduled links, password protection, YouTube and Spotify embeds, visibility toggles, and safe redirect handling.
+- **Profile gates and audio:** Server-enforced whole-profile passwords plus gesture-first Spotify, SoundCloud, and uploaded audio with visible stop/mute controls.
 - **Analytics:** Non-blocking click and profile-view collection with referrer, country, device, and time-based insights.
 - **Billing and storage:** Optional payment integrations for Pro features and optional S3-compatible media storage.
 - **Account management:** Profile settings, username changes, subscription management, and permanent account deletion.

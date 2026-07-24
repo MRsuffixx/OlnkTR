@@ -14,7 +14,7 @@
 - **Authentication:** Google OAuth and passwordless email via Nodemailer (Auth.js v5 / NextAuth `database` session strategy).
 - **Public profiles:** mobile-optimised, real-time preview in the editor.
 - **Editable links:** drag-and-drop reorder, per-link icon, scheduling, password protection, YouTube and Spotify embeds, click recording.
-- **Appearance:** structured `AppearanceSettings` JSON (background, buttons, typography, layout, effects, advanced) with custom CSS for Pro.
+- **Appearance:** structured `AppearanceSettings` JSON (background, buttons, typography, layout, effects, audio, social proof, advanced) with custom CSS for Pro.
 - **Analytics:** click + view tracking, dedupe keys, daily buckets, 7/30/90-day dashboards. Advanced block (countries, devices, sources) is Pro-gated.
 - **Pro billing:** USD $3/mo and $22/yr via Stripe and Adyen; ₺129/₺949 via iyzico and PayTR. PayTR is manual renewal.
 - **Storage:** S3-compatible object storage (R2 / MinIO / Backblaze supported) for avatars and backgrounds.
@@ -321,7 +321,7 @@
 
 ### 4.4 Appearance schema
 
-The `AppearanceSettings` document is a deeply-typed Zod schema in `src/lib/appearance.ts`. Six top-level groups (`background`, `buttons`, `typography`, `layout`, `effects`, `advanced`). Editing the editor or the live preview always goes through the **same** schema and `mergePermittedAppearance` so free users never read Pro-only paths.
+The `AppearanceSettings` document is a deeply-typed Zod schema in `src/lib/appearance.ts`. Eight top-level groups (`background`, `buttons`, `typography`, `layout`, `effects`, `audio`, `socialProof`, `advanced`). Editing the editor or the live preview always goes through the **same** schema and `mergePermittedAppearance` so free users never read Pro-only paths. Newly introduced fields have parse-time defaults, preserving older stored themes.
 
 Background presets: `sunrise`, `mint`, `paper`, `aurora`, `midnight`, `mesh`, `confetti`.
 

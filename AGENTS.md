@@ -363,6 +363,8 @@ pnpm audit --prod --audit-level high   # CI gate
 | `/api/billing/iyzico/callback` | n/a | route.ts | iyzico hosted-form return → 303 |
 | `/api/billing/renew` | bearer | route.ts | Adyen recurring cron |
 | `/api/links/[id]/unlock` | n/a | route.ts | Password verification |
+| `/api/profiles/[username]/unlock` | n/a | route.ts | Whole-profile password verification |
+| `/api/profiles/[username]/visits` | n/a | route.ts | Gated aggregate public counter |
 | `/api/maintenance` | bearer | route.ts | Cleanup cron |
 | `/api/qr/[username]` | n/a | route.ts | PNG QR, 1h cache + 24h SWR |
 | `/api/register/intent` | n/a | route.ts | Rate-limited intent reservation |

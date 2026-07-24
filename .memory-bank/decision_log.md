@@ -292,3 +292,19 @@ official plugins widen their ranges.
 - `pnpm outdated` intentionally reports only ESLint 10 and TypeScript 7.
 - Framework, runtime, Auth.js, storage, formatting, and lint integration packages remain at
   their current compatible releases.
+
+---
+
+## ADR-020 — Ambient profile features stay in versioned appearance JSON
+
+**Date:** 2026-07-24
+**Status:** Accepted
+**Context:** Audio, social proof, and visual effects need instant preview, deterministic downgrade behavior, and future extensibility without a table column per cosmetic choice.
+
+**Decision:** Keep presentation settings under `Theme.settings`, add Zod defaults for schema evolution, and tier every new leaf in `FEATURE_CATALOG`. Only query-sensitive security state (`User.profilePasswordHash` and `profileAccessVersion`) becomes relational columns. Provider scripts and canvas code are lazy-loaded after the resolved appearance enables them.
+
+**Consequences:**
+- Existing theme JSON parses without being reset.
+- Free downgrades retain stored Pro choices but public rendering uses explicit fallbacks.
+- Whole-profile protection can be enforced before any protected content is rendered and again at `/go/[id]`.
+- Spotify never receives a fake volume API: its mute action is an honest pause/resume, while SoundCloud and direct files expose real volume.

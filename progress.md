@@ -12,9 +12,11 @@
 - Google OAuth and Nodemailer magic-link sign-in.
 - Username claim with `pg_advisory_xact_lock` + DB unique constraint as authority.
 - Drag-and-drop link reorder via `@dnd-kit`.
-- Per-link icon, embed type, scheduling, password protection (all users).
-- Appearance studio with 6 tabs (background, buttons, typography, layout, effects, advanced).
-- Click + view tracking with dedupe keys, daily buckets, and country recording (when `TRUSTED_IP_HEADER` is configured).
+- Per-link icons, enable/disable, and drag-and-drop ordering.
+- Appearance studio with 8 tabs (background, buttons, typography, layout, effects, audio, counter, advanced).
+- Click + view tracking with 30-minute view dedupe, daily buckets, and country recording (when `TRUSTED_IP_HEADER` is configured).
+- Honest optional all-time/today visitor counter backed by real analytics buckets.
+- Gesture-first Spotify and SoundCloud profile audio with accessible stop/mute controls.
 - 30-day analytics dashboard with bar chart and per-link clicks.
 - QR code generation at `/api/qr/[username]` (PNG, 1h cache + 24h SWR).
 - Custom domain add/verify via DNS TXT (`_olnk.<domain>`).
@@ -42,6 +44,10 @@
 - Advanced analytics block (views, unique visitors, top countries, devices, sources).
 - "Remove branding" toggle.
 - Advanced billing UI: provider chooser, status card, cancel confirm, last 24 invoices.
+- Direct profile-audio and entry-sound uploads, custom player skins, and loop controls.
+- Independently toggleable lazy canvas/CRT effects with reduced-motion and hidden-tab safeguards.
+- Whole-profile password protection with server-side content withholding, throttled scrypt verification, and versioned HttpOnly access cookies.
+- Near-live distinct visitor counter and retro digital style.
 
 ### 1.3 Quality Gates (Green)
 - `pnpm check` (ESLint + tsc, `--max-warnings=0`).
@@ -109,6 +115,16 @@
 ---
 
 ## 5. Change Log (recent)
+
+### 2026-07-24 — Audio, ambient effects, profile gates, and honest counters
+
+- Extended the versioned appearance document with backward-compatible `audio`, `socialProof`, and granular visual-effect paths; all leaves are centrally tiered.
+- Added gesture-first Spotify/SoundCloud/direct-file playback, Pro entry sounds, one-tap stop/mute, and lazy provider scripts.
+- Added mouse particles, Matrix rain, 3B tilt, CRT, glitch, and scanline effects as independent lazy chunks with reduced-motion and tab-visibility controls.
+- Added a server-enforced Pro whole-profile gate; protected bio/theme/link data is not rendered before a throttled scrypt check, and `/go/[id]` re-verifies access.
+- Added honest all-time/today/five-minute counters. Profile views now dedupe the same visitor for 30 minutes.
+- Applied `20260724233000_profile_extras` and a data-safe migration-history alignment for `UploadedAsset.updatedAt`; `prisma migrate dev` is back in sync.
+- Added schema-evolution, entitlement fallback, and profile-token tests.
 
 ### 2026-07-24 — Admin control room and security refresh
 
