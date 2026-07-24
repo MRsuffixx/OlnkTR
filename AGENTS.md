@@ -22,14 +22,14 @@
 |---|---|---|---|
 | Runtime | Node.js | `^20.19 \|\| ^22.13 \|\| >=24` | pinned to `22.13.0` via `.node-version` |
 | Package manager | pnpm | `11.9.0` | `verifyDepsBeforeRun: false` |
-| Framework | Next.js (App Router, Turbopack) | `16.2.10` | `serverExternalPackages: ["iyzipay", "@adyen/api-library"]` |
+| Framework | Next.js (App Router, Turbopack) | `16.2.11` | `serverExternalPackages: ["iyzipay", "@adyen/api-library"]` |
 | UI | React + React DOM | `19.2.7` | |
 | Language | TypeScript | `6.0.3` | `strict`, `noUncheckedIndexedAccess`, `verbatimModuleSyntax` |
 | Styling | Tailwind CSS | `4.3.3` | PostCSS plugin only; design tokens via `@theme` in `globals.css` |
 | ORM | Prisma (`prisma-client` ESM generator) | `7.9.0` | output to `../generated/prisma` (gitignored) |
 | Driver | `@prisma/adapter-pg` + `pg` | `7.9.0` / `8.22.0` | |
 | API | tRPC + TanStack Query | `11.18.0` / `5.101.2` | superjson, httpBatchStreamLink |
-| Auth | Auth.js (NextAuth v5 beta) | `5.0.0-beta.31` | `database` session strategy, Prisma adapter |
+| Auth | Auth.js (NextAuth v5 beta) | `5.0.0-beta.32` | `database` session strategy, Prisma adapter |
 | Email | Nodemailer | `9.0.3` | pinned via `peerDependencyRules` |
 | Validation | Zod | `4.4.3` | all untrusted input |
 | Env validation | `@t3-oss/env-nextjs` | `0.13.11` | `src/env.js` |

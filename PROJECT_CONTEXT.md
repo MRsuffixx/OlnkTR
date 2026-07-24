@@ -41,7 +41,7 @@
 |---|---|---|---|
 | Runtime | Node.js | `^20.19 \|\| ^22.13 \|\| >=24` (pinned `22.13.0`) | LTS node |
 | Package manager | pnpm | `11.9.0` | Workspace + peer override management |
-| Framework | Next.js (App Router, Turbopack) | `16.2.10` | RSC + server actions + middleware |
+| Framework | Next.js (App Router, Turbopack) | `16.2.11` | RSC + server actions + middleware |
 | UI | React + React DOM | `19.2.7` | Concurrent rendering |
 | Language | TypeScript | `6.0.3` | strict + verbatimModuleSyntax + noUncheckedIndexedAccess |
 | Styling | Tailwind CSS | `4.3.3` | PostCSS plugin only; tokens via `@theme` |
@@ -50,8 +50,8 @@
 | DB | PostgreSQL | 17 (CI) | Migrations + advisory locks |
 | API | tRPC + TanStack Query | `11.18.0` / `5.101.2` | End-to-end typed RPC + cache |
 | Wire format | superjson | `2.2.6` | Date / Map / Set / BigInt round-trip |
-| Auth | Auth.js (NextAuth v5 beta) | `5.0.0-beta.31` | Server-rendered OAuth + magic link |
-| Auth adapter | `@auth/prisma-adapter` | `2.11.2` | Adapter normalisation extension in `src/server/auth/config.ts` |
+| Auth | Auth.js (NextAuth v5 beta) | `5.0.0-beta.32` | Server-rendered OAuth + magic link |
+| Auth adapter | `@auth/prisma-adapter` | `2.11.3` | Adapter normalisation extension in `src/server/auth/config.ts` |
 | Email | Nodemailer | `9.0.3` | pinned via peer rules |
 | Validation | Zod | `4.4.3` | All untrusted input |
 | Env validation | `@t3-oss/env-nextjs` | `0.13.11` | `src/env.js` |

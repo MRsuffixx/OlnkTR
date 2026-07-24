@@ -292,7 +292,7 @@ The 404 and 410 responses are `Cache-Control: public, max-age=60` HTML pages.
 | **Adyen** | Global recurring + Drop-in | `@adyen/api-library@32` (HMAC), `@adyen/adyen-web@6.41` (Drop-in client only) | `src/server/payments/adapters/adyen.ts` + `src/components/dashboard/adyen-checkout.tsx` |
 | **AWS S3-compatible storage** | Avatars + backgrounds | `@aws-sdk/client-s3` + presigner, `forcePathStyle: true` | `src/server/storage.ts` |
 | **DNS** | Custom domain verification | `_olnk.<domain>` TXT lookup (provider-agnostic) | `src/server/domains.ts`, `src/server/api/routers/customization.ts` |
-| **Auth.js / NextAuth** | Auth core + adapters | `next-auth@5.0.0-beta.31`, `@auth/prisma-adapter@2.11.2` | `src/server/auth/*` |
+| **Auth.js / NextAuth** | Auth core + adapters | `next-auth@5.0.0-beta.32`, `@auth/prisma-adapter@2.11.3` | `src/server/auth/*` |
 | **Vercel** (optional) | Hosting | HTTP headers via `x-vercel-forwarded-for` | via `env.TRUSTED_IP_HEADER` |
 | **Cloudflare** (optional) | CDN | HTTP headers via `cf-connecting-ip` | via `env.TRUSTED_IP_HEADER` |
 
