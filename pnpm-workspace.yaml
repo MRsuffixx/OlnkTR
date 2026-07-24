@@ -13,14 +13,16 @@ verifyDepsBeforeRun: false
 # only use the createTransport/sendMail API retained by the patched v9 line.
 peerDependencyRules:
   allowedVersions:
-    '@auth/core@0.41.2>nodemailer': '9.0.3'
-    'next-auth@5.0.0-beta.31>nodemailer': '9.0.3'
+    '@auth/core@0.41.3>nodemailer': '9.0.3'
+    'next-auth@5.0.0-beta.32>nodemailer': '9.0.3'
 
 overrides:
   '@hono/node-server': '1.19.13'
+  'find-my-way': '9.7.0'
   'postman-request>qs': '6.15.3'
   'postman-request>uuid': '11.1.1'
   'next>postcss': '8.5.20'
+  'next>sharp': '0.35.3'
 
 minimumReleaseAgeExclude:
   - '@prisma/adapter-pg@7.9.0'
