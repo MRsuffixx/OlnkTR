@@ -6,6 +6,8 @@ import {
   ArrowUpRight,
   ImageIcon,
   LockKeyhole,
+  Music2,
+  Pause,
   QrCode,
   Share2,
 } from "lucide-react";
@@ -75,6 +77,39 @@ export function ProfilePreview({
       )}
       {appearance.background.mode === "motion" && (
         <div className="olnk-gradient-motion absolute inset-0" />
+      )}
+      {appearance.effects.matrixRain !== "off" && (
+        <div
+          className="pointer-events-none absolute inset-0 overflow-hidden bg-black/35 font-mono text-[10px] leading-4 text-green-400 opacity-65"
+          aria-hidden
+        >
+          {Array.from({ length: 18 }, (_, index) => (
+            <span
+              key={index}
+              className="absolute top-0 [writing-mode:vertical-rl]"
+              style={{
+                left: `${index * 6}%`,
+                opacity:
+                  appearance.effects.matrixRain === "intense" ? 0.8 : 0.4,
+                transform: `translateY(${(index % 5) * 17}px)`,
+              }}
+            >
+              01OLNKTR101001
+            </span>
+          ))}
+        </div>
+      )}
+      {appearance.effects.mouseParticles !== "off" && (
+        <div
+          className="olnk-particles pointer-events-none absolute inset-0 opacity-35"
+          aria-hidden
+        />
+      )}
+      {appearance.effects.crtFilter && (
+        <div className="pointer-events-none absolute inset-0 z-20 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgb(0_0_0/.24))]" />
+      )}
+      {appearance.effects.scanlines && (
+        <div className="pointer-events-none absolute inset-0 z-20 bg-[repeating-linear-gradient(to_bottom,transparent_0_3px,rgb(0_0_0/.18)_3px_4px)]" />
       )}
       <div className="bg-ink absolute top-3 left-1/2 h-5 w-24 -translate-x-1/2 rounded-full" />
       <div
@@ -150,6 +185,26 @@ export function ProfilePreview({
           style={{ order: 2 }}
         >
           {draft.bio || "Kendini birkaç kelimeyle anlat."}
+        </p>
+      )}
+      {appearance.socialProof.enabled && (
+        <p
+          className={
+            appearance.socialProof.style === "retro"
+              ? "relative mt-3 rounded border border-green-400 bg-black/80 px-2 py-1 font-mono text-[9px] font-black tracking-widest text-green-300"
+              : appearance.socialProof.style === "pill"
+                ? "relative mt-3 rounded-full border border-current/15 bg-white/35 px-2 py-1 text-[9px] font-black"
+                : "relative mt-3 text-[9px] font-black opacity-60"
+          }
+          style={{ order: 2 }}
+        >
+          1.284{" "}
+          {appearance.socialProof.label ||
+            (appearance.socialProof.metric === "today"
+              ? "bugün ziyaret"
+              : appearance.socialProof.metric === "live"
+                ? "son 5 dakikada"
+                : "toplam ziyaret")}
         </p>
       )}
       <div
@@ -233,6 +288,25 @@ export function ProfilePreview({
           style={{ order: 6 }}
         >
           olnk.tr/{username}
+        </div>
+      )}
+      {(appearance.audio.enabled || appearance.audio.entryEnabled) && (
+        <div className="absolute right-3 bottom-3 left-3 z-30 flex items-center gap-2 rounded-xl border border-black/10 bg-white/90 p-2 text-left shadow-xl backdrop-blur">
+          <span
+            className="grid size-8 shrink-0 place-items-center rounded-full text-white"
+            style={{ backgroundColor: appearance.audio.accentColor }}
+          >
+            <Pause className="size-3" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[10px] font-black">
+              {appearance.audio.title || "Profil müziği"}
+            </span>
+            <span className="block text-[8px] opacity-50">
+              Dokununca başlar
+            </span>
+          </span>
+          <Music2 className="size-3.5 opacity-55" />
         </div>
       )}
     </div>

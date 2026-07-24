@@ -123,29 +123,41 @@ function validSoundCloudUrl(value: string) {
   }
 }
 
+function validHttpsUrl(value: string) {
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export function ProfileAudioPlayer({ settings }: { settings: AudioSettings }) {
   const directAudio = useRef<HTMLAudioElement>(null);
   const entryAudio = useRef<HTMLAudioElement>(null);
   const spotifyHost = useRef<HTMLDivElement>(null);
   const soundCloudFrame = useRef<HTMLIFrameElement>(null);
   const controller = useRef<PlayerController | null>(null);
-  const entryPlayed = useRef(false);
   const [ready, setReady] = useState(settings.source === "upload");
   const [playing, setPlaying] = useState(false);
   const [entryPlaying, setEntryPlaying] = useState(false);
+  const [entryHasPlayed, setEntryHasPlayed] = useState(false);
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(settings.volume);
   const [dismissed, setDismissed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const sourceValid =
-    settings.source === "upload" ||
+    (settings.source === "upload" && validHttpsUrl(settings.sourceUrl)) ||
     (settings.source === "spotify" && validSpotifyUrl(settings.sourceUrl)) ||
     (settings.source === "soundcloud" &&
       validSoundCloudUrl(settings.sourceUrl));
+  const hasBackground =
+    settings.enabled && settings.source !== "none" && sourceValid;
+  const hasEntry =
+    settings.entryEnabled && validHttpsUrl(settings.entryUrl);
 
   useEffect(() => {
-    if (!settings.enabled || !sourceValid) return;
+    if (!hasBackground) return;
     let active = true;
     let current: PlayerController | null = null;
 
@@ -223,7 +235,7 @@ export function ProfileAudioPlayer({ settings }: { settings: AudioSettings }) {
       controller.current = null;
     };
   }, [
-    settings.enabled,
+    hasBackground,
     settings.source,
     settings.sourceUrl,
     settings.volume,
@@ -232,8 +244,7 @@ export function ProfileAudioPlayer({ settings }: { settings: AudioSettings }) {
 
   if (
     dismissed ||
-    (!settings.enabled && !settings.entryEnabled) ||
-    (!sourceValid && !settings.entryEnabled)
+    (!hasBackground && !hasEntry)
   )
     return null;
 
@@ -244,7 +255,7 @@ export function ProfileAudioPlayer({ settings }: { settings: AudioSettings }) {
     setPlaying(false);
   };
   const beginBackground = () => {
-    if (!settings.enabled || !ready) return;
+    if (!hasBackground || !ready) return;
     controller.current?.play();
   };
   const toggle = async () => {
@@ -253,10 +264,10 @@ export function ProfileAudioPlayer({ settings }: { settings: AudioSettings }) {
       stopEverything();
       return;
     }
-    if (settings.entryEnabled && settings.entryUrl && !entryPlayed.current) {
+    if (hasEntry && !entryHasPlayed) {
       const element = entryAudio.current;
       if (element) {
-        entryPlayed.current = true;
+        setEntryHasPlayed(true);
         element.volume = settings.entryVolume / 100;
         try {
           await element.play();
@@ -303,7 +314,7 @@ export function ProfileAudioPlayer({ settings }: { settings: AudioSettings }) {
       aria-label="Profil ses oynatıcısı"
       style={{ "--audio-accent": settings.accentColor } as CSSProperties}
     >
-      {settings.enabled && settings.source === "upload" && (
+      {hasBackground && settings.source === "upload" && (
         <audio
           ref={directAudio}
           src={settings.sourceUrl}
@@ -312,7 +323,7 @@ export function ProfileAudioPlayer({ settings }: { settings: AudioSettings }) {
           onError={() => setError("Ses dosyası yüklenemedi.")}
         />
       )}
-      {settings.entryEnabled && settings.entryUrl && (
+      {hasEntry && (
         <audio
           ref={entryAudio}
           src={settings.entryUrl}
@@ -324,10 +335,13 @@ export function ProfileAudioPlayer({ settings }: { settings: AudioSettings }) {
           onError={() => setError("Giriş sesi yüklenemedi.")}
         />
       )}
-      {settings.enabled && settings.source === "spotify" && (
-        <div ref={spotifyHost} className="mb-2 min-h-20 overflow-hidden rounded-xl" />
+      {hasBackground && settings.source === "spotify" && (
+        <div
+          ref={spotifyHost}
+          className="mb-2 min-h-20 overflow-hidden rounded-xl"
+        />
       )}
-      {settings.enabled && settings.source === "soundcloud" && (
+      {hasBackground && settings.source === "soundcloud" && (
         <iframe
           ref={soundCloudFrame}
           title={settings.title || "SoundCloud oynatıcı"}
@@ -354,7 +368,7 @@ export function ProfileAudioPlayer({ settings }: { settings: AudioSettings }) {
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-black">
             {settings.title ||
-              (settings.entryEnabled && !entryPlayed.current
+              (hasEntry && !entryHasPlayed
                 ? "Giriş sesini başlat"
                 : "Profil müziği")}
           </p>

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { Prisma } from "../../../generated/prisma/client";
 import { db } from "~/server/db";
 
 export type PublicVisitMetric = "total" | "today" | "live";
@@ -17,14 +18,16 @@ export async function getPublicVisitCount(
 ) {
   if (metric === "live") {
     const activeSince = new Date(now.getTime() - 5 * 60 * 1000);
-    return db.profileViewEvent.count({
-      where: {
-        userId,
-        createdAt: { gte: activeSince },
-        visitorHash: { not: null },
-      },
-      distinct: ["visitorHash"],
-    });
+    const [result] = await db.$queryRaw<Array<{ count: bigint }>>(
+      Prisma.sql`
+        SELECT COUNT(DISTINCT "visitorHash")::bigint AS "count"
+        FROM "ProfileViewEvent"
+        WHERE "userId" = ${userId}
+          AND "createdAt" >= ${activeSince}
+          AND "visitorHash" IS NOT NULL
+      `,
+    );
+    return Number(result?.count ?? 0);
   }
 
   const result = await db.analyticsDailyBucket.aggregate({

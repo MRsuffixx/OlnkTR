@@ -21,11 +21,7 @@ function profilePath(username: string) {
   return `/${encodeURIComponent(username)}`;
 }
 
-function rejected(
-  request: Request,
-  username: string,
-  retryAfter?: number,
-) {
+function rejected(request: Request, username: string, retryAfter?: number) {
   const response = NextResponse.redirect(
     new URL(`${profilePath(username)}?gateError=1`, request.url),
     303,

@@ -1,18 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { normalizeUsername } from "~/lib/username";
 import { db } from "~/server/db";
 import { getPublicVisitCount } from "~/server/analytics/public-count";
 import { canPublishAccount } from "~/server/auth/account-access";
-import {
-  hasProAccess,
-  resolveAppearanceForPlan,
-} from "~/server/entitlements";
+import { hasProAccess, resolveAppearanceForPlan } from "~/server/entitlements";
 import { getTrustedClientAddress } from "~/server/security/client-identity";
 import { consumeRateLimit } from "~/server/security/rate-limit";
+import {
+  profileAccessCookieName,
+  verifyProfileAccessToken,
+} from "~/server/security/profile-access";
 
 export async function GET(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ username: string }> },
 ) {
   const rawUsername = (await params).username;
@@ -41,6 +42,8 @@ export async function GET(
       accountStatus: true,
       accountStatusExpiresAt: true,
       deletionRequestedAt: true,
+      profilePasswordHash: true,
+      profileAccessVersion: true,
       theme: { select: { settings: true } },
       subscription: true,
       manualEntitlement: true,
@@ -50,10 +53,18 @@ export async function GET(
     return NextResponse.json({ error: "Bulunamadı." }, { status: 404 });
 
   const pro = hasProAccess(profile.subscription, profile.manualEntitlement);
-  const socialProof = resolveAppearanceForPlan(
-    profile.theme?.settings,
-    pro,
-  ).effective.socialProof;
+  if (
+    pro &&
+    profile.profilePasswordHash &&
+    !verifyProfileAccessToken(
+      profile.id,
+      profile.profileAccessVersion,
+      request.cookies.get(profileAccessCookieName(profile.id))?.value,
+    )
+  )
+    return NextResponse.json({ error: "Bulunamadı." }, { status: 404 });
+  const socialProof = resolveAppearanceForPlan(profile.theme?.settings, pro)
+    .effective.socialProof;
   if (!socialProof.enabled)
     return NextResponse.json({ error: "Bulunamadı." }, { status: 404 });
 

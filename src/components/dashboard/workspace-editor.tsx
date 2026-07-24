@@ -378,6 +378,9 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [upgrade, setUpgrade] = useState(false);
   const [previewCss, setPreviewCss] = useState(initial.customCss);
+  const [profilePasswordProtected, setProfilePasswordProtected] = useState(
+    initial.profilePasswordProtected,
+  );
   const draftRef = useRef(draft);
   const revisionRef = useRef(initial.revision);
   const savedHashRef = useRef(JSON.stringify(draft));
@@ -746,6 +749,8 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                 setDraft((current) => ({ ...current, customCss }))
               }
               onUpgrade={() => setUpgrade(true)}
+              profilePasswordProtected={profilePasswordProtected}
+              onProfilePasswordChange={setProfilePasswordProtected}
             />
           </div>
         </section>

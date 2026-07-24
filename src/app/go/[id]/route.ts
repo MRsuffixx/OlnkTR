@@ -2,10 +2,15 @@ import { after, NextResponse, type NextRequest } from "next/server";
 
 import { recordLinkClick } from "~/server/analytics/ingest";
 import { db } from "~/server/db";
+import { hasProAccess } from "~/server/entitlements";
 import {
   linkAccessCookieName,
   verifyLinkAccessToken,
 } from "~/server/security/link-access";
+import {
+  profileAccessCookieName,
+  verifyProfileAccessToken,
+} from "~/server/security/profile-access";
 
 export async function GET(
   request: NextRequest,
@@ -30,7 +35,18 @@ export async function GET(
         ],
       },
     },
-    include: { user: { select: { username: true } } },
+    include: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+          profilePasswordHash: true,
+          profileAccessVersion: true,
+          subscription: true,
+          manualEntitlement: true,
+        },
+      },
+    },
   });
 
   if (!link) {
@@ -45,6 +61,25 @@ export async function GET(
       new URL(`/${link.user.username ?? ""}`, request.url),
       302,
     );
+  if (
+    link.user.profilePasswordHash &&
+    hasProAccess(link.user.subscription, link.user.manualEntitlement)
+  ) {
+    const token = request.cookies.get(
+      profileAccessCookieName(link.user.id),
+    )?.value;
+    if (
+      !verifyProfileAccessToken(
+        link.user.id,
+        link.user.profileAccessVersion,
+        token,
+      )
+    )
+      return NextResponse.redirect(
+        new URL(`/${link.user.username ?? ""}`, request.url),
+        302,
+      );
+  }
   if (link.passwordHash) {
     const token = request.cookies.get(linkAccessCookieName(id))?.value;
     if (!verifyLinkAccessToken(id, link.accessVersion, token))

@@ -1,6 +1,12 @@
 "use client";
 
-import { Crown, LockKeyhole, Sparkles } from "lucide-react";
+import {
+  Crown,
+  KeyRound,
+  LoaderCircle,
+  LockKeyhole,
+  Sparkles,
+} from "lucide-react";
 import { useState } from "react";
 
 import { AssetUpload } from "~/components/dashboard/asset-upload";
@@ -10,15 +16,25 @@ import {
   type AppearanceFeaturePath,
 } from "~/config/feature-catalog";
 import { BACKGROUND_PRESETS, type AppearanceSettings } from "~/lib/appearance";
+import { api } from "~/trpc/react";
 
 type Category =
-  "background" | "buttons" | "typography" | "layout" | "effects" | "advanced";
+  | "background"
+  | "buttons"
+  | "typography"
+  | "layout"
+  | "effects"
+  | "audio"
+  | "socialProof"
+  | "advanced";
 const categories: Array<{ id: Category; label: string }> = [
   { id: "background", label: "Arka plan" },
   { id: "buttons", label: "Düğmeler" },
   { id: "typography", label: "Yazı" },
   { id: "layout", label: "Düzen" },
   { id: "effects", label: "Efektler" },
+  { id: "audio", label: "Ses" },
+  { id: "socialProof", label: "Sayaç" },
   { id: "advanced", label: "Gelişmiş" },
 ];
 
@@ -65,6 +81,8 @@ export function AppearanceEditor({
   onMediaUploaded,
   onCssChange,
   onUpgrade,
+  profilePasswordProtected,
+  onProfilePasswordChange,
 }: {
   appearance: AppearanceSettings;
   customCss: string;
@@ -73,8 +91,16 @@ export function AppearanceEditor({
   onMediaUploaded: (url: string) => void;
   onCssChange: (value: string) => void;
   onUpgrade: () => void;
+  profilePasswordProtected: boolean;
+  onProfilePasswordChange: (protectedProfile: boolean) => void;
 }) {
   const [category, setCategory] = useState<Category>("background");
+  const [profilePassword, setProfilePassword] = useState("");
+  const [profilePasswordError, setProfilePasswordError] = useState<
+    string | null
+  >(null);
+  const profilePasswordMutation =
+    api.workspace.setProfilePassword.useMutation();
   function update(path: AppearanceFeaturePath, value: unknown) {
     if (!hasPro && needsPro(path, value)) return onUpgrade();
     if (
@@ -104,6 +130,27 @@ export function AppearanceEditor({
   }
   const value = <T,>(path: AppearanceFeaturePath) =>
     read(appearance, path) as T;
+  async function saveProfilePassword() {
+    if (!hasPro && !profilePasswordProtected) {
+      onUpgrade();
+      return;
+    }
+    setProfilePasswordError(null);
+    try {
+      const result = await profilePasswordMutation.mutateAsync({
+        password:
+          profilePasswordProtected && !profilePassword ? null : profilePassword,
+      });
+      onProfilePasswordChange(result.profilePasswordProtected);
+      setProfilePassword("");
+    } catch (error) {
+      setProfilePasswordError(
+        error instanceof Error
+          ? error.message
+          : "Profil parolası kaydedilemedi.",
+      );
+    }
+  }
 
   return (
     <section className="border-ink/10 mt-8 rounded-3xl border bg-[#F8F7F1] p-4 sm:p-5">
@@ -582,6 +629,249 @@ export function AppearanceEditor({
               hasPro={hasPro}
               onChange={update}
             />
+            <Choice
+              label="Fare parçacıkları"
+              path="effects.mouseParticles"
+              current={value("effects.mouseParticles")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["off", "Kapalı"],
+                ["subtle", "Hafif"],
+                ["intense", "Yoğun"],
+              ]}
+            />
+            <Choice
+              label="3B eğim"
+              path="effects.cardTilt"
+              current={value("effects.cardTilt")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["off", "Kapalı"],
+                ["links", "Bağlantılar"],
+                ["profile", "Profil kartı"],
+              ]}
+            />
+            <Choice
+              label="Matrix yağmuru"
+              path="effects.matrixRain"
+              current={value("effects.matrixRain")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["off", "Kapalı"],
+                ["subtle", "Hafif"],
+                ["intense", "Yoğun"],
+              ]}
+            />
+            <Toggle
+              label="CRT ekran filtresi"
+              path="effects.crtFilter"
+              checked={value("effects.crtFilter")}
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Toggle
+              label="Glitch parlaması"
+              path="effects.glitch"
+              checked={value("effects.glitch")}
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Toggle
+              label="Tarama çizgileri"
+              path="effects.scanlines"
+              checked={value("effects.scanlines")}
+              hasPro={hasPro}
+              onChange={update}
+            />
+          </>
+        )}
+        {category === "audio" && (
+          <>
+            <div className="border-mint bg-mint/20 rounded-2xl border p-4 text-xs leading-5">
+              Ses, ziyaretçi oynat düğmesine dokunana kadar başlamaz. Oynatıcıda
+              her zaman tek dokunuşla durdurma ve sessize alma bulunur.
+            </div>
+            <Toggle
+              label="Profil müziğini göster"
+              path="audio.enabled"
+              checked={value("audio.enabled")}
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Choice
+              label="Kaynak"
+              path="audio.source"
+              current={value("audio.source")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["none", "Yok"],
+                ["spotify", "Spotify"],
+                ["soundcloud", "SoundCloud"],
+                ["upload", "Dosya"],
+              ]}
+            />
+            {value<string>("audio.source") !== "upload" && (
+              <TextField
+                label="Parça veya liste adresi"
+                path="audio.sourceUrl"
+                value={value("audio.sourceUrl")}
+                placeholder={
+                  value<string>("audio.source") === "soundcloud"
+                    ? "https://soundcloud.com/..."
+                    : "https://open.spotify.com/..."
+                }
+                hasPro={hasPro}
+                onChange={update}
+              />
+            )}
+            {value<string>("audio.source") === "upload" && (
+              <div className="border-ink/10 rounded-2xl border bg-white p-4">
+                <Label label="Ses dosyası" path="audio.source" />
+                <AssetUpload
+                  purpose="audio"
+                  accept="audio/mpeg,audio/mp4,audio/ogg,audio/wav"
+                  disabled={!hasPro}
+                  onUploaded={(url) => update("audio.sourceUrl", url)}
+                />
+                {!hasPro && (
+                  <button
+                    type="button"
+                    onClick={onUpgrade}
+                    className="text-orange-ink mt-2 text-xs font-black"
+                  >
+                    Dosya yüklemek için Pro’ya geç
+                  </button>
+                )}
+              </div>
+            )}
+            <TextField
+              label="Oynatıcı başlığı"
+              path="audio.title"
+              value={value("audio.title")}
+              placeholder="Şu an çalıyor"
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Range
+              label="Başlangıç ses düzeyi"
+              path="audio.volume"
+              value={value("audio.volume")}
+              min={0}
+              max={100}
+              suffix="%"
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Toggle
+              label="Parçayı sürekli tekrarla"
+              path="audio.loop"
+              checked={value("audio.loop")}
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Choice
+              label="Oynatıcı görünümü"
+              path="audio.skin"
+              current={value("audio.skin")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["minimal", "Sade"],
+                ["glass", "Cam"],
+                ["retro", "Retro"],
+              ]}
+            />
+            <ColorField
+              label="Oynatıcı vurgu rengi"
+              path="audio.accentColor"
+              value={value("audio.accentColor")}
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <div className="border-yellow/70 bg-yellow/10 space-y-4 rounded-2xl border p-4">
+              <Toggle
+                label="Tek seferlik giriş sesi"
+                path="audio.entryEnabled"
+                checked={value("audio.entryEnabled")}
+                hasPro={hasPro}
+                onChange={update}
+              />
+              <TextField
+                label="Giriş sesi adresi"
+                path="audio.entryUrl"
+                value={value("audio.entryUrl")}
+                placeholder="https://.../giris-sesi.mp3"
+                hasPro={hasPro}
+                onChange={update}
+              />
+              <AssetUpload
+                purpose="entrySound"
+                accept="audio/mpeg,audio/mp4,audio/ogg,audio/wav"
+                disabled={!hasPro}
+                onUploaded={(url) => update("audio.entryUrl", url)}
+              />
+              <Range
+                label="Giriş sesi düzeyi"
+                path="audio.entryVolume"
+                value={value("audio.entryVolume")}
+                min={0}
+                max={100}
+                suffix="%"
+                hasPro={hasPro}
+                onChange={update}
+              />
+            </div>
+          </>
+        )}
+        {category === "socialProof" && (
+          <>
+            <div className="border-mint bg-mint/20 rounded-2xl border p-4 text-xs leading-5">
+              Sayaç yalnızca botlardan arındırılmış, 30 dakikalık tekrarları
+              tekilleştirilmiş gerçek profil görüntülemelerini gösterir.
+            </div>
+            <Toggle
+              label="Ziyaretçi sayacını göster"
+              path="socialProof.enabled"
+              checked={value("socialProof.enabled")}
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Choice
+              label="Gösterilen değer"
+              path="socialProof.metric"
+              current={value("socialProof.metric")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["total", "Tüm zamanlar"],
+                ["today", "Bugün"],
+                ["live", "Son 5 dakika"],
+              ]}
+            />
+            <Choice
+              label="Sayaç görünümü"
+              path="socialProof.style"
+              current={value("socialProof.style")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["plain", "Sade"],
+                ["pill", "Rozet"],
+                ["retro", "Dijital"],
+              ]}
+            />
+            <TextField
+              label="Özel etiket"
+              path="socialProof.label"
+              value={value("socialProof.label")}
+              placeholder="toplam ziyaret"
+              hasPro={hasPro}
+              onChange={update}
+            />
           </>
         )}
         {category === "advanced" && (
@@ -628,6 +918,60 @@ export function AppearanceEditor({
               @import, veri protokolleri ve sayfa dışı konumlandırma sunucuda
               temizlenir.
             </p>
+            <div className="border-yellow/70 bg-yellow/10 rounded-2xl border p-4">
+              <div className="flex items-center gap-2">
+                <KeyRound className="text-orange size-4" />
+                <p className="text-sm font-black">
+                  Profil parolası
+                  {profilePasswordProtected ? " · etkin" : ""}
+                </p>
+                <TierBadge pro />
+              </div>
+              <p className="text-ink/50 mt-2 text-xs leading-5">
+                Parola doğrulanmadan biyografi, tema ve bağlantılar sunucu
+                çıktısına eklenmez.
+              </p>
+              <div className="mt-3 flex gap-2">
+                <input
+                  type="password"
+                  value={profilePassword}
+                  minLength={6}
+                  maxLength={72}
+                  disabled={!hasPro && !profilePasswordProtected}
+                  onFocus={() =>
+                    !hasPro && !profilePasswordProtected && onUpgrade()
+                  }
+                  onChange={(event) => setProfilePassword(event.target.value)}
+                  placeholder="En az 6 karakter"
+                  className="input flex-1"
+                />
+                <button
+                  type="button"
+                  disabled={
+                    profilePasswordMutation.isPending ||
+                    (!profilePassword && !profilePasswordProtected)
+                  }
+                  onClick={() => void saveProfilePassword()}
+                  className="bg-ink text-paper rounded-xl px-3 text-xs font-black disabled:opacity-40"
+                >
+                  {profilePasswordMutation.isPending ? (
+                    <LoaderCircle className="size-4 animate-spin" />
+                  ) : profilePasswordProtected && !profilePassword ? (
+                    "Kaldır"
+                  ) : (
+                    "Uygula"
+                  )}
+                </button>
+              </div>
+              {profilePasswordError && (
+                <p
+                  role="alert"
+                  className="text-orange-ink mt-2 text-xs font-bold"
+                >
+                  {profilePasswordError}
+                </p>
+              )}
+            </div>
           </>
         )}
       </div>

@@ -80,6 +80,13 @@ describe("subscription entitlements", () => {
     stored.background.mode = "video";
     stored.background.mediaUrl = "https://cdn.example.test/background.mp4";
     stored.effects.cursor = "star";
+    stored.effects.matrixRain = "intense";
+    stored.audio.source = "upload";
+    stored.audio.sourceUrl = "https://cdn.example.test/profile.mp3";
+    stored.audio.entryEnabled = true;
+    stored.audio.entryUrl = "https://cdn.example.test/entry.mp3";
+    stored.socialProof.metric = "live";
+    stored.socialProof.style = "retro";
     stored.advanced.removeBranding = true;
 
     const resolved = resolveAppearanceForPlan(stored, false);
@@ -87,6 +94,15 @@ describe("subscription entitlements", () => {
     expect(resolved.effective.background.mode).toBe("gradient");
     expect(resolved.effective.background.mediaUrl).toBe("");
     expect(resolved.effective.effects.cursor).toBe("default");
+    expect(resolved.effective.effects.matrixRain).toBe("off");
+    expect(resolved.effective.audio.source).toBe("none");
+    expect(resolved.effective.audio.sourceUrl).toBe(
+      "https://cdn.example.test/profile.mp3",
+    );
+    expect(resolved.effective.audio.entryEnabled).toBe(false);
+    expect(resolved.effective.audio.entryUrl).toBe("");
+    expect(resolved.effective.socialProof.metric).toBe("total");
+    expect(resolved.effective.socialProof.style).toBe("plain");
     expect(resolved.effective.advanced.removeBranding).toBe(false);
     expect(resolved.lockedPaths).toContain("background.mode");
   });

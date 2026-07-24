@@ -8,6 +8,7 @@ import { cache } from "react";
 
 import { Brand } from "~/components/brand";
 import { ProfileEffects } from "~/components/profile/profile-effects";
+import { ProfileAmbientEffects } from "~/components/profile/profile-ambient-effects";
 import { ProfileBackgroundVideo } from "~/components/profile/profile-background-video";
 import { ProfileAudioPlayer } from "~/components/profile/profile-audio-player";
 import { ProfileGate } from "~/components/profile/profile-gate";
@@ -151,7 +152,11 @@ export default async function PublicProfilePage({
   return (
     <main
       data-olnk-profile
-      className="relative min-h-dvh overflow-hidden px-4 py-7"
+      className={`relative min-h-dvh overflow-hidden px-4 py-7 ${
+        appearance.audio.enabled || appearance.audio.entryEnabled
+          ? "pb-44"
+          : ""
+      }`}
       style={{
         ...background,
         color: appearance.typography.color,
@@ -178,6 +183,7 @@ export default async function PublicProfilePage({
         <div className="olnk-gradient-motion absolute inset-0" />
       )}
       <ProfileEffects effects={appearance.effects} />
+      <ProfileAmbientEffects effects={appearance.effects} />
       {(appearance.audio.enabled || appearance.audio.entryEnabled) && (
         <ProfileAudioPlayer settings={appearance.audio} />
       )}
@@ -222,6 +228,7 @@ export default async function PublicProfilePage({
         </div>
         <section
           className={`mt-4 flex flex-col ${alignment}`}
+          data-olnk-tilt="profile"
           style={{ order: 2 }}
         >
           <div
@@ -310,6 +317,7 @@ export default async function PublicProfilePage({
               <div
                 key={link.id}
                 className="olnk-link"
+                data-olnk-tilt="link"
                 data-hover={appearance.buttons.hover}
                 data-press={appearance.buttons.press}
                 data-entrance={appearance.effects.entrance}
