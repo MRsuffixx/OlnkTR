@@ -164,7 +164,7 @@ export const authConfig = {
   session: { strategy: "database" },
   callbacks: {
     signIn: async ({ user }) => {
-      if (!user.id) return true;
+      if (!user.id) return false;
       const account = await getAccountAccess(user.id);
       if (account?.role === "ADMIN") {
         const actorUserId = account.id;

@@ -3,10 +3,7 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    AUTH_SECRET:
-      process.env.NODE_ENV === "production"
-        ? z.string().min(32)
-        : z.string().optional(),
+    AUTH_SECRET: z.string().min(32),
     AUTH_GOOGLE_ID: z.string().optional(),
     AUTH_GOOGLE_SECRET: z.string().optional(),
     EMAIL_SERVER: z.string().optional(),

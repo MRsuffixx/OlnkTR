@@ -257,3 +257,18 @@
 **Root cause:** The migration verifies uniqueness before NOT NULL + UNIQUE-ing `emailNormalized`.
 **Workaround:** Reconcile the offending rows manually (collapse or rename).
 **Canonical fix:** Migration is a one-time guard; future normalisations won't repeat this check.
+
+---
+
+## 26. Audit remediation verified against a stale report snapshot
+
+**Severity:** Resolved
+**Symptom:** The audit report referenced an `admin-users.ts` router, session impersonation cookies,
+and Prisma model names that are absent from the current branch.
+**Root cause:** The report was generated from an older or different implementation snapshot.
+**Resolution:** Every reported finding was revalidated against the current tree. Valid residual
+issues were fixed: runtime HMAC fallbacks, missing-id sign-in handling, custom keyframe collisions,
+tRPC cache policy, and database URL parsing. Adyen Standard webhook verification now has a
+regression fixture covering its per-notification-item HMAC protocol.
+**Verification:** See `AUDIT_REMEDIATION.md` for the baseline, classification matrix, exact
+commands, and remaining environment-dependent checks.

@@ -7,10 +7,7 @@ import { env } from "~/env";
 const ACCESS_DURATION_MS = 12 * 60 * 60 * 1000;
 
 function sign(value: string) {
-  return createHmac(
-    "sha256",
-    env.AUTH_SECRET ?? "local-development-only-secret",
-  )
+  return createHmac("sha256", env.AUTH_SECRET)
     .update(value)
     .digest("base64url");
 }

@@ -328,3 +328,27 @@ official plugins widen their ranges.
 - Free downgrades retain stored Pro choices but public rendering uses explicit fallbacks.
 - Whole-profile protection can be enforced before any protected content is rendered and again at `/go/[id]`.
 - Spotify never receives a fake volume API: its mute action is an honest pause/resume, while SoundCloud and direct files expose real volume.
+
+---
+
+## ADR-021 — Runtime signing has no development fallback
+
+**Date:** 2026-07-25
+**Status:** Accepted
+**Context:** Auth sessions, protected-content access cookies, and analytics dedupe identifiers all
+depend on HMAC signing. Predictable development fallback strings become a security boundary when
+an environment is accidentally deployed with non-production mode.
+
+**Decision:** Require `AUTH_SECRET` (minimum 32 characters) in every runtime mode. Link access,
+profile access, and analytics ingestion use only the validated secret. Test and CI environments
+provide explicit non-production-only values.
+
+Custom CSS keyframe identifiers are also rewritten under the `olnk-user-kf-` namespace so a
+profile stylesheet cannot replace application animation definitions by name.
+
+**Consequences:**
+
+- Local setup fails early until the developer generates an `AUTH_SECRET`.
+- Existing access cookies remain valid because the HMAC inputs and algorithm did not change.
+- A deployment with a missing secret cannot silently fall back to a publicly known key.
+- User keyframes remain usable, but their sanitized output has isolated names.

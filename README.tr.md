@@ -28,17 +28,17 @@
 
 ## Teknoloji yığını
 
-| Katman | Teknoloji |
-| --- | --- |
-| Uygulama | Next.js 16, React 19, TypeScript 6 |
-| Uygulama programlama arayüzü ve doğrulama | tRPC 11, TanStack Query, Zod 4, SuperJSON |
-| Kimlik doğrulama | Auth.js / NextAuth 5, Prisma bağdaştırıcısı, Google OAuth, Nodemailer |
-| Veritabanı | PostgreSQL, Prisma 7 |
-| Biçimlendirme | Tailwind CSS 4 |
-| Etkileşim | dnd kit, Lucide React |
-| Ödeme | Stripe, iyzico, PayTR, Adyen |
-| Depolama | S3 uyumlu nesne depolama |
-| Paket yöneticisi | pnpm 11 |
+| Katman                                    | Teknoloji                                                             |
+| ----------------------------------------- | --------------------------------------------------------------------- |
+| Uygulama                                  | Next.js 16, React 19, TypeScript 6                                    |
+| Uygulama programlama arayüzü ve doğrulama | tRPC 11, TanStack Query, Zod 4, SuperJSON                             |
+| Kimlik doğrulama                          | Auth.js / NextAuth 5, Prisma bağdaştırıcısı, Google OAuth, Nodemailer |
+| Veritabanı                                | PostgreSQL, Prisma 7                                                  |
+| Biçimlendirme                             | Tailwind CSS 4                                                        |
+| Etkileşim                                 | dnd kit, Lucide React                                                 |
+| Ödeme                                     | Stripe, iyzico, PayTR, Adyen                                          |
+| Depolama                                  | S3 uyumlu nesne depolama                                              |
+| Paket yöneticisi                          | pnpm 11                                                               |
 
 ## Başlangıç
 
@@ -73,15 +73,15 @@ pnpm exec auth secret
 
 Oluşturulan değeri `.env` içindeki `AUTH_SECRET` alanına ekleyin.
 
-| Değişken grubu | Amaç | Zorunluluk |
-| --- | --- | --- |
-| `DATABASE_URL` | PostgreSQL bağlantı adresi | Zorunlu |
-| `AUTH_SECRET` | Oturum ve belirteç güvenliği | Üretimde zorunlu, yerelde önerilir |
-| `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Google OAuth | Google girişi etkinse zorunlu |
-| `EMAIL_SERVER`, `EMAIL_FROM` | Şifresiz e-posta girişi | E-posta girişi etkinse zorunlu |
-| `NEXT_PUBLIC_APP_URL` | Uygulamanın standart adresi | Önerilir |
-| Ödeme sağlayıcısı değişkenleri | Pro plan ödeme akışı ve bildirimleri | İsteğe bağlı |
-| `STORAGE_*` | S3 uyumlu profil görseli ve arka plan yüklemeleri | İsteğe bağlı |
+| Değişken grubu                         | Amaç                                              | Zorunluluk                     |
+| -------------------------------------- | ------------------------------------------------- | ------------------------------ |
+| `DATABASE_URL`                         | PostgreSQL bağlantı adresi                        | Zorunlu                        |
+| `AUTH_SECRET`                          | Oturum ve belirteç güvenliği                      | Her ortamda zorunlu            |
+| `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Google OAuth                                      | Google girişi etkinse zorunlu  |
+| `EMAIL_SERVER`, `EMAIL_FROM`           | Şifresiz e-posta girişi                           | E-posta girişi etkinse zorunlu |
+| `NEXT_PUBLIC_APP_URL`                  | Uygulamanın standart adresi                       | Önerilir                       |
+| Ödeme sağlayıcısı değişkenleri         | Pro plan ödeme akışı ve bildirimleri              | İsteğe bağlı                   |
+| `STORAGE_*`                            | S3 uyumlu profil görseli ve arka plan yüklemeleri | İsteğe bağlı                   |
 
 Google OAuth için şu geri dönüş adreslerini kaydedin:
 
@@ -109,20 +109,20 @@ Tarayıcıda `http://localhost:3000` adresini açın.
 
 ## Kullanılabilir komutlar
 
-| Komut | Açıklama |
-| --- | --- |
-| `pnpm dev` | Turbopack geliştirme sunucusunu başlatır |
-| `pnpm build` | Üretim derlemesi oluşturur |
-| `pnpm start` | Üretim sunucusunu çalıştırır |
-| `pnpm check` | ESLint ve TypeScript denetimlerini çalıştırır |
-| `pnpm lint` | Uyarıya izin vermeden ESLint'i çalıştırır |
-| `pnpm typecheck` | Dosya üretmeden TypeScript denetimi yapar |
-| `pnpm format:check` | Biçimlendirmeyi denetler |
-| `pnpm format:write` | Desteklenen kaynak dosyalarını biçimlendirir |
-| `pnpm db:generate` | Prisma istemcisini oluşturur |
-| `pnpm db:migrate:dev` | Geliştirme geçişlerini oluşturur veya uygular |
-| `pnpm db:migrate` | Sürümlenmiş geçişleri uygular |
-| `pnpm db:studio` | Prisma Studio'yu açar |
+| Komut                                          | Açıklama                                                           |
+| ---------------------------------------------- | ------------------------------------------------------------------ |
+| `pnpm dev`                                     | Turbopack geliştirme sunucusunu başlatır                           |
+| `pnpm build`                                   | Üretim derlemesi oluşturur                                         |
+| `pnpm start`                                   | Üretim sunucusunu çalıştırır                                       |
+| `pnpm check`                                   | ESLint ve TypeScript denetimlerini çalıştırır                      |
+| `pnpm lint`                                    | Uyarıya izin vermeden ESLint'i çalıştırır                          |
+| `pnpm typecheck`                               | Dosya üretmeden TypeScript denetimi yapar                          |
+| `pnpm format:check`                            | Biçimlendirmeyi denetler                                           |
+| `pnpm format:write`                            | Desteklenen kaynak dosyalarını biçimlendirir                       |
+| `pnpm db:generate`                             | Prisma istemcisini oluşturur                                       |
+| `pnpm db:migrate:dev`                          | Geliştirme geçişlerini oluşturur veya uygular                      |
+| `pnpm db:migrate`                              | Sürümlenmiş geçişleri uygular                                      |
+| `pnpm db:studio`                               | Prisma Studio'yu açar                                              |
 | `pnpm admin:role <e-posta> --role ADMIN\|USER` | Mevcut bir hesabı sunucudan yönetici yapar veya yetkisini kaldırır |
 
 ### İlk yöneticiyi oluşturma

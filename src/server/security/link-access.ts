@@ -5,10 +5,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { env } from "~/env";
 
 function sign(value: string) {
-  return createHmac(
-    "sha256",
-    env.AUTH_SECRET ?? "local-development-only-secret",
-  )
+  return createHmac("sha256", env.AUTH_SECRET)
     .update(value)
     .digest("base64url");
 }

@@ -15,12 +15,7 @@ const BOT_PATTERN =
   /bot|crawler|spider|headless|preview|facebookexternalhit|whatsapp|telegrambot|discordbot|slurp/i;
 
 function digest(value: string) {
-  return createHmac(
-    "sha256",
-    env.AUTH_SECRET ?? "local-analytics-development-secret",
-  )
-    .update(value)
-    .digest("hex");
+  return createHmac("sha256", env.AUTH_SECRET).update(value).digest("hex");
 }
 
 function referrerData(headers: Pick<Headers, "get">) {

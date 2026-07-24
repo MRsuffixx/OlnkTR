@@ -76,15 +76,15 @@ pnpm exec auth secret
 
 Add the generated value to `AUTH_SECRET` in `.env`.
 
-| Variable group                         | Purpose                                            | Required                                    |
-| -------------------------------------- | -------------------------------------------------- | ------------------------------------------- |
-| `DATABASE_URL`                         | PostgreSQL connection URL                          | Yes                                         |
-| `AUTH_SECRET`                          | Session and token security                         | Required in production; recommended locally |
-| `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Google OAuth                                       | Required when Google sign-in is enabled     |
-| `EMAIL_SERVER`, `EMAIL_FROM`           | Passwordless email sign-in                         | Required when email sign-in is enabled      |
-| `NEXT_PUBLIC_APP_URL`                  | Canonical application URL (required in production) | Required in production                      |
-| Payment-provider variables             | Pro plan checkout and webhooks                     | Optional                                    |
-| `STORAGE_*`                            | S3-compatible avatar and background uploads        | Optional                                    |
+| Variable group                         | Purpose                                            | Required                                |
+| -------------------------------------- | -------------------------------------------------- | --------------------------------------- |
+| `DATABASE_URL`                         | PostgreSQL connection URL                          | Yes                                     |
+| `AUTH_SECRET`                          | Session and token security                         | Required in every environment           |
+| `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Google OAuth                                       | Required when Google sign-in is enabled |
+| `EMAIL_SERVER`, `EMAIL_FROM`           | Passwordless email sign-in                         | Required when email sign-in is enabled  |
+| `NEXT_PUBLIC_APP_URL`                  | Canonical application URL (required in production) | Required in production                  |
+| Payment-provider variables             | Pro plan checkout and webhooks                     | Optional                                |
+| `STORAGE_*`                            | S3-compatible avatar and background uploads        | Optional                                |
 
 For Google OAuth, register these callback URLs:
 

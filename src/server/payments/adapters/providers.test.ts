@@ -4,10 +4,18 @@ vi.mock("~/env", () => ({
   env: {
     NODE_ENV: "test",
     DATABASE_URL: "postgresql://test:test@localhost:5432/olnk_test",
+    ADYEN_API_KEY: "test-api-key",
+    ADYEN_MERCHANT_ACCOUNT: "TestMerchant",
+    ADYEN_HMAC_KEY:
+      "44782DEF547AAA06C910C43932B1EB0C71FC68D9D0C057550C48EC2ACF6BA056",
+    NEXT_PUBLIC_ADYEN_CLIENT_KEY: "test-client-key",
   },
 }));
 
-import { normalizeAdyenNotification } from "~/server/payments/adapters/adyen";
+import {
+  adyenAdapter,
+  normalizeAdyenNotification,
+} from "~/server/payments/adapters/adyen";
 import { createIyzicoWebhookSignature } from "~/server/payments/adapters/iyzico";
 import { createPaytrCallbackHash } from "~/server/payments/adapters/paytr";
 import { mapStripeSubscriptionStatus } from "~/server/payments/adapters/stripe";
@@ -40,6 +48,66 @@ describe("payment provider fixtures", () => {
       intentId: "intent-1",
       amountMinor: 300,
     });
+  });
+
+  it("accepts a Standard Adyen webhook only with a valid per-item HMAC", async () => {
+    const payload = {
+      live: "false",
+      notificationItems: [
+        {
+          NotificationRequestItem: {
+            additionalData: {
+              hmacSignature: "coqCmt/IZ4E3CzPvMY8zTjQVL5hYJUiBRg8UU+iCWo0=",
+            },
+            amount: { value: 1130, currency: "EUR" },
+            pspReference: "7914073381342284",
+            eventCode: "AUTHORISATION",
+            eventDate: "2019-05-06T17:15:34.121+02:00",
+            merchantAccountCode: "TestMerchant",
+            merchantReference: "TestPayment-1407325143704",
+            operations: ["CANCEL", "CAPTURE", "REFUND"],
+            paymentMethod: "visa",
+            success: "true",
+          },
+        },
+      ],
+    };
+    const events = await adyenAdapter.handleWebhook(
+      Buffer.from(JSON.stringify(payload)),
+      new Headers(),
+    );
+
+    expect(events).toEqual([
+      expect.objectContaining({
+        id: "7914073381342284:AUTHORISATION",
+        intentId: "TestPayment-1407325143704",
+        type: "payment_succeeded",
+      }),
+    ]);
+  });
+
+  it("rejects a Standard Adyen webhook without a per-item or header HMAC", async () => {
+    const payload = {
+      notificationItems: [
+        {
+          NotificationRequestItem: {
+            amount: { value: 300, currency: "USD" },
+            pspReference: "unsigned-event",
+            eventCode: "AUTHORISATION",
+            merchantAccountCode: "TestMerchant",
+            merchantReference: "intent-unsigned",
+            success: "true",
+          },
+        },
+      ],
+    };
+
+    await expect(
+      adyenAdapter.handleWebhook(
+        Buffer.from(JSON.stringify(payload)),
+        new Headers(),
+      ),
+    ).rejects.toThrow(/hmacSignature|HMAC/);
   });
 
   it("matches the iyzico v3 canonical subscription signature fixture", () => {

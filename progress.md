@@ -150,6 +150,20 @@
 - Verification: Prisma generation, `pnpm check`, format, 25 unit tests, production build, and
   Playwright desktop/mobile access checks all pass.
 
+### 2026-07-25 — External audit remediation
+
+- Revalidated all 26 report findings against the current branch; the reported Critical/High
+  admin crashes, impersonation issue, and Adyen bypass were stale or technically incorrect.
+- Removed every predictable runtime HMAC fallback and made `AUTH_SECRET` mandatory in all
+  environments.
+- Made Auth.js reject sign-in callbacks without a server-issued user ID.
+- Namespaced sanitized custom CSS keyframes and rewrote their animation references.
+- Added explicit `private, no-store` to all tRPC transport responses.
+- Replaced `start-database.sh` delimiter parsing with WHATWG URL parsing and added a non-mutating
+  `--check-url` validation mode.
+- Added Adyen Standard webhook and custom keyframe regression tests.
+- Full command results and per-finding classifications are recorded in `AUDIT_REMEDIATION.md`.
+
 ### 2026-07-21 — Stabilization (HEAD `433f4fb`)
 
 - **chore(config): use port 3100 and disable implicit dep installs** (`433f4fb`) — Playwright webserver switched from `pnpm dev` to `pnpm start`, port 3000 → 3100, webserver timeout 120 s → 180 s, `verifyDepsBeforeRun: false`.

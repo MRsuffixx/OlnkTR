@@ -94,6 +94,11 @@ const SAFE_PROPERTIES = new Set([
 const FORBIDDEN_VALUE =
   /(?:url|image-set|cross-fade|element|expression|attr|var)\s*\(|javascript\s*:|data\s*:|behavior\s*:|-moz-binding|@/i;
 const FORBIDDEN_SELECTOR = /(^|[\s,>+~])(html|body|:root)(?=$|[\s,.#:[>+~])/i;
+const KEYFRAME_PREFIX = "olnk-user-kf-";
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 function removeUnsafeAtRule(rule: AtRule) {
   const name = rule.name.toLowerCase();
@@ -121,6 +126,15 @@ export function sanitizeCustomCss(input: string) {
     comment.remove();
   });
   root.walkAtRules(removeUnsafeAtRule);
+  const keyframes = new Map<string, string>();
+  root.walkAtRules((rule) => {
+    if (!["keyframes", "-webkit-keyframes"].includes(rule.name.toLowerCase()))
+      return;
+    const original = rule.params.trim();
+    const scoped = `${KEYFRAME_PREFIX}${original}`;
+    keyframes.set(original, scoped);
+    rule.params = scoped;
+  });
   root.walkDecls((declaration) => {
     const property = declaration.prop.toLowerCase();
     if (
@@ -129,6 +143,16 @@ export function sanitizeCustomCss(input: string) {
       FORBIDDEN_VALUE.test(declaration.value)
     )
       declaration.remove();
+    else if (property === "animation" || property === "animation-name") {
+      for (const [original, scoped] of keyframes)
+        declaration.value = declaration.value.replace(
+          new RegExp(
+            `(^|[^a-zA-Z0-9_-])${escapeRegExp(original)}(?=$|[^a-zA-Z0-9_-])`,
+            "g",
+          ),
+          `$1${scoped}`,
+        );
+    }
   });
   root.walkRules((rule: Rule) => {
     if (
