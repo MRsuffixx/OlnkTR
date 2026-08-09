@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   createVerificationMessage,
+  isEmailAuthenticationCallback,
   isEmailVerificationRequest,
   sendVerificationRequest,
 } from "~/server/auth/email-verification";
@@ -39,14 +40,31 @@ describe("email verification", () => {
     ).toBe(true);
     expect(
       isEmailVerificationRequest({
-        userEmail: "kullanici@example.com",
-        userId: "user-1",
         verificationRequest: true,
       }),
     ).toBe(false);
     expect(
       isEmailVerificationRequest({
         userEmail: "kullanici@example.com",
+      }),
+    ).toBe(false);
+  });
+
+  it("identifies the verified email callback separately", () => {
+    expect(
+      isEmailAuthenticationCallback({
+        accountType: "email",
+      }),
+    ).toBe(true);
+    expect(
+      isEmailAuthenticationCallback({
+        accountType: "email",
+        verificationRequest: true,
+      }),
+    ).toBe(false);
+    expect(
+      isEmailAuthenticationCallback({
+        accountType: "oauth",
       }),
     ).toBe(false);
   });

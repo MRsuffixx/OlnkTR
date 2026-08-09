@@ -49,6 +49,33 @@
 - Çalışan bir PostgreSQL veritabanı
 - En az bir kimlik doğrulama sağlayıcısı: Google OAuth veya SMTP sunucusu
 
+### Docker ile hızlı başlangıç
+
+Host üzerinde Node.js veya PostgreSQL kurmadan uygulama, veritabanı ve yerel e-posta
+yakalayıcısını birlikte başlatabilirsiniz:
+
+```bash
+docker compose up --build --wait
+```
+
+- Uygulama: `http://localhost:3000`
+- Yerel e-posta kutusu (Mailpit): `http://localhost:8025`
+- Migration'lar uygulamadan önce `migrate` servisi tarafından otomatik uygulanır.
+- SMTP, yerel ortamda `smtp://mailpit:1025` adresine yönlendirilir.
+
+Logları izlemek veya yığını durdurmak için:
+
+```bash
+docker compose logs --follow app
+docker compose down
+```
+
+Compose varsayılanları yalnız yerel geliştirme içindir ve portlar `127.0.0.1`
+üzerine bağlanır. İnternete açık dağıtımda güçlü `AUTH_SECRET`/`CRON_SECRET`
+değerleri ve gerçek `DOCKER_APP_URL` ayarlayın. Veritabanı ile yakalanan e-postaları
+da silmek isterseniz `docker compose down --volumes` komutunu bilinçli olarak
+kullanın.
+
 ### 1. Depoyu kopyalayın
 
 ```bash
@@ -77,6 +104,7 @@ Oluşturulan değeri `.env` içindeki `AUTH_SECRET` alanına ekleyin.
 | -------------------------------------- | ------------------------------------------------- | ------------------------------ |
 | `DATABASE_URL`                         | PostgreSQL bağlantı adresi                        | Zorunlu                        |
 | `AUTH_SECRET`                          | Oturum ve belirteç güvenliği                      | Her ortamda zorunlu            |
+| `AUTH_URL`                             | Auth.js geri dönüş ve magic-link kökeni           | Docker/üretimde önerilir       |
 | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Google OAuth                                      | Google girişi etkinse zorunlu  |
 | `EMAIL_SERVER`, `EMAIL_FROM`           | Şifresiz e-posta girişi                           | E-posta girişi etkinse zorunlu |
 | `NEXT_PUBLIC_APP_URL`                  | Uygulamanın standart adresi                       | Önerilir                       |

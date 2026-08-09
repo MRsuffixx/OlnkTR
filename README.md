@@ -52,6 +52,32 @@ A mobile-first link-in-bio platform for creators, professionals, and small busin
 - A running PostgreSQL database
 - At least one authentication provider: Google OAuth or an SMTP server
 
+### Quick start with Docker
+
+Run the application, database, and local email catcher without installing Node.js
+or PostgreSQL on the host:
+
+```bash
+docker compose up --build --wait
+```
+
+- Application: `http://localhost:3000`
+- Local inbox (Mailpit): `http://localhost:8025`
+- The one-shot `migrate` service applies all committed migrations before the app starts.
+- Local SMTP is wired to `smtp://mailpit:1025`.
+
+To inspect logs or stop the stack:
+
+```bash
+docker compose logs --follow app
+docker compose down
+```
+
+The Compose defaults are local-development values and all published ports bind to
+`127.0.0.1`. Set strong `AUTH_SECRET`/`CRON_SECRET` values and a real
+`DOCKER_APP_URL` before any internet-facing deployment. To intentionally remove
+the local database and captured messages, use `docker compose down --volumes`.
+
 ### 1. Clone the repository
 
 ```bash
@@ -80,6 +106,7 @@ Add the generated value to `AUTH_SECRET` in `.env`.
 | -------------------------------------- | -------------------------------------------------- | --------------------------------------- |
 | `DATABASE_URL`                         | PostgreSQL connection URL                          | Yes                                     |
 | `AUTH_SECRET`                          | Session and token security                         | Required in every environment           |
+| `AUTH_URL`                             | Auth.js callback and magic-link origin             | Recommended for Docker/production       |
 | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Google OAuth                                       | Required when Google sign-in is enabled |
 | `EMAIL_SERVER`, `EMAIL_FROM`           | Passwordless email sign-in                         | Required when email sign-in is enabled  |
 | `NEXT_PUBLIC_APP_URL`                  | Canonical application URL (required in production) | Required in production                  |

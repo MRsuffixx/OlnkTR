@@ -6,15 +6,17 @@ export type VerificationRequest = Parameters<
 >[0];
 
 export function isEmailVerificationRequest(input: {
-  userId?: string | null;
   userEmail?: string | null;
   verificationRequest?: boolean;
 }) {
-  return Boolean(
-    !input.userId &&
-      input.userEmail &&
-      input.verificationRequest === true,
-  );
+  return Boolean(input.userEmail && input.verificationRequest === true);
+}
+
+export function isEmailAuthenticationCallback(input: {
+  accountType?: string | null;
+  verificationRequest?: boolean;
+}) {
+  return input.accountType === "email" && input.verificationRequest !== true;
 }
 
 function escapeHtml(value: string) {

@@ -19,6 +19,7 @@ const smtpServerSchema = z
 export const env = createEnv({
   server: {
     AUTH_SECRET: z.string().min(32),
+    AUTH_URL: z.string().url().optional(),
     AUTH_GOOGLE_ID: z.string().optional(),
     AUTH_GOOGLE_SECRET: z.string().optional(),
     EMAIL_SERVER: smtpServerSchema.optional(),
@@ -77,6 +78,7 @@ export const env = createEnv({
   },
   runtimeEnv: {
     AUTH_SECRET: process.env.AUTH_SECRET,
+    AUTH_URL: process.env.AUTH_URL,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
     EMAIL_SERVER: process.env.EMAIL_SERVER,

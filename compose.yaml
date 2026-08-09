@@ -2,6 +2,7 @@ name: olnktr
 
 x-app-environment: &app-environment
   AUTH_SECRET: ${AUTH_SECRET:-docker-local-auth-secret-change-before-production}
+  AUTH_URL: ${DOCKER_APP_URL:-http://localhost:3000}
   CRON_SECRET: ${CRON_SECRET:-docker-local-cron-secret-change-before-production}
   DATABASE_URL: postgresql://${POSTGRES_USER:-olnktr}:${POSTGRES_PASSWORD:-olnktr}@database:5432/${POSTGRES_DB:-olnktr}
   EMAIL_FROM: ${DOCKER_EMAIL_FROM:-olnk.tr <giris@olnk.local>}

@@ -13,6 +13,7 @@ import {
   getAccountAccess,
 } from "~/server/auth/account-access";
 import {
+  isEmailAuthenticationCallback,
   isEmailVerificationRequest,
   sendVerificationRequest,
 } from "~/server/auth/email-verification";
@@ -175,17 +176,15 @@ export const authConfig = {
   },
   session: { strategy: "database" },
   callbacks: {
-    signIn: async ({ user, email }) => {
-      if (!user.id) {
-        const userEmail = user.email;
-        if (
-          !userEmail ||
-          !isEmailVerificationRequest({
-            userEmail,
-            verificationRequest: email?.verificationRequest,
-          })
-        )
-          return false;
+    signIn: async ({ user, email, account: providerAccount }) => {
+      const userEmail = user.email;
+      if (
+        userEmail &&
+        isEmailVerificationRequest({
+          userEmail,
+          verificationRequest: email?.verificationRequest,
+        })
+      ) {
         const normalizedEmail = normalizeEmail(userEmail);
         const rate = await consumeRateLimit({
           key: `auth-email:${normalizedEmail}`,
@@ -193,9 +192,23 @@ export const authConfig = {
           windowMs: 60 * 60 * 1000,
           blockMs: 60 * 60 * 1000,
         });
-        return rate.allowed;
+        if (!rate.allowed) return false;
+        if (!user.id) return true;
+        const existingAccount = await getAccountAccess(user.id);
+        return existingAccount ? canAccessAccount(existingAccount) : true;
       }
+
+      const emailAuthenticationCallback = isEmailAuthenticationCallback({
+        accountType: providerAccount?.type,
+        verificationRequest: email?.verificationRequest,
+      });
+      if (emailAuthenticationCallback && !userEmail) return false;
+      if (!user.id) return false;
       const account = await getAccountAccess(user.id);
+      // Auth.js creates a random temporary id before persisting a brand-new
+      // user. At this point the one-time verification token was already
+      // validated and consumed by Auth.js.
+      if (emailAuthenticationCallback && !account) return true;
       if (account?.role === "ADMIN") {
         const actorUserId = account.id;
         const actorLabel = adminActorLabel(account);
