@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   createVerificationMessage,
+  isEmailVerificationRequest,
   sendVerificationRequest,
 } from "~/server/auth/email-verification";
 import type { VerificationRequest } from "~/server/auth/email-verification";
@@ -29,6 +30,27 @@ function createRequest(): VerificationRequest {
 }
 
 describe("email verification", () => {
+  it("only identifies Auth.js email pre-verification callbacks", () => {
+    expect(
+      isEmailVerificationRequest({
+        userEmail: "kullanici@example.com",
+        verificationRequest: true,
+      }),
+    ).toBe(true);
+    expect(
+      isEmailVerificationRequest({
+        userEmail: "kullanici@example.com",
+        userId: "user-1",
+        verificationRequest: true,
+      }),
+    ).toBe(false);
+    expect(
+      isEmailVerificationRequest({
+        userEmail: "kullanici@example.com",
+      }),
+    ).toBe(false);
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     sendMail.mockResolvedValue({ rejected: [], pending: [] });

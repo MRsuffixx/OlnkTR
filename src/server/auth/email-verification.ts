@@ -5,6 +5,18 @@ export type VerificationRequest = Parameters<
   NodemailerConfig["sendVerificationRequest"]
 >[0];
 
+export function isEmailVerificationRequest(input: {
+  userId?: string | null;
+  userEmail?: string | null;
+  verificationRequest?: boolean;
+}) {
+  return Boolean(
+    !input.userId &&
+      input.userEmail &&
+      input.verificationRequest === true,
+  );
+}
+
 function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")

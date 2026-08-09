@@ -12,7 +12,10 @@ import {
   canAccessAccount,
   getAccountAccess,
 } from "~/server/auth/account-access";
-import { sendVerificationRequest } from "~/server/auth/email-verification";
+import {
+  isEmailVerificationRequest,
+  sendVerificationRequest,
+} from "~/server/auth/email-verification";
 import { db } from "~/server/db";
 import {
   claimUsername,
@@ -172,8 +175,26 @@ export const authConfig = {
   },
   session: { strategy: "database" },
   callbacks: {
-    signIn: async ({ user }) => {
-      if (!user.id) return false;
+    signIn: async ({ user, email }) => {
+      if (!user.id) {
+        const userEmail = user.email;
+        if (
+          !userEmail ||
+          !isEmailVerificationRequest({
+            userEmail,
+            verificationRequest: email?.verificationRequest,
+          })
+        )
+          return false;
+        const normalizedEmail = normalizeEmail(userEmail);
+        const rate = await consumeRateLimit({
+          key: `auth-email:${normalizedEmail}`,
+          limit: 5,
+          windowMs: 60 * 60 * 1000,
+          blockMs: 60 * 60 * 1000,
+        });
+        return rate.allowed;
+      }
       const account = await getAccountAccess(user.id);
       if (account?.role === "ADMIN") {
         const actorUserId = account.id;
