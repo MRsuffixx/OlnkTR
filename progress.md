@@ -138,9 +138,12 @@
   remain in force and email requests are address-rate-limited.
 - Added a Turkish escaped magic-link template, strict SMTP URL/pair validation, and
   `AUTH_URL` so container bind addresses cannot leak into emailed links.
+- Pinned patched `fast-uri`, `ip-address`, and `nanoid` transitives after the current
+  registry audit exposed five advisories; the production audit now reports zero.
 - Verified clean install, Prisma generation/migrations, lint/typecheck, unit tests,
-  formatting, production build, container health, SMTP delivery, token consumption,
-  user/session creation, and dashboard redirect.
+  formatting, production build, all 12 Playwright cases (including DB-backed coverage),
+  container health, SMTP delivery, token consumption, user/session creation, and dashboard redirect.
+
 ### 2026-07-24 — Audio, ambient effects, profile gates, and honest counters
 
 - Extended the versioned appearance document with backward-compatible `audio`, `socialProof`, and granular visual-effect paths; all leaves are centrally tiered.
