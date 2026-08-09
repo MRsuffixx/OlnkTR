@@ -12,6 +12,7 @@ import {
   canAccessAccount,
   getAccountAccess,
 } from "~/server/auth/account-access";
+import { sendVerificationRequest } from "~/server/auth/email-verification";
 import { db } from "~/server/db";
 import {
   claimUsername,
@@ -30,8 +31,15 @@ declare module "next-auth" {
 }
 
 const googleEnabled = Boolean(env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET);
-const emailEnabled = Boolean(env.EMAIL_SERVER && env.EMAIL_FROM);
+const emailServerConfigured = Boolean(env.EMAIL_SERVER);
+const emailFromConfigured = Boolean(env.EMAIL_FROM);
 
+if (emailServerConfigured !== emailFromConfigured)
+  throw new Error(
+    "EMAIL_SERVER and EMAIL_FROM must either both be configured or both be omitted.",
+  );
+
+const emailEnabled = emailServerConfigured && emailFromConfigured;
 export const authMethods = { googleEnabled, emailEnabled };
 
 const providers: NextAuthConfig["providers"] = [];
@@ -51,6 +59,7 @@ if (emailEnabled) {
     Nodemailer({
       server: env.EMAIL_SERVER,
       from: env.EMAIL_FROM,
+      sendVerificationRequest,
       maxAge: 10 * 60,
     }),
   );
