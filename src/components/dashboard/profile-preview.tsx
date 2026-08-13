@@ -46,7 +46,11 @@ export function ProfilePreview({
   const initial =
     draft.name.trim().slice(0, 1).toLocaleUpperCase("tr-TR") || "O";
   const appearance = draft.appearance;
-  const density = profileDensity(appearance.layout.density);
+  const density = profileDensity(
+    appearance.layout.template === "compact"
+      ? "compact"
+      : appearance.layout.density,
+  );
   const now = new Date();
   const previewLinks = draft.links.filter(
     (link) =>
@@ -184,6 +188,7 @@ export function ProfilePreview({
         )}
         <h2
           className="relative font-black"
+          data-olnk-heading-effect={appearance.typography.headingEffect}
           style={{
             marginTop: density.profileGap,
             fontFamily: profileFontFamily(appearance.typography.headingFont),

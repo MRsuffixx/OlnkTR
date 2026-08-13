@@ -7,7 +7,7 @@
 [![Lisans](https://img.shields.io/badge/lisans-OMAL--1.0-5C4EE5)](LICENSE.tr)
 ![Katkılara açık](https://img.shields.io/badge/katkılara-açık-brightgreen.svg)
 
-Öncelikle Türkçe konuşan içerik üreticileri, profesyoneller ve küçük işletmeler için geliştirilen mobil öncelikli bir biyografi bağlantısı platformudur. Her kullanıcı, bağlantılarını yayımlayabileceği, profilini kişiselleştirebileceği, QR kodunu paylaşabileceği ve ziyaretçi etkileşimlerini inceleyebileceği `olnk.tr/[kullanici-adi]` adresine sahip olur.
+Öncelikle Türkçe konuşan içerik üreticileri, profesyoneller ve küçük işletmeler için geliştirilen mobil öncelikli bir mini site oluşturucudur. Her kullanıcı `olnk.tr/[kullanici-adi]` adresinde kendi sitesine sahip olur. Bağlantılar ilk içerik türüdür; ürün mimarisi bölümler, widget'lar, paylaşılabilir temalar, medya ve daha zengin kimlik bileşenleri için tasarlanmıştır.
 
 [İngilizce belgeleri okuyun](README.md)
 
@@ -19,8 +19,8 @@
 - **Kimlik doğrulama ve ilk kurulum:** Auth.js ile Google OAuth ve şifresiz e-posta girişi; normalleştirilmiş ve veritabanı düzeyinde benzersiz kullanıcı adları.
 - **Kullanıcı adı güvenliği:** Ayrılmış rota denetimleri, Türkçe duyarlı normalleştirme, gizlemeye dayanıklı içerik denetimi ve veritabanından yönetilen engel listesi.
 - **Herkese açık profiller:** Standart adres, Open Graph verileri, yapılandırılmış veri, duyarlı yerleşim ve indirilebilir QR koduyla hızlı, sunucuda oluşturulan sayfalar.
-- **Profil düzenleyici:** Canlı telefon önizlemesi, tıklayarak düzenleme, sürükleyip bırakarak sıralama ve revizyon duyarlı otomatik kayıt sunan bölünmüş ekranlı panel.
-- **Görünüm ayarları:** Özel arka planlar, yazı biçimleri, düğme stilleri, yerleşimler, görsel efektler, bağlantı bazlı biçimlendirme ve isteğe bağlı özel CSS.
+- **Mini site oluşturucu:** Profil, içerik ve tasarım çalışma alanları; canlı telefon önizlemesi, tıklayarak düzenleme, sürükleyip bırakarak sıralama ve revizyon duyarlı otomatik kayıt.
+- **Sürümlü tasarım motoru:** Semantik renk token'ları, profil kartları, düzen şablonları, tam tema presetleri, özel arka planlar, tipografi, düğmeler, efektler, ses, SEO, gizlilik ve isteğe bağlı özel CSS.
 - **Bağlantı denetimleri:** Zamanlanmış bağlantılar, parola koruması, YouTube ve Spotify yerleştirmeleri, görünürlük seçenekleri ve güvenli yönlendirme.
 - **Analizler:** Yönlendirmeyi geciktirmeyen tıklama ve profil görüntüleme kaydı; yönlendiren kaynak, ülke, cihaz ve zaman bazlı içgörüler.
 - **Ödeme ve depolama:** Pro özellikleri için isteğe bağlı ödeme sağlayıcıları ve S3 uyumlu medya depolama desteği.

@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/badge/license-OMAL--1.0-5C4EE5)](LICENSE)
 ![Pull requests welcome](https://img.shields.io/badge/pull%20requests-welcome-brightgreen.svg)
 
-A mobile-first link-in-bio platform for creators, professionals, and small businesses, built primarily for Turkish-speaking users. Each user receives a public page at `olnk.tr/[username]` where they can publish links, personalize their profile, share a QR code, and understand audience engagement.
+A mobile-first mini-site builder for creators, professionals, and small businesses, built primarily for Turkish-speaking users. Each user receives a public site at `olnk.tr/[username]` where links are only the beginning: the product is designed to grow into structured sections, widgets, reusable themes, media, and richer identity without turning appearance settings into database columns.
 
 [Read the Turkish documentation](README.tr.md)
 
@@ -21,8 +21,8 @@ A mobile-first link-in-bio platform for creators, professionals, and small busin
 - **Authentication and onboarding:** Google OAuth and passwordless email sign-in with Auth.js, plus normalized and database-enforced unique usernames.
 - **Username safety:** Reserved-route checks, Turkish-aware normalization, obfuscation-resistant moderation, and a database-managed blocklist.
 - **Public profiles:** Fast server-rendered pages with canonical URLs, Open Graph metadata, structured data, responsive layouts, and downloadable QR codes.
-- **Profile editor:** A split-screen dashboard with a live phone preview, click-to-edit controls, drag-and-drop ordering, and revision-aware autosave.
-- **Appearance controls:** Custom backgrounds, typography, button styles, layouts, lazy canvas/retro effects, audio, honest visitor counters, per-link styling, and optional custom CSS.
+- **Mini-site builder:** A profile/content/design workspace with a live phone preview, click-to-edit controls, drag-and-drop ordering, and revision-aware autosave.
+- **Versioned design engine:** Semantic colour tokens, profile cards, layout templates, full-theme presets, custom backgrounds, typography, button styles, lazy canvas/retro effects, audio, SEO, privacy controls, and optional custom CSS.
 - **Link controls:** Scheduled links, password protection, YouTube and Spotify embeds, visibility toggles, and safe redirect handling.
 - **Profile gates and audio:** Server-enforced whole-profile passwords plus gesture-first Spotify, SoundCloud, and uploaded audio with visible stop/mute controls.
 - **Analytics:** Non-blocking click and profile-view collection with referrer, country, device, and time-based insights.

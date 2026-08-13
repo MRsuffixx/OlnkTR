@@ -8,11 +8,16 @@ export type AppearanceFeature = {
 };
 
 export const FEATURE_CATALOG = {
+  version: {
+    label: "Ayar belgesi sürümü",
+    tier: "free",
+    fallback: 2,
+  },
   preset: {
     label: "Tema paketi",
     tier: "free",
     fallback: "custom",
-    proValues: ["cyber", "terminal"],
+    proValues: ["frost", "midnight", "cyber", "terminal"],
   },
   "colors.primary": { label: "Ana renk", tier: "free", fallback: "#F06432" },
   "colors.secondary": {

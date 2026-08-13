@@ -134,7 +134,7 @@ model Theme {
 
 - The legacy columns (`backgroundType`, `buttonStyle`, `buttonShape`, `fontFamily`) are kept for backwards compatibility with old data; the structured appearance document lives in `settings`.
 - `customCss` is sanitized on every write via `sanitizeCustomCss`.
-- `settingsVersion` lets the migration script detect which back-fill format to use (currently `1`).
+- `settingsVersion` records the last persisted appearance-document format. Existing rows may remain at `1`; the parser migrates them in memory and the next workspace save persists version `2`.
 
 ### 2.4 ProfileLink
 
@@ -682,9 +682,9 @@ export const setLinkPasswordInput = z.object({
 
 ### `AppearanceSettings` summary (`src/lib/appearance.ts`)
 
-A deeply-typed Zod schema with eight groups: `background`, `buttons`, `typography`, `layout`, `effects`, `audio`, `socialProof`, and `advanced`. New fields carry Zod defaults so stored pre-Part-5 theme JSON remains valid. Every leaf path is tiered in `FEATURE_CATALOG`; direct audio, entry sounds, canvas/CRT effects, live/retro counters, and player skins fail closed to deterministic Free values.
+A deeply-typed, versioned Zod document. Version `2` separates semantic `colors`, `background`, `card`, `buttons`, `typography`, `layout`, `effects`, `audio`, `socialProof`, `seo`, `privacy`, and `advanced` groups. `parseAppearance()` explicitly migrates the legacy version-1 colour fields into semantic tokens, then supplies safe defaults for newly introduced groups.
 
-The schema is also the source of `FEATURE_CATALOG` keys (`src/config/feature-catalog.ts`). Pro-only paths are gated by `tier: "pro"` plus optional `proValues` lists.
+Every editable leaf is represented in `FEATURE_CATALOG` (`src/config/feature-catalog.ts`). Pro-only paths are gated by `tier: "pro"` plus optional `proValues` lists. Full-profile presets call the same typed settings model; they do not bypass leaf-level entitlement resolution.
 
 ---
 

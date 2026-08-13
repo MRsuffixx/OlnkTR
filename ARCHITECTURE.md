@@ -79,7 +79,17 @@ an internal SMTP endpoint and a loopback-only development inbox.
    - `/onboarding` if no `username`.
 2. RSC pages (`page.tsx`) call server-side tRPC procedures (`api.workspace.get`, `api.analytics.overview`, `api.billing.overview`, `api.customization.domainOverview`) via the cached caller in `src/trpc/server.ts`.
 3. The page hydrates with the resulting state; subsequent mutations use the client `httpBatchStreamLink`.
-4. The dashboard layout sets `metadata.robots = { index: false, follow: false }`.
+4. `WorkspaceEditor` is a three-area mini-site builder: a profile/content/design tool rail, the active inspector, and a shared live profile preview. Mobile keeps the same tools and switches between editor and preview.
+5. Identity and real content stay relational (`User`, `ProfileLink`). Presentation, layout, effects, typography, audio, SEO, and privacy preferences are validated as one versioned `Theme.settings` document.
+6. The dashboard layout sets `metadata.robots = { index: false, follow: false }`.
+
+### 2.2.1 Appearance document v2
+
+- `src/lib/appearance.ts` owns parsing, v1 → v2 migration, defaults, full-profile presets, semantic CSS-variable generation, and profile-card rendering.
+- `colors` is the visual token source of truth; components consume semantic values such as `button`, `textPrimary`, `cardBorder`, and `particle` instead of duplicating colour fields across feature groups.
+- `FEATURE_CATALOG` tiers every editable leaf. Free downgrades keep stored Pro choices while `resolveAppearanceForPlan()` produces deterministic public fallbacks.
+- Security-sensitive gates remain relational. `privacy` controls indexing, analytics ingestion, and share controls but cannot replace `User.profilePasswordHash` enforcement.
+- Links, future social accounts, badges, sections, and widgets are content and must use separate models rather than being embedded in `Theme.settings`.
 
 ### 2.3 Auth flow
 

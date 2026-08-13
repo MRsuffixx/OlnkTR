@@ -352,3 +352,28 @@ profile stylesheet cannot replace application animation definitions by name.
 - Existing access cookies remain valid because the HMAC inputs and algorithm did not change.
 - A deployment with a missing secret cannot silently fall back to a publicly known key.
 - User keyframes remain usable, but their sanitized output has isolated names.
+
+---
+
+## ADR-022 — The profile becomes a versioned mini-site document
+
+**Date:** 2026-08-13
+**Status:** Accepted
+**Context:** A flat collection of appearance columns cannot grow into cards, responsive layouts,
+presets, SEO, privacy, sections, and widgets without schema churn and duplicated colour state.
+
+**Decision:** Keep identity and real content in relational models, and evolve `Theme.settings` to
+appearance document version 2. The document has explicit configuration groups and a semantic
+colour-token source of truth. `parseAppearance()` migrates version-1 documents in memory; a later
+workspace save persists version 2. Theme presets produce ordinary validated documents, and every
+editable leaf remains subject to `FEATURE_CATALOG` entitlement resolution.
+
+Sections, social accounts, badges, and widgets will become separate content models when shipped.
+Profile passwords remain relational because they are enforcement state, not presentation state.
+
+**Consequences:**
+
+- Existing profiles render without a destructive database migration.
+- The dashboard preview and public profile share the same presets, tokens, cards, and layouts.
+- Adding a cosmetic field does not add a Prisma column.
+- Content querying and ordering remain relational and indexable.

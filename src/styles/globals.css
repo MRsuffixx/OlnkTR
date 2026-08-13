@@ -134,7 +134,11 @@ a {
 .olnk-particles {
   pointer-events: none;
   opacity: 0.42;
-  background-image: radial-gradient(circle, #fff 1.5px, transparent 1.8px);
+  background-image: radial-gradient(
+    circle,
+    var(--color-particle, #fff) 1.5px,
+    transparent 1.8px
+  );
   background-size: 34px 34px;
   animation: olnk-particles 12s linear infinite;
 }
@@ -142,10 +146,29 @@ a {
 .olnk-gradient-motion {
   pointer-events: none;
   opacity: 0.58;
-  background: linear-gradient(120deg, #f8c95c, #f06432, #b9ddc7, #f5f0de);
+  background: linear-gradient(
+    120deg,
+    var(--color-secondary, #f8c95c),
+    var(--color-primary, #f06432),
+    var(--color-accent, #b9ddc7),
+    var(--color-background, #f5f0de)
+  );
   background-size: 300% 300%;
   animation: olnk-gradient 9s ease infinite;
   mix-blend-mode: soft-light;
+}
+
+[data-olnk-template="terminal"] {
+  font-family: var(--font-roboto-mono), monospace !important;
+}
+
+[data-olnk-template="terminal"] .olnk-link {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+[data-olnk-heading-effect="shimmer"] {
+  animation: olnk-heading-shimmer 3.2s linear infinite;
 }
 
 .olnk-custom-cursor {
@@ -315,6 +338,12 @@ a {
   97% {
     clip-path: inset(32% 0 35%);
     translate: -3px 0;
+  }
+}
+
+@keyframes olnk-heading-shimmer {
+  to {
+    background-position: -220% 0;
   }
 }
 

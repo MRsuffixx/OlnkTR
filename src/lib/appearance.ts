@@ -494,12 +494,18 @@ function migrateLegacyAppearance(
 }
 
 export function parseAppearance(value: unknown): AppearanceSettings {
-  const current = appearanceSchema.safeParse(value);
-  if (current.success) return current.data;
+  const declaredVersion =
+    value && typeof value === "object"
+      ? (value as Record<string, unknown>).version
+      : undefined;
+  if (declaredVersion === APPEARANCE_SETTINGS_VERSION) {
+    const current = appearanceSchema.safeParse(value);
+    return current.success ? current.data : structuredClone(DEFAULT_APPEARANCE);
+  }
   const legacy = legacyAppearanceSchema.safeParse(value);
-  return legacy.success
-    ? migrateLegacyAppearance(legacy.data)
-    : structuredClone(DEFAULT_APPEARANCE);
+  if (legacy.success) return migrateLegacyAppearance(legacy.data);
+  const current = appearanceSchema.safeParse(value);
+  return current.success ? current.data : structuredClone(DEFAULT_APPEARANCE);
 }
 
 type BackgroundPresetDefinition = {
@@ -577,12 +583,12 @@ export const PROFILE_PRESETS = {
   frost: {
     label: "Frost Glass",
     description: "Yumuşak cam ve ferah yüzey",
-    tier: "free",
+    tier: "pro",
   },
   midnight: {
     label: "Midnight",
     description: "Koyu, sakin ve odaklı",
-    tier: "free",
+    tier: "pro",
   },
   cyber: {
     label: "Cyber Grid",
@@ -619,8 +625,11 @@ export function applyAppearancePreset(
       ...next.background,
       mode: "gradient",
       preset: "mint",
-      gradient:
-        BACKGROUND_PRESETS.mint as AppearanceSettings["background"]["gradient"],
+      gradient: {
+        type: BACKGROUND_PRESETS.mint.type ?? "linear",
+        angle: BACKGROUND_PRESETS.mint.angle ?? 155,
+        stops: structuredClone(BACKGROUND_PRESETS.mint.stops!),
+      },
     };
     next.card = {
       enabled: true,
@@ -660,8 +669,11 @@ export function applyAppearancePreset(
       ...next.background,
       mode: "gradient",
       preset: "midnight",
-      gradient:
-        BACKGROUND_PRESETS.midnight as AppearanceSettings["background"]["gradient"],
+      gradient: {
+        type: BACKGROUND_PRESETS.midnight.type ?? "radial",
+        angle: BACKGROUND_PRESETS.midnight.angle ?? 180,
+        stops: structuredClone(BACKGROUND_PRESETS.midnight.stops!),
+      },
     };
     next.card = {
       ...next.card,

@@ -76,11 +76,14 @@ export async function generateMetadata({
     profile.theme?.settings,
     pro,
   ).effective;
-  const title = appearance.seo.title || profile.name || `@${profile.username}`;
-  const description =
-    appearance.seo.description ||
-    profile.bio ||
-    `${title} bağlantılarını olnk'te keşfet.`;
+  const title = appearance.seo.title
+    ? appearance.seo.title
+    : (profile.name ?? `@${profile.username}`);
+  const description = appearance.seo.description
+    ? appearance.seo.description
+    : profile.bio
+      ? profile.bio
+      : `${title} bağlantılarını olnk'te keşfet.`;
   return {
     title,
     description,
@@ -171,7 +174,11 @@ export default async function PublicProfilePage({
         ? "text-right items-end"
         : "text-center items-center";
   const background = appearanceBackground(appearance);
-  const density = profileDensity(appearance.layout.density);
+  const density = profileDensity(
+    appearance.layout.template === "compact"
+      ? "compact"
+      : appearance.layout.density,
+  );
   const visitorCount = appearance.socialProof.enabled
     ? await getPublicVisitCount(
         profile.id,
@@ -306,6 +313,7 @@ export default async function PublicProfilePage({
           )}
           <h1
             className="font-black"
+            data-olnk-heading-effect={appearance.typography.headingEffect}
             style={{
               marginTop: density.profileGap,
               fontFamily: profileFontFamily(appearance.typography.headingFont),
