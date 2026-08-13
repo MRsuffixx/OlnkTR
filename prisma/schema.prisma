@@ -154,48 +154,48 @@ enum AdminAuditOutcome {
 }
 
 model User {
-  id                 String    @id @default(cuid())
-  name               String?
-  email              String?   @unique
-  emailNormalized    String?   @unique @db.VarChar(254)
-  emailVerified      DateTime?
-  image              String?
-  username           String?   @unique
-  usernameNormalized String?   @unique
-  bio                String    @default("") @db.VarChar(160)
-  onboardedAt        DateTime?
-  usernameChangedAt  DateTime?
-  deletionRequestedAt DateTime?
-  role               UserRole     @default(USER)
-  accountStatus      AccountStatus @default(ACTIVE)
-  accountStatusReason String?      @db.VarChar(500)
+  id                     String        @id @default(cuid())
+  name                   String?
+  email                  String?       @unique
+  emailNormalized        String?       @unique @db.VarChar(254)
+  emailVerified          DateTime?
+  image                  String?
+  username               String?       @unique
+  usernameNormalized     String?       @unique
+  bio                    String        @default("") @db.VarChar(160)
+  onboardedAt            DateTime?
+  usernameChangedAt      DateTime?
+  deletionRequestedAt    DateTime?
+  role                   UserRole      @default(USER)
+  accountStatus          AccountStatus @default(ACTIVE)
+  accountStatusReason    String?       @db.VarChar(500)
   accountStatusExpiresAt DateTime?
-  lastLoginAt        DateTime?
-  lastActiveAt       DateTime?
-  profilePasswordHash String?    @db.VarChar(256)
-  profileAccessVersion Int       @default(0)
-  editorRevision     Int       @default(0)
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  lastLoginAt            DateTime?
+  lastActiveAt           DateTime?
+  profilePasswordHash    String?       @db.VarChar(256)
+  profileAccessVersion   Int           @default(0)
+  editorRevision         Int           @default(0)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
 
-  accounts Account[]
-  sessions Session[]
-  theme    Theme?
-  links    ProfileLink[]
-  socialAccounts SocialAccount[]
-  clicks   ClickEvent[]
-  subscription   Subscription?
-  paymentIntents PaymentIntent[]
-  billingInvoices BillingInvoice[]
-  profileViews   ProfileViewEvent[]
-  customDomains  CustomDomain[]
-  domainReclaimChallenges DomainReclaimChallenge[]
-  assets         UploadedAsset[]
-  manualEntitlement ManualEntitlement? @relation("ManualEntitlementUser")
-  manualEntitlementsGranted ManualEntitlement[] @relation("ManualEntitlementGrantor")
-  adminAuditEvents AdminAuditLog[] @relation("AdminAuditActor")
-  adminTargetAuditEvents AdminAuditLog[] @relation("AdminAuditTarget")
-  refundFlags BillingInvoice[] @relation("BillingInvoiceRefundFlagger")
+  accounts                  Account[]
+  sessions                  Session[]
+  theme                     Theme?
+  links                     ProfileLink[]
+  socialAccounts            SocialAccount[]
+  clicks                    ClickEvent[]
+  subscription              Subscription?
+  paymentIntents            PaymentIntent[]
+  billingInvoices           BillingInvoice[]
+  profileViews              ProfileViewEvent[]
+  customDomains             CustomDomain[]
+  domainReclaimChallenges   DomainReclaimChallenge[]
+  assets                    UploadedAsset[]
+  manualEntitlement         ManualEntitlement?       @relation("ManualEntitlementUser")
+  manualEntitlementsGranted ManualEntitlement[]      @relation("ManualEntitlementGrantor")
+  adminAuditEvents          AdminAuditLog[]          @relation("AdminAuditActor")
+  adminTargetAuditEvents    AdminAuditLog[]          @relation("AdminAuditTarget")
+  refundFlags               BillingInvoice[]         @relation("BillingInvoiceRefundFlagger")
 
   @@index([usernameNormalized])
   @@index([role, accountStatus])
@@ -226,22 +226,22 @@ model Theme {
 }
 
 model ProfileLink {
-  id        String   @id
-  userId    String
-  title     String   @db.VarChar(80)
-  url       String   @db.VarChar(2048)
-  iconUrl   String?  @db.VarChar(2048)
-  position  Int
-  enabled   Boolean  @default(true)
-  customization Json @default("{}")
+  id             String    @id
+  userId         String
+  title          String    @db.VarChar(80)
+  url            String    @db.VarChar(2048)
+  iconUrl        String?   @db.VarChar(2048)
+  position       Int
+  enabled        Boolean   @default(true)
+  customization  Json      @default("{}")
   scheduledStart DateTime?
   scheduledEnd   DateTime?
-  passwordHash   String?  @db.VarChar(256)
-  accessVersion  Int      @default(0)
+  passwordHash   String?   @db.VarChar(256)
+  accessVersion  Int       @default(0)
   deletedAt      DateTime?
   embedType      EmbedType @default(LINK)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   clicks ClickEvent[]
@@ -254,22 +254,22 @@ model ProfileLink {
 }
 
 model SocialAccount {
-  id               String   @id
+  id               String    @id
   userId           String
-  platform         String   @db.VarChar(32)
-  label            String   @db.VarChar(40)
-  username         String?  @db.VarChar(80)
-  url              String   @default("") @db.VarChar(2048)
-  enabled          Boolean  @default(true)
-  iconOnly         Boolean  @default(true)
-  usePlatformColor Boolean  @default(true)
-  customColor      String?  @db.VarChar(7)
-  tooltip          String?  @db.VarChar(80)
-  settings         Json     @default("{}")
+  platform         String    @db.VarChar(32)
+  label            String    @db.VarChar(40)
+  username         String?   @db.VarChar(80)
+  url              String    @default("") @db.VarChar(2048)
+  enabled          Boolean   @default(true)
+  iconOnly         Boolean   @default(true)
+  usePlatformColor Boolean   @default(true)
+  customColor      String?   @db.VarChar(7)
+  tooltip          String?   @db.VarChar(80)
+  settings         Json      @default("{}")
   position         Int
   deletedAt        DateTime?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -280,16 +280,16 @@ model SocialAccount {
 }
 
 model ClickEvent {
-  id          String   @id @default(cuid())
-  linkId      String
-  userId      String
-  createdAt   DateTime @default(now())
-  referrer    String?  @db.VarChar(512)
-  referrerHost String? @db.VarChar(253)
-  userAgent   String?  @db.VarChar(512)
-  country     String?  @db.VarChar(2)
-  visitorHash String?  @db.VarChar(64)
-  dedupeKey   String?  @unique @db.VarChar(64)
+  id           String   @id @default(cuid())
+  linkId       String
+  userId       String
+  createdAt    DateTime @default(now())
+  referrer     String?  @db.VarChar(512)
+  referrerHost String?  @db.VarChar(253)
+  userAgent    String?  @db.VarChar(512)
+  country      String?  @db.VarChar(2)
+  visitorHash  String?  @db.VarChar(64)
+  dedupeKey    String?  @unique @db.VarChar(64)
 
   link ProfileLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
   user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -302,16 +302,16 @@ model ClickEvent {
 }
 
 model ProfileViewEvent {
-  id          String   @id @default(cuid())
-  userId      String
-  createdAt   DateTime @default(now())
-  referrer    String?  @db.VarChar(512)
-  referrerHost String? @db.VarChar(253)
-  userAgent   String?  @db.VarChar(512)
-  country     String?  @db.VarChar(2)
-  deviceType String?   @db.VarChar(24)
-  visitorHash String?  @db.VarChar(64)
-  dedupeKey   String?  @unique @db.VarChar(64)
+  id           String   @id @default(cuid())
+  userId       String
+  createdAt    DateTime @default(now())
+  referrer     String?  @db.VarChar(512)
+  referrerHost String?  @db.VarChar(253)
+  userAgent    String?  @db.VarChar(512)
+  country      String?  @db.VarChar(2)
+  deviceType   String?  @db.VarChar(24)
+  visitorHash  String?  @db.VarChar(64)
+  dedupeKey    String?  @unique @db.VarChar(64)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -323,14 +323,14 @@ model ProfileViewEvent {
 }
 
 model AnalyticsDailyBucket {
-  id         String             @id @default(cuid())
-  eventType  AnalyticsEventType
-  userId     String
-  targetKey  String             @db.VarChar(191)
-  date       DateTime           @db.Date
-  count      Int                @default(0)
-  createdAt  DateTime           @default(now())
-  updatedAt  DateTime           @updatedAt
+  id        String             @id @default(cuid())
+  eventType AnalyticsEventType
+  userId    String
+  targetKey String             @db.VarChar(191)
+  date      DateTime           @db.Date
+  count     Int                @default(0)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
 
   @@unique([eventType, userId, targetKey, date])
   @@index([userId, eventType, date])
@@ -410,7 +410,7 @@ model BillingInvoice {
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   refundFlaggedBy User? @relation("BillingInvoiceRefundFlagger", fields: [refundFlaggedById], references: [id], onDelete: SetNull)
 
   @@unique([provider, providerInvoiceId])
@@ -435,11 +435,11 @@ model WebhookEvent {
 }
 
 model CustomDomain {
-  id                String       @id @default(cuid())
-  userId            String
+  id                 String       @id @default(cuid())
+  userId             String
   domain             String       @db.VarChar(253)
   domainNormalized   String       @unique @db.VarChar(253)
-  verificationToken String       @unique @db.VarChar(64)
+  verificationToken  String       @unique @db.VarChar(64)
   status             DomainStatus @default(PENDING)
   verifiedAt         DateTime?
   lastCheckedAt      DateTime?
@@ -457,13 +457,13 @@ model CustomDomain {
 }
 
 model DomainReclaimChallenge {
-  id               String   @id @default(cuid())
-  userId           String
-  domainNormalized String   @db.VarChar(253)
-  verificationToken String  @unique @db.VarChar(64)
-  expiresAt        DateTime
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                String   @id @default(cuid())
+  userId            String
+  domainNormalized  String   @db.VarChar(253)
+  verificationToken String   @unique @db.VarChar(64)
+  expiresAt         DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -472,21 +472,21 @@ model DomainReclaimChallenge {
 }
 
 model UploadedAsset {
-  id        String   @id @default(cuid())
-  userId    String
-  objectKey String   @unique @db.VarChar(512)
-  publicUrl String   @db.VarChar(2048)
-  mimeType  String   @db.VarChar(128)
-  sizeBytes Int
-  actualSizeBytes Int?
-  purpose   AssetPurpose
-  status    AssetStatus @default(PENDING)
-  finalizedAt DateTime?
-  deletionAttempts Int @default(0)
-  nextDeletionAt DateTime?
-  lastError String? @db.VarChar(512)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String       @id @default(cuid())
+  userId           String
+  objectKey        String       @unique @db.VarChar(512)
+  publicUrl        String       @db.VarChar(2048)
+  mimeType         String       @db.VarChar(128)
+  sizeBytes        Int
+  actualSizeBytes  Int?
+  purpose          AssetPurpose
+  status           AssetStatus  @default(PENDING)
+  finalizedAt      DateTime?
+  deletionAttempts Int          @default(0)
+  nextDeletionAt   DateTime?
+  lastError        String?      @db.VarChar(512)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -554,21 +554,21 @@ model ManualEntitlement {
 }
 
 model AdminAuditLog {
-  id               String             @id @default(cuid())
-  actorUserId      String?
-  actorLabel       String             @db.VarChar(254)
-  targetUserId     String?
-  targetEmail      String?            @db.VarChar(254)
-  targetUsername   String?            @db.VarChar(30)
-  category         AdminAuditCategory
-  action           String             @db.VarChar(80)
-  outcome          AdminAuditOutcome  @default(SUCCESS)
-  reason           String?            @db.VarChar(500)
-  metadata         Json               @default("{}")
-  requestIpHash    String?            @db.VarChar(64)
-  createdAt        DateTime           @default(now())
+  id             String             @id @default(cuid())
+  actorUserId    String?
+  actorLabel     String             @db.VarChar(254)
+  targetUserId   String?
+  targetEmail    String?            @db.VarChar(254)
+  targetUsername String?            @db.VarChar(30)
+  category       AdminAuditCategory
+  action         String             @db.VarChar(80)
+  outcome        AdminAuditOutcome  @default(SUCCESS)
+  reason         String?            @db.VarChar(500)
+  metadata       Json               @default("{}")
+  requestIpHash  String?            @db.VarChar(64)
+  createdAt      DateTime           @default(now())
 
-  actor User? @relation("AdminAuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  actor  User? @relation("AdminAuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
   target User? @relation("AdminAuditTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
 
   @@index([createdAt])
