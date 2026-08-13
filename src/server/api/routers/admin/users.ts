@@ -14,6 +14,8 @@ import {
   adminUserListInput,
   adminWorkspaceInput,
   linkCustomizationSchema,
+  socialAccountSettingsSchema,
+  socialPlatformSchema,
 } from "~/lib/schemas";
 import { faviconForUrl } from "~/lib/theme";
 import { processAccountDeletionJob } from "~/server/account-deletion";
@@ -275,6 +277,10 @@ export const adminUsersRouter = createTRPCRouter({
               _count: { select: { clicks: true } },
             },
           },
+          socialAccounts: {
+            where: { deletedAt: null },
+            orderBy: { position: "asc" },
+          },
           billingInvoices: {
             orderBy: { createdAt: "desc" },
             take: 24,
@@ -338,6 +344,17 @@ export const adminUsersRouter = createTRPCRouter({
           scheduledStart: link.scheduledStart?.toISOString() ?? null,
           scheduledEnd: link.scheduledEnd?.toISOString() ?? null,
         })),
+        socialAccounts: user.socialAccounts.flatMap((account) => {
+          const platform = socialPlatformSchema.safeParse(account.platform);
+          if (!platform.success) return [];
+          return [
+            {
+              ...account,
+              platform: platform.data,
+              settings: socialAccountSettingsSchema.parse(account.settings),
+            },
+          ];
+        }),
       };
     }),
 
@@ -517,6 +534,65 @@ export const adminUsersRouter = createTRPCRouter({
           },
           data: { enabled: false, deletedAt: new Date() },
         });
+        await Promise.all(
+          input.workspace.socials.map((account, position) => {
+            const settings = socialAccountSettingsSchema.parse(
+              account.settings,
+            );
+            const hasDestination = Boolean(
+              account.url ||
+                (account.platform === "DISCORD" && settings.discord.userId),
+            );
+            return tx.socialAccount.upsert({
+              where: { id_userId: { id: account.id, userId: target.id } },
+              create: {
+                id: account.id,
+                userId: target.id,
+                platform: account.platform,
+                label: account.label,
+                username: account.username || null,
+                url: account.url,
+                enabled: account.enabled && hasDestination,
+                iconOnly: account.iconOnly,
+                usePlatformColor: account.usePlatformColor,
+                customColor: account.customColor,
+                tooltip: account.tooltip || null,
+                settings: settings,
+                position,
+              },
+              update: {
+                platform: account.platform,
+                label: account.label,
+                username: account.username || null,
+                url: account.url,
+                enabled: account.enabled && hasDestination,
+                iconOnly: account.iconOnly,
+                usePlatformColor: account.usePlatformColor,
+                customColor: account.customColor,
+                tooltip: account.tooltip || null,
+                settings: settings,
+                position,
+                deletedAt: null,
+              },
+            });
+          }),
+        );
+        await tx.socialAccount.updateMany({
+          where: {
+            userId: target.id,
+            deletedAt: null,
+            ...(input.workspace.socials.length
+              ? {
+                  id: {
+                    notIn: input.workspace.socials.map(
+                      (account) => account.id,
+                    ),
+                  },
+                }
+              : {}),
+          },
+          data: { enabled: false, deletedAt: new Date() },
+        });
         await tx.adminAuditLog.create({
           data: createAdminAuditData({
             actorUserId: ctx.currentUser.id,
@@ -529,6 +605,7 @@ export const adminUsersRouter = createTRPCRouter({
               previousRevision: target.editorRevision,
               nextRevision: target.editorRevision + 1,
               linkCount: input.workspace.links.length,
+              socialAccountCount: input.workspace.socials.length,
             },
             headers: ctx.headers,
           }),

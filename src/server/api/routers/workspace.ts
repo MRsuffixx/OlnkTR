@@ -4,6 +4,8 @@ import type { Prisma } from "../../../../generated/prisma/client";
 import { APPEARANCE_SETTINGS_VERSION } from "~/lib/appearance";
 import {
   linkCustomizationSchema,
+  socialAccountSettingsSchema,
+  socialPlatformSchema,
   setLinkPasswordInput,
   setProfilePasswordInput,
   workspaceInput,
@@ -57,6 +59,10 @@ export const workspaceRouter = createTRPCRouter({
           where: { deletedAt: null },
           orderBy: { position: "asc" },
         },
+        socialAccounts: {
+          where: { deletedAt: null },
+          orderBy: { position: "asc" },
+        },
       },
     });
     if (!user) throw new TRPCError({ code: "NOT_FOUND" });
@@ -103,6 +109,25 @@ export const workspaceRouter = createTRPCRouter({
         passwordProtected: Boolean(link.passwordHash),
         embedType: link.embedType,
       })),
+      socials: user.socialAccounts.flatMap((account) => {
+        const platform = socialPlatformSchema.safeParse(account.platform);
+        if (!platform.success) return [];
+        return [
+          {
+            id: account.id,
+            platform: platform.data,
+            label: account.label,
+            username: account.username ?? "",
+            url: account.url,
+            enabled: account.enabled,
+            iconOnly: account.iconOnly,
+            usePlatformColor: account.usePlatformColor,
+            customColor: account.customColor,
+            tooltip: account.tooltip ?? "",
+            settings: socialAccountSettingsSchema.parse(account.settings),
+          },
+        ];
+      }),
     };
   }),
 
@@ -117,6 +142,7 @@ export const workspaceRouter = createTRPCRouter({
           subscription: true,
           manualEntitlement: true,
           links: { where: { deletedAt: null } },
+          socialAccounts: { where: { deletedAt: null } },
         },
       });
       if (!current) throw new TRPCError({ code: "NOT_FOUND" });
@@ -230,6 +256,48 @@ export const workspaceRouter = createTRPCRouter({
               deletedAt: null,
               ...(input.links.length
                 ? { id: { notIn: input.links.map((link) => link.id) } }
+                : {}),
+            },
+            data: { enabled: false, deletedAt: new Date() },
+          });
+          await Promise.all(
+            input.socials.map((account, position) => {
+              const settings = socialAccountSettingsSchema.parse(
+                account.settings,
+              );
+              const hasDestination = Boolean(
+                account.url ||
+                  (account.platform === "DISCORD" &&
+                    settings.discord.userId),
+              );
+              const data = {
+                platform: account.platform,
+                label: account.label,
+                username: account.username || null,
+                url: account.url,
+                enabled: account.enabled && hasDestination,
+                iconOnly: account.iconOnly,
+                usePlatformColor: account.usePlatformColor,
+                customColor: account.customColor,
+                tooltip: account.tooltip || null,
+                settings: settings as Prisma.InputJsonValue,
+                position,
+                deletedAt: null,
+              };
+              return tx.socialAccount.upsert({
+                where: { id_userId: { id: account.id, userId } },
+                create: { id: account.id, userId, ...data },
+                update: data,
+              });
+            }),
+          );
+
+          await tx.socialAccount.updateMany({
+            where: {
+              userId,
+              deletedAt: null,
+              ...(input.socials.length
+                ? { id: { notIn: input.socials.map((account) => account.id) } }
                 : {}),
             },
             data: { enabled: false, deletedAt: new Date() },

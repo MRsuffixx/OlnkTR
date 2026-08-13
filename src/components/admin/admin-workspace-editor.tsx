@@ -64,6 +64,19 @@ function initialWorkspace(user: UserDetail): WorkspaceInput {
       passwordProtected: link.passwordProtected,
       embedType: link.embedType,
     })),
+    socials: user.socialAccounts.map((account) => ({
+      id: account.id,
+      platform: account.platform,
+      label: account.label,
+      username: account.username ?? "",
+      url: account.url,
+      enabled: account.enabled,
+      iconOnly: account.iconOnly,
+      usePlatformColor: account.usePlatformColor,
+      customColor: account.customColor,
+      tooltip: account.tooltip ?? "",
+      settings: account.settings,
+    })),
   };
 }
 

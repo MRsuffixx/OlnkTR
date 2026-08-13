@@ -1,0 +1,235 @@
+export const SOCIAL_PLATFORM_IDS = [
+  "DISCORD",
+  "GITHUB",
+  "GITLAB",
+  "X",
+  "INSTAGRAM",
+  "TIKTOK",
+  "YOUTUBE",
+  "TWITCH",
+  "KICK",
+  "STEAM",
+  "SPOTIFY",
+  "REDDIT",
+  "TELEGRAM",
+  "WHATSAPP",
+  "LINKEDIN",
+  "BEHANCE",
+  "DRIBBBLE",
+  "SOUNDCLOUD",
+  "LASTFM",
+  "PINTEREST",
+  "SNAPCHAT",
+  "ROBLOX",
+  "MINECRAFT",
+  "EPIC_GAMES",
+  "XBOX",
+  "PLAYSTATION",
+  "CUSTOM",
+] as const;
+
+export type SocialPlatformId = (typeof SOCIAL_PLATFORM_IDS)[number];
+
+export type SocialPlatformDefinition = {
+  label: string;
+  color: `#${string}`;
+  shortLabel: string;
+  placeholder: string;
+  group: "social" | "creator" | "developer" | "gaming" | "custom";
+};
+
+export const SOCIAL_PLATFORM_REGISTRY = {
+  DISCORD: {
+    label: "Discord",
+    color: "#5865F2",
+    shortLabel: "D",
+    placeholder: "https://discord.com/users/...",
+    group: "social",
+  },
+  GITHUB: {
+    label: "GitHub",
+    color: "#181717",
+    shortLabel: "GH",
+    placeholder: "https://github.com/kullanici",
+    group: "developer",
+  },
+  GITLAB: {
+    label: "GitLab",
+    color: "#FC6D26",
+    shortLabel: "GL",
+    placeholder: "https://gitlab.com/kullanici",
+    group: "developer",
+  },
+  X: {
+    label: "X",
+    color: "#000000",
+    shortLabel: "X",
+    placeholder: "https://x.com/kullanici",
+    group: "social",
+  },
+  INSTAGRAM: {
+    label: "Instagram",
+    color: "#E4405F",
+    shortLabel: "IG",
+    placeholder: "https://instagram.com/kullanici",
+    group: "social",
+  },
+  TIKTOK: {
+    label: "TikTok",
+    color: "#000000",
+    shortLabel: "TT",
+    placeholder: "https://tiktok.com/@kullanici",
+    group: "creator",
+  },
+  YOUTUBE: {
+    label: "YouTube",
+    color: "#FF0000",
+    shortLabel: "YT",
+    placeholder: "https://youtube.com/@kanal",
+    group: "creator",
+  },
+  TWITCH: {
+    label: "Twitch",
+    color: "#9146FF",
+    shortLabel: "TW",
+    placeholder: "https://twitch.tv/kanal",
+    group: "creator",
+  },
+  KICK: {
+    label: "Kick",
+    color: "#53FC18",
+    shortLabel: "K",
+    placeholder: "https://kick.com/kanal",
+    group: "creator",
+  },
+  STEAM: {
+    label: "Steam",
+    color: "#1B2838",
+    shortLabel: "ST",
+    placeholder: "https://steamcommunity.com/id/...",
+    group: "gaming",
+  },
+  SPOTIFY: {
+    label: "Spotify",
+    color: "#1DB954",
+    shortLabel: "SP",
+    placeholder: "https://open.spotify.com/user/...",
+    group: "creator",
+  },
+  REDDIT: {
+    label: "Reddit",
+    color: "#FF4500",
+    shortLabel: "R",
+    placeholder: "https://reddit.com/u/kullanici",
+    group: "social",
+  },
+  TELEGRAM: {
+    label: "Telegram",
+    color: "#26A5E4",
+    shortLabel: "TG",
+    placeholder: "https://t.me/kullanici",
+    group: "social",
+  },
+  WHATSAPP: {
+    label: "WhatsApp",
+    color: "#25D366",
+    shortLabel: "WA",
+    placeholder: "https://wa.me/905...",
+    group: "social",
+  },
+  LINKEDIN: {
+    label: "LinkedIn",
+    color: "#0A66C2",
+    shortLabel: "IN",
+    placeholder: "https://linkedin.com/in/kullanici",
+    group: "developer",
+  },
+  BEHANCE: {
+    label: "Behance",
+    color: "#1769FF",
+    shortLabel: "BE",
+    placeholder: "https://behance.net/kullanici",
+    group: "creator",
+  },
+  DRIBBBLE: {
+    label: "Dribbble",
+    color: "#EA4C89",
+    shortLabel: "DR",
+    placeholder: "https://dribbble.com/kullanici",
+    group: "creator",
+  },
+  SOUNDCLOUD: {
+    label: "SoundCloud",
+    color: "#FF5500",
+    shortLabel: "SC",
+    placeholder: "https://soundcloud.com/kullanici",
+    group: "creator",
+  },
+  LASTFM: {
+    label: "Last.fm",
+    color: "#D51007",
+    shortLabel: "FM",
+    placeholder: "https://last.fm/user/kullanici",
+    group: "creator",
+  },
+  PINTEREST: {
+    label: "Pinterest",
+    color: "#BD081C",
+    shortLabel: "P",
+    placeholder: "https://pinterest.com/kullanici",
+    group: "social",
+  },
+  SNAPCHAT: {
+    label: "Snapchat",
+    color: "#D4C500",
+    shortLabel: "SN",
+    placeholder: "https://snapchat.com/add/kullanici",
+    group: "social",
+  },
+  ROBLOX: {
+    label: "Roblox",
+    color: "#E2231A",
+    shortLabel: "RB",
+    placeholder: "https://roblox.com/users/.../profile",
+    group: "gaming",
+  },
+  MINECRAFT: {
+    label: "Minecraft",
+    color: "#62B47A",
+    shortLabel: "MC",
+    placeholder: "https://namemc.com/profile/...",
+    group: "gaming",
+  },
+  EPIC_GAMES: {
+    label: "Epic Games",
+    color: "#313131",
+    shortLabel: "EP",
+    placeholder: "https://store.epicgames.com/...",
+    group: "gaming",
+  },
+  XBOX: {
+    label: "Xbox",
+    color: "#107C10",
+    shortLabel: "XB",
+    placeholder: "https://account.xbox.com/profile?...",
+    group: "gaming",
+  },
+  PLAYSTATION: {
+    label: "PlayStation",
+    color: "#003791",
+    shortLabel: "PS",
+    placeholder: "https://psnprofiles.com/...",
+    group: "gaming",
+  },
+  CUSTOM: {
+    label: "Özel bağlantı",
+    color: "#F06432",
+    shortLabel: "+",
+    placeholder: "https://",
+    group: "custom",
+  },
+} as const satisfies Record<SocialPlatformId, SocialPlatformDefinition>;
+
+export function socialPlatformDefinition(platform: SocialPlatformId) {
+  return SOCIAL_PLATFORM_REGISTRY[platform];
+}

@@ -182,6 +182,7 @@ model User {
   sessions Session[]
   theme    Theme?
   links    ProfileLink[]
+  socialAccounts SocialAccount[]
   clicks   ClickEvent[]
   subscription   Subscription?
   paymentIntents PaymentIntent[]
@@ -250,6 +251,32 @@ model ProfileLink {
   @@index([userId, deletedAt, position])
   @@index([userId, enabled])
   @@index([userId, scheduledStart, scheduledEnd])
+}
+
+model SocialAccount {
+  id               String   @id
+  userId           String
+  platform         String   @db.VarChar(32)
+  label            String   @db.VarChar(40)
+  username         String?  @db.VarChar(80)
+  url              String   @default("") @db.VarChar(2048)
+  enabled          Boolean  @default(true)
+  iconOnly         Boolean  @default(true)
+  usePlatformColor Boolean  @default(true)
+  customColor      String?  @db.VarChar(7)
+  tooltip          String?  @db.VarChar(80)
+  settings         Json     @default("{}")
+  position         Int
+  deletedAt        DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([id, userId])
+  @@index([userId, deletedAt, position])
+  @@index([userId, enabled])
+  @@index([platform])
 }
 
 model ClickEvent {

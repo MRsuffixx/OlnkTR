@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { linkFontSchema } from "~/config/font-registry";
+import { SOCIAL_PLATFORM_IDS } from "~/config/social-platform-registry";
 import { normalizeEmail } from "~/lib/email";
 
 import { appearanceSchema, hexColor } from "~/lib/appearance";
@@ -45,6 +46,59 @@ export const linkCustomizationSchema = z.object({
 
 export type LinkCustomization = z.infer<typeof linkCustomizationSchema>;
 
+export const socialPlatformSchema = z.enum(SOCIAL_PLATFORM_IDS);
+
+export const socialAccountSettingsSchema = z
+  .object({
+    discord: z
+      .object({
+        userId: z
+          .string()
+          .trim()
+          .regex(/^\d{17,20}$/, "Discord kullanıcı kimliği 17–20 rakam olmalı.")
+          .or(z.literal("")),
+        showPresence: z.boolean(),
+        showActivity: z.boolean(),
+        showSpotify: z.boolean(),
+      })
+      .default({
+        userId: "",
+        showPresence: false,
+        showActivity: false,
+        showSpotify: false,
+      }),
+  })
+  .strict();
+
+export const workspaceSocialInput = z
+  .object({
+    id: z.uuid(),
+    platform: socialPlatformSchema,
+    label: z.string().trim().min(1, "Etiket gerekli.").max(40),
+    username: z.string().trim().max(80),
+    url: optionalWebUrl,
+    enabled: z.boolean(),
+    iconOnly: z.boolean(),
+    usePlatformColor: z.boolean(),
+    customColor: hexColor.nullable(),
+    tooltip: z.string().trim().max(80),
+    settings: socialAccountSettingsSchema,
+  })
+  .superRefine((account, context) => {
+    if (
+      account.platform === "DISCORD" &&
+      account.settings.discord.showPresence &&
+      !account.settings.discord.userId
+    )
+      context.addIssue({
+        code: "custom",
+        path: ["settings", "discord", "userId"],
+        message: "Canlı durum için Discord kullanıcı kimliği gerekli.",
+      });
+  });
+
+export type WorkspaceSocialInput = z.infer<typeof workspaceSocialInput>;
+
 export const workspaceLinkInput = z
   .object({
     id: z.uuid(),
@@ -82,6 +136,7 @@ export const workspaceInput = z
     appearance: appearanceSchema,
     customCss: z.string().max(12_000),
     links: z.array(workspaceLinkInput).max(50),
+    socials: z.array(workspaceSocialInput).max(50),
   })
   .superRefine((workspace, context) => {
     const ids = new Set<string>();
@@ -93,6 +148,15 @@ export const workspaceInput = z
           message: "Bağlantı kimlikleri benzersiz olmalıdır.",
         });
       ids.add(link.id);
+    });
+    workspace.socials.forEach((account, index) => {
+      if (ids.has(account.id))
+        context.addIssue({
+          code: "custom",
+          path: ["socials", index, "id"],
+          message: "Sosyal hesap kimlikleri benzersiz olmalıdır.",
+        });
+      ids.add(account.id);
     });
     if (JSON.stringify(workspace.appearance).length > 32_000)
       context.addIssue({
