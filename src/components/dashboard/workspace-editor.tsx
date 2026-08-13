@@ -584,6 +584,8 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
           : status === "conflict"
             ? "Başka sekmede değişti"
             : "Kaydedilemedi — yeniden dene";
+  const activeBuilderPanel =
+    builderPanels.find((panel) => panel.id === builderPanel) ?? builderPanels[0]!;
 
   return (
     <main className="mx-auto max-w-[1600px]">
@@ -603,16 +605,42 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
           <Eye className="size-4" /> Önizleme
         </button>
       </div>
-      <div className="grid md:h-[calc(100vh-4rem)] md:grid-cols-[minmax(390px,580px)_1fr]">
+      <div className="grid md:h-[calc(100vh-4rem)] md:grid-cols-[92px_minmax(390px,540px)_1fr]">
+        <aside className="border-ink/10 bg-cream/35 hidden flex-col items-center border-r py-5 md:flex">
+          <div className="bg-ink text-paper grid size-11 place-items-center rounded-2xl">
+            <PanelsTopLeft className="size-5" />
+          </div>
+          <nav className="mt-7 flex w-full flex-col gap-2 px-2" aria-label="Sayfa oluşturucu">
+            {builderPanels.map((panel) => (
+              <button
+                key={panel.id}
+                type="button"
+                onClick={() => setBuilderPanel(panel.id)}
+                aria-pressed={builderPanel === panel.id}
+                className={`flex flex-col items-center gap-1.5 rounded-2xl px-1 py-3 text-[10px] font-black transition ${
+                  builderPanel === panel.id
+                    ? "bg-ink text-paper shadow-[3px_3px_0_#F06432]"
+                    : "text-ink/55 hover:bg-paper hover:text-ink"
+                }`}
+              >
+                <panel.icon className="size-4" />
+                {panel.label}
+              </button>
+            ))}
+          </nav>
+          <span className="text-ink/35 mt-auto [writing-mode:vertical-rl] text-[9px] font-black tracking-[.2em] uppercase">
+            olnk studio
+          </span>
+        </aside>
         <section
           className={`dashboard-scrollbar border-ink/10 bg-paper overflow-y-auto border-r px-4 py-6 sm:px-6 md:block md:px-8 ${mobileTab === "edit" ? "block" : "hidden"}`}
         >
           <div className="mx-auto max-w-xl pb-24">
-            <div className="mb-7 flex items-start justify-between gap-4">
+            <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
                   <p className="text-orange-ink text-xs font-black tracking-[.15em] uppercase">
-                    Canlı düzenleyici
+                    Mini site oluşturucu
                   </p>
                   <span
                     className={`rounded-full px-2 py-0.5 text-[9px] font-black ${initial.hasPro ? "bg-yellow" : "bg-cream"}`}
@@ -621,8 +649,11 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                   </span>
                 </div>
                 <h1 className="display-serif mt-1 text-4xl font-bold">
-                  Sayfanı kur
+                  {activeBuilderPanel.label}
                 </h1>
+                <p className="text-ink/45 mt-1 text-xs font-semibold">
+                  {activeBuilderPanel.description}
+                </p>
               </div>
               <button
                 type="button"
@@ -639,6 +670,23 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                 {label}
               </button>
             </div>
+            <nav className="dashboard-scrollbar mb-6 flex gap-2 overflow-x-auto pb-1 md:hidden" aria-label="Sayfa oluşturucu">
+              {builderPanels.map((panel) => (
+                <button
+                  key={panel.id}
+                  type="button"
+                  onClick={() => setBuilderPanel(panel.id)}
+                  aria-pressed={builderPanel === panel.id}
+                  className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-black ${
+                    builderPanel === panel.id
+                      ? "bg-ink text-paper"
+                      : "border-ink/10 border bg-white"
+                  }`}
+                >
+                  <panel.icon className="size-4" /> {panel.label}
+                </button>
+              ))}
+            </nav>
             {status === "conflict" && (
               <div className="border-orange/30 bg-orange/10 text-orange-ink mb-5 rounded-2xl border p-4 text-sm font-semibold">
                 Profil başka bir sekmede değiştirildi. Bu sekmedeki taslağı
@@ -650,7 +698,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                 {saveError}
               </div>
             )}
-            <section className="border-ink/10 rounded-3xl border bg-[#F8F7F1] p-4 sm:p-5">
+            {builderPanel === "profile" && <section className="border-ink/10 rounded-3xl border bg-[#F8F7F1] p-4 sm:p-5">
               <h2 className="text-sm font-black">Profil bilgileri</h2>
               <div className="mt-4 space-y-4">
                 <Field label="Görünen ad">
@@ -693,8 +741,8 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                   }
                 />
               </div>
-            </section>
-            <section className="mt-7">
+            </section>}
+            {builderPanel === "links" && <section>
               <div className="mb-3 flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-black">Bağlantılar</h2>
@@ -758,8 +806,8 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                   <strong className="mt-3">İlk bağlantını ekle</strong>
                 </button>
               )}
-            </section>
-            <AppearanceEditor
+            </section>}
+            {builderPanel === "design" && <AppearanceEditor
               appearance={draft.appearance}
               customCss={draft.customCss}
               hasPro={initial.hasPro}
@@ -784,7 +832,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
               onUpgrade={() => setUpgrade(true)}
               profilePasswordProtected={profilePasswordProtected}
               onProfilePasswordChange={setProfilePasswordProtected}
-            />
+            />}
           </div>
         </section>
         <section

@@ -204,7 +204,7 @@ export function AppearanceEditor({
   }
 
   return (
-    <section className="border-ink/10 mt-8 rounded-3xl border bg-[#F8F7F1] p-4 sm:p-5">
+    <section className="border-ink/10 rounded-3xl border bg-[#F8F7F1] p-4 sm:p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-lg font-black">Görünüm stüdyosu</h2>
