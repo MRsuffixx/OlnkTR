@@ -30,8 +30,13 @@ const handler = async (req: NextRequest) => {
           }
         : undefined,
   });
-  response.headers.set("Cache-Control", "private, no-store");
-  return response;
+  const responseHeaders = new Headers(response.headers);
+  responseHeaders.set("Cache-Control", "private, no-store");
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: responseHeaders,
+  });
 };
 
 export { handler as GET, handler as POST };
