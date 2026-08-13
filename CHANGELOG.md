@@ -19,7 +19,7 @@ Meaningful product, architecture, migration, and security changes are recorded h
 ### Changed
 
 - Repositioned OLNK.TR architecture from link-in-bio toward a structured identity page,
-  mini-site, and future widget platform while preserving `/{username}`.
+  full website builder and future widget platform while preserving `/{username}`.
 - Expanded the Free creative baseline to semantic colors, multi-stop linear/radial gradients,
   image backgrounds, core card/avatar controls, basic Bento, and a simple terminal preset.
 - Kept conic gradients, video/motion backgrounds, advanced effects, direct audio, and larger

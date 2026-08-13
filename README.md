@@ -26,7 +26,7 @@ A mobile-first, full-scale profile and website builder for creators, professiona
 - **Authentication and onboarding:** Google OAuth and passwordless email sign-in with Auth.js, plus normalized and database-enforced unique usernames.
 - **Username safety:** Reserved-route checks, Turkish-aware normalization, obfuscation-resistant moderation, and a database-managed blocklist.
 - **Public profiles:** Fast server-rendered pages with canonical URLs, Open Graph metadata, structured data, responsive layouts, and downloadable QR codes.
-- **Mini-site builder:** A profile/content/design workspace with live phone, tablet, and desktop previews, click-to-edit controls, drag-and-drop ordering, and revision-aware autosave.
+- **Full website builder:** Profile, link, social, design, and music workspaces with live phone, tablet, and desktop previews, click-to-edit controls, drag-and-drop ordering, and revision-aware autosave.
 - **Versioned design engine:** Semantic colour tokens, profile cards, layout templates, full-theme presets, custom backgrounds, typography, button styles, lazy canvas/retro effects, audio, SEO, privacy controls, and optional custom CSS.
 - **Link controls:** Scheduled links, password protection, YouTube and Spotify embeds, visibility toggles, and safe redirect handling.
 - **Profile gates and audio:** Server-enforced whole-profile passwords plus gesture-first Spotify, SoundCloud, and uploaded audio with visible stop/mute controls.

@@ -30,7 +30,7 @@
 - Admin control room under `/admin`: live database RBAC, user/workspace/account operations,
   unified subscriptions, revenue/platform charts, provider visibility, immutable audit, and
   trusted-shell role management.
-- Mini-site builder dashboard with dedicated Profile, Content, and Design workspaces plus shared mobile, tablet, and desktop live previews.
+- Full website builder dashboard with dedicated Profile, Content, Social, Design, and Music workspaces plus shared mobile, tablet, and desktop live previews.
 - Appearance document v3 with explicit v1/v2 migration, semantic colour tokens, dedicated avatar settings, profile cards, layout templates, SEO/privacy settings, and a Free minimal preset.
 - Reusable two-to-five-stop linear/radial gradient editor, approved font registry, image backgrounds, core card/avatar controls, and basic Bento/terminal layouts.
 - Free avatar/background-image uploads with centralized 100 MB profile storage limits and binary container-signature verification.
@@ -152,9 +152,9 @@
 - Made full-profile presets deterministic so stale filters, layouts, and avatar animations cannot leak between themes.
 - Verification: `pnpm check`, all 41 Vitest tests, and `pnpm build` pass.
 
-### 2026-08-13 — Mini-site builder foundation
+### 2026-08-13 — Full website builder foundation
 
-- Repositioned olnk.tr from a link-in-bio product to a Turkish-first mini-site builder; links remain the first relational content type rather than defining the product boundary.
+- Repositioned olnk.tr from a link-in-bio product to a Turkish-first full website builder; links remain one relational content type rather than defining the product boundary.
 - Rebuilt the workspace as Profile, Content, and Design workspaces around one live preview, including mobile editor/preview switching.
 - Introduced appearance document version 2 with semantic CSS colour tokens, profile-card surfaces, stack/compact/bento/terminal layouts, heading effects, full-theme presets, and explicit version-1 migration.
 - Added SEO title/description/share-image controls and privacy switches for indexing, analytics ingestion, and share actions; server-enforced profile passwords remain relational.

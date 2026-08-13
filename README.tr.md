@@ -19,7 +19,7 @@
 - **Kimlik doğrulama ve ilk kurulum:** Auth.js ile Google OAuth ve şifresiz e-posta girişi; normalleştirilmiş ve veritabanı düzeyinde benzersiz kullanıcı adları.
 - **Kullanıcı adı güvenliği:** Ayrılmış rota denetimleri, Türkçe duyarlı normalleştirme, gizlemeye dayanıklı içerik denetimi ve veritabanından yönetilen engel listesi.
 - **Herkese açık profiller:** Standart adres, Open Graph verileri, yapılandırılmış veri, duyarlı yerleşim ve indirilebilir QR koduyla hızlı, sunucuda oluşturulan sayfalar.
-- **Mini site oluşturucu:** Profil, içerik ve tasarım çalışma alanları; canlı telefon, tablet ve masaüstü önizlemeleri, tıklayarak düzenleme, sürükleyip bırakarak sıralama ve revizyon duyarlı otomatik kayıt.
+- **Tam site oluşturucu:** Profil, bağlantı, sosyal hesap, tasarım ve müzik çalışma alanları; canlı telefon, tablet ve masaüstü önizlemeleri, tıklayarak düzenleme, sürükleyip bırakarak sıralama ve revizyon duyarlı otomatik kayıt.
 - **Sürümlü tasarım motoru:** Semantik renk token'ları, profil kartları, düzen şablonları, tam tema presetleri, özel arka planlar, tipografi, düğmeler, efektler, ses, SEO, gizlilik ve isteğe bağlı özel CSS.
 - **Bağlantı denetimleri:** Zamanlanmış bağlantılar, parola koruması, YouTube ve Spotify yerleştirmeleri, görünürlük seçenekleri ve güvenli yönlendirme.
 - **Analizler:** Yönlendirmeyi geciktirmeyen tıklama ve profil görüntüleme kaydı; yönlendiren kaynak, ülke, cihaz ve zaman bazlı içgörüler.
