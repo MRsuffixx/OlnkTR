@@ -154,7 +154,10 @@ export function AppearanceEditor({
         preset: "custom",
         colors:
           preset.mode === "solid" && "color" in preset
-            ? { ...appearance.colors, background: preset.color ?? appearance.colors.background }
+            ? {
+                ...appearance.colors,
+                background: preset.color ?? appearance.colors.background,
+              }
             : appearance.colors,
         background: {
           ...appearance.background,
@@ -246,7 +249,10 @@ export function AppearanceEditor({
                     locked
                       ? onUpgrade()
                       : onChange(
-                          applyAppearancePreset(appearance, id as ProfilePresetId),
+                          applyAppearancePreset(
+                            appearance,
+                            id as ProfilePresetId,
+                          ),
                         )
                   }
                   className={`relative min-h-28 overflow-hidden rounded-2xl border p-4 text-left transition ${
@@ -256,7 +262,9 @@ export function AppearanceEditor({
                   }`}
                 >
                   <span className="text-sm font-black">{preset.label}</span>
-                  <span className={`mt-2 block text-xs leading-5 ${active ? "text-paper/65" : "text-ink/50"}`}>
+                  <span
+                    className={`mt-2 block text-xs leading-5 ${active ? "text-paper/65" : "text-ink/50"}`}
+                  >
                     {preset.description}
                   </span>
                   {preset.tier === "pro" && (
@@ -272,8 +280,8 @@ export function AppearanceEditor({
         {category === "colors" && (
           <>
             <div className="border-mint bg-mint/20 rounded-2xl border p-4 text-xs leading-5">
-              Renkler tek bir semantik token sisteminden üretilir. Tema, kart, metin ve
-              düğmeler aynı değişkenleri kullanır.
+              Renkler tek bir semantik token sisteminden üretilir. Tema, kart,
+              metin ve düğmeler aynı değişkenleri kullanır.
             </div>
             <div className="grid grid-cols-2 gap-3">
               {colorFields.map(([path, label]) => (
@@ -434,18 +442,68 @@ export function AppearanceEditor({
                 onChange={update}
               />
             </div>
-            <Range label="Opaklık" path="card.opacity" value={value("card.opacity")} min={0} max={100} suffix="%" hasPro={hasPro} onChange={update} />
-            <Range label="Arka plan bulanıklığı" path="card.blur" value={value("card.blur")} min={0} max={40} suffix="px" hasPro={hasPro} onChange={update} />
-            <Range label="Köşe yarıçapı" path="card.radius" value={value("card.radius")} min={0} max={48} suffix="px" hasPro={hasPro} onChange={update} />
-            <Range label="Kenar kalınlığı" path="card.borderWidth" value={value("card.borderWidth")} min={0} max={6} suffix="px" hasPro={hasPro} onChange={update} />
-            <Range label="İç boşluk" path="card.padding" value={value("card.padding")} min={16} max={64} suffix="px" hasPro={hasPro} onChange={update} />
+            <Range
+              label="Opaklık"
+              path="card.opacity"
+              value={value("card.opacity")}
+              min={0}
+              max={100}
+              suffix="%"
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Range
+              label="Arka plan bulanıklığı"
+              path="card.blur"
+              value={value("card.blur")}
+              min={0}
+              max={40}
+              suffix="px"
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Range
+              label="Köşe yarıçapı"
+              path="card.radius"
+              value={value("card.radius")}
+              min={0}
+              max={48}
+              suffix="px"
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Range
+              label="Kenar kalınlığı"
+              path="card.borderWidth"
+              value={value("card.borderWidth")}
+              min={0}
+              max={6}
+              suffix="px"
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Range
+              label="İç boşluk"
+              path="card.padding"
+              value={value("card.padding")}
+              min={16}
+              max={64}
+              suffix="px"
+              hasPro={hasPro}
+              onChange={update}
+            />
             <Choice
               label="Gölge"
               path="card.shadow"
               current={value("card.shadow")}
               hasPro={hasPro}
               onChoose={update}
-              options={[["none", "Yok"], ["soft", "Yumuşak"], ["hard", "Keskin"], ["glow", "Parlama"]]}
+              options={[
+                ["none", "Yok"],
+                ["soft", "Yumuşak"],
+                ["hard", "Keskin"],
+                ["glow", "Parlama"],
+              ]}
             />
           </>
         )}
@@ -1078,7 +1136,8 @@ export function AppearanceEditor({
           <>
             <div className="border-mint bg-mint/20 rounded-2xl border p-4 text-xs leading-5">
               Arama görünümü ve ziyaretçi gizliliği profil ayar belgesinde ayrı
-              alanlarda tutulur. Profil parolası ise sunucuda korunmaya devam eder.
+              alanlarda tutulur. Profil parolası ise sunucuda korunmaya devam
+              eder.
             </div>
             <TextField
               label="Arama başlığı"

@@ -125,192 +125,194 @@ export function ProfilePreview({
         data-olnk-template={appearance.layout.template}
         style={{ ...appearanceCardStyle(appearance) }}
       >
-      {appearance.privacy.showShareActions && <div
-        className="relative flex w-full justify-end gap-2"
-        style={{
-          order:
-            appearance.layout.socialPlacement === "aboveBio"
-              ? 1
-              : appearance.layout.socialPlacement === "belowBio"
-                ? 3
-                : 5,
-        }}
-        aria-hidden="true"
-      >
-        {[QrCode, Share2].map((Icon, index) => (
-          <span
-            key={index}
-            className="grid size-8 place-items-center rounded-full border border-current/15 bg-white/50"
-          >
-            <Icon className="size-3.5" />
-          </span>
-        ))}
-      </div>}
-      <button
-        type="button"
-        onClick={(event) => {
-          event.stopPropagation();
-          onSelect(null);
-        }}
-        className="bg-orange relative mt-2 grid shrink-0 place-items-center overflow-hidden text-3xl font-black text-white shadow-[3px_4px_0_rgba(23,33,27,.55)]"
-        style={{
-          width: appearance.layout.avatarSize,
-          height: appearance.layout.avatarSize,
-          borderRadius: profileAvatarRadius(appearance.layout.avatarShape),
-          border: `${appearance.layout.avatarBorderWidth}px solid ${appearance.colors.cardBorder}`,
-          clipPath:
-            appearance.layout.avatarShape === "hexagon"
-              ? "polygon(25% 6.7%,75% 6.7%,100% 50%,75% 93.3%,25% 93.3%,0 50%)"
-              : undefined,
-          order: 2,
-        }}
-        aria-label="Profil bilgilerini düzenle"
-      >
-        {draft.image ? (
-          <img src={draft.image} alt="" className="size-full object-cover" />
-        ) : (
-          initial
-        )}
-      </button>
-      {appearance.layout.bioPlacement === "aboveName" && (
-        <p
-          className="relative max-w-[280px] leading-6 opacity-70"
-          style={{ marginTop: density.profileGap, order: 2 }}
-        >
-          {draft.bio || "Kendini birkaç kelimeyle anlat."}
-        </p>
-      )}
-      <h2
-        className="relative font-black"
-        style={{
-          marginTop: density.profileGap,
-          fontFamily: profileFontFamily(appearance.typography.headingFont),
-          fontSize: appearance.typography.headingSize,
-          letterSpacing: appearance.typography.letterSpacing,
-          ...profileHeadingStyle(appearance),
-          order: 2,
-        }}
-      >
-        {draft.name || "Görünen adın"}
-      </h2>
-      {appearance.layout.bioPlacement === "belowName" && (
-        <p
-          className="relative mt-2 max-w-[280px] leading-6 opacity-70"
-          style={{ order: 2 }}
-        >
-          {draft.bio || "Kendini birkaç kelimeyle anlat."}
-        </p>
-      )}
-      {appearance.socialProof.enabled && (
-        <p
-          className={
-            appearance.socialProof.style === "retro"
-              ? "relative mt-3 rounded border border-green-400 bg-black/80 px-2 py-1 font-mono text-[9px] font-black tracking-widest text-green-300"
-              : appearance.socialProof.style === "pill"
-                ? "relative mt-3 rounded-full border border-current/15 bg-white/35 px-2 py-1 text-[9px] font-black"
-                : "relative mt-3 text-[9px] font-black opacity-60"
-          }
-          style={{ order: 2 }}
-        >
-          1.284{" "}
-          {appearance.socialProof.label ||
-            (appearance.socialProof.metric === "today"
-              ? "bugün ziyaret"
-              : appearance.socialProof.metric === "live"
-                ? "son 30 dakikada"
-                : "toplam ziyaret")}
-        </p>
-      )}
-      <div
-        className={`relative w-full ${appearance.layout.template === "bento" ? "grid-cols-2" : "grid-cols-1"}`}
-        style={{
-          display: "grid",
-          gap: appearance.buttons.spacing,
-          marginTop: density.linksTop,
-          order: 4,
-        }}
-      >
-        {!previewLinks.length && (
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onSelect("new");
+        {appearance.privacy.showShareActions && (
+          <div
+            className="relative flex w-full justify-end gap-2"
+            style={{
+              order:
+                appearance.layout.socialPlacement === "aboveBio"
+                  ? 1
+                  : appearance.layout.socialPlacement === "belowBio"
+                    ? 3
+                    : 5,
             }}
-            className="flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-current/30 px-4 text-sm font-bold opacity-60"
+            aria-hidden="true"
           >
-            <ImageIcon className="size-4" /> İlk bağlantını ekle
-          </button>
-        )}
-        {previewLinks.map((link, index) => {
-          const embed =
-            !link.passwordProtected && link.embedType !== "LINK"
-              ? profileEmbedUrl(link.embedType, link.url)
-              : null;
-          return (
-            <div
-              key={link.id}
-              className={
-                appearance.layout.template === "bento" && index % 3 === 2
-                  ? "col-span-2"
-                  : ""
-              }
-            >
-              {embed && (
-                <iframe
-                  src={embed}
-                  title={link.title}
-                  className="mb-2 aspect-video w-full rounded-2xl border-0"
-                  sandbox="allow-scripts allow-same-origin allow-presentation"
-                />
-              )}
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onSelect(link.id);
-                }}
-                className={`olnk-link flex w-full items-center gap-3 px-4 text-left font-bold transition ${link.enabled ? "" : "opacity-45"} ${selectedId === link.id ? "ring-4 ring-white/80 ring-offset-2 ring-offset-transparent" : ""}`}
-                data-hover={appearance.buttons.hover}
-                data-press={appearance.buttons.press}
-                data-entrance={appearance.effects.entrance}
-                style={{
-                  ...profileButtonStyle(appearance, link.customization),
-                  animationDelay: `${index * appearance.effects.staggerMs}ms`,
-                }}
+            {[QrCode, Share2].map((Icon, index) => (
+              <span
+                key={index}
+                className="grid size-8 place-items-center rounded-full border border-current/15 bg-white/50"
               >
-                {link.customization.iconStyle !== "hidden" && (
-                  <span className="text-ink grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-white/90 text-xs">
-                    {link.iconUrl ? (
-                      <img
-                        src={link.iconUrl}
-                        alt=""
-                        className={`size-5 ${link.customization.iconStyle === "mono" ? "grayscale" : ""}`}
-                      />
-                    ) : (
-                      link.title.slice(0, 1).toUpperCase()
-                    )}
-                  </span>
-                )}
-                <span className="flex-1 truncate">{link.title}</span>
-                {link.passwordProtected ? (
-                  <LockKeyhole className="size-3.5" />
-                ) : (
-                  <ArrowUpRight className="size-4 shrink-0" />
-                )}
-              </button>
-            </div>
-          );
-        })}
-      </div>
-      {!appearance.advanced.removeBranding && (
-        <div
-          className="relative mt-auto pt-10 text-xs font-black opacity-60"
-          style={{ order: 6 }}
+                <Icon className="size-3.5" />
+              </span>
+            ))}
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onSelect(null);
+          }}
+          className="bg-orange relative mt-2 grid shrink-0 place-items-center overflow-hidden text-3xl font-black text-white shadow-[3px_4px_0_rgba(23,33,27,.55)]"
+          style={{
+            width: appearance.layout.avatarSize,
+            height: appearance.layout.avatarSize,
+            borderRadius: profileAvatarRadius(appearance.layout.avatarShape),
+            border: `${appearance.layout.avatarBorderWidth}px solid ${appearance.colors.cardBorder}`,
+            clipPath:
+              appearance.layout.avatarShape === "hexagon"
+                ? "polygon(25% 6.7%,75% 6.7%,100% 50%,75% 93.3%,25% 93.3%,0 50%)"
+                : undefined,
+            order: 2,
+          }}
+          aria-label="Profil bilgilerini düzenle"
         >
-          olnk.tr/{username}
+          {draft.image ? (
+            <img src={draft.image} alt="" className="size-full object-cover" />
+          ) : (
+            initial
+          )}
+        </button>
+        {appearance.layout.bioPlacement === "aboveName" && (
+          <p
+            className="relative max-w-[280px] leading-6 opacity-70"
+            style={{ marginTop: density.profileGap, order: 2 }}
+          >
+            {draft.bio || "Kendini birkaç kelimeyle anlat."}
+          </p>
+        )}
+        <h2
+          className="relative font-black"
+          style={{
+            marginTop: density.profileGap,
+            fontFamily: profileFontFamily(appearance.typography.headingFont),
+            fontSize: appearance.typography.headingSize,
+            letterSpacing: appearance.typography.letterSpacing,
+            ...profileHeadingStyle(appearance),
+            order: 2,
+          }}
+        >
+          {draft.name || "Görünen adın"}
+        </h2>
+        {appearance.layout.bioPlacement === "belowName" && (
+          <p
+            className="relative mt-2 max-w-[280px] leading-6 opacity-70"
+            style={{ order: 2 }}
+          >
+            {draft.bio || "Kendini birkaç kelimeyle anlat."}
+          </p>
+        )}
+        {appearance.socialProof.enabled && (
+          <p
+            className={
+              appearance.socialProof.style === "retro"
+                ? "relative mt-3 rounded border border-green-400 bg-black/80 px-2 py-1 font-mono text-[9px] font-black tracking-widest text-green-300"
+                : appearance.socialProof.style === "pill"
+                  ? "relative mt-3 rounded-full border border-current/15 bg-white/35 px-2 py-1 text-[9px] font-black"
+                  : "relative mt-3 text-[9px] font-black opacity-60"
+            }
+            style={{ order: 2 }}
+          >
+            1.284{" "}
+            {appearance.socialProof.label ||
+              (appearance.socialProof.metric === "today"
+                ? "bugün ziyaret"
+                : appearance.socialProof.metric === "live"
+                  ? "son 30 dakikada"
+                  : "toplam ziyaret")}
+          </p>
+        )}
+        <div
+          className={`relative w-full ${appearance.layout.template === "bento" ? "grid-cols-2" : "grid-cols-1"}`}
+          style={{
+            display: "grid",
+            gap: appearance.buttons.spacing,
+            marginTop: density.linksTop,
+            order: 4,
+          }}
+        >
+          {!previewLinks.length && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onSelect("new");
+              }}
+              className="flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-current/30 px-4 text-sm font-bold opacity-60"
+            >
+              <ImageIcon className="size-4" /> İlk bağlantını ekle
+            </button>
+          )}
+          {previewLinks.map((link, index) => {
+            const embed =
+              !link.passwordProtected && link.embedType !== "LINK"
+                ? profileEmbedUrl(link.embedType, link.url)
+                : null;
+            return (
+              <div
+                key={link.id}
+                className={
+                  appearance.layout.template === "bento" && index % 3 === 2
+                    ? "col-span-2"
+                    : ""
+                }
+              >
+                {embed && (
+                  <iframe
+                    src={embed}
+                    title={link.title}
+                    className="mb-2 aspect-video w-full rounded-2xl border-0"
+                    sandbox="allow-scripts allow-same-origin allow-presentation"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onSelect(link.id);
+                  }}
+                  className={`olnk-link flex w-full items-center gap-3 px-4 text-left font-bold transition ${link.enabled ? "" : "opacity-45"} ${selectedId === link.id ? "ring-4 ring-white/80 ring-offset-2 ring-offset-transparent" : ""}`}
+                  data-hover={appearance.buttons.hover}
+                  data-press={appearance.buttons.press}
+                  data-entrance={appearance.effects.entrance}
+                  style={{
+                    ...profileButtonStyle(appearance, link.customization),
+                    animationDelay: `${index * appearance.effects.staggerMs}ms`,
+                  }}
+                >
+                  {link.customization.iconStyle !== "hidden" && (
+                    <span className="text-ink grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-white/90 text-xs">
+                      {link.iconUrl ? (
+                        <img
+                          src={link.iconUrl}
+                          alt=""
+                          className={`size-5 ${link.customization.iconStyle === "mono" ? "grayscale" : ""}`}
+                        />
+                      ) : (
+                        link.title.slice(0, 1).toUpperCase()
+                      )}
+                    </span>
+                  )}
+                  <span className="flex-1 truncate">{link.title}</span>
+                  {link.passwordProtected ? (
+                    <LockKeyhole className="size-3.5" />
+                  ) : (
+                    <ArrowUpRight className="size-4 shrink-0" />
+                  )}
+                </button>
+              </div>
+            );
+          })}
         </div>
-      )}
+        {!appearance.advanced.removeBranding && (
+          <div
+            className="relative mt-auto pt-10 text-xs font-black opacity-60"
+            style={{ order: 6 }}
+          >
+            olnk.tr/{username}
+          </div>
+        )}
       </div>
       {(appearance.audio.enabled || appearance.audio.entryEnabled) && (
         <div className="absolute right-3 bottom-3 left-3 z-30 flex items-center gap-2 rounded-xl border border-black/10 bg-white/90 p-2 text-left shadow-xl backdrop-blur">

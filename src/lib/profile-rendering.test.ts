@@ -11,9 +11,9 @@ describe("shared profile rendering", () => {
   it("preserves configured outline text and border colors", () => {
     const appearance = structuredClone(DEFAULT_APPEARANCE);
     appearance.buttons.fill = "outline";
-    appearance.buttons.color = "#AA0000";
-    appearance.buttons.textColor = "#123456";
-    appearance.buttons.borderColor = "#654321";
+    appearance.colors.button = "#AA0000";
+    appearance.colors.buttonText = "#123456";
+    appearance.colors.cardBorder = "#654321";
     const style = profileButtonStyle(appearance, {
       buttonColor: null,
       textColor: null,

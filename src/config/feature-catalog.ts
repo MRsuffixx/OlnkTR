@@ -420,7 +420,9 @@ export const FEATURE_GROUPS = [
   {
     id: "colors",
     label: "Renk sistemi",
-    paths: Object.keys(FEATURE_CATALOG).filter((key) => key.startsWith("colors.")),
+    paths: Object.keys(FEATURE_CATALOG).filter((key) =>
+      key.startsWith("colors."),
+    ),
   },
   {
     id: "background",
@@ -432,7 +434,9 @@ export const FEATURE_GROUPS = [
   {
     id: "card",
     label: "Profil kartı",
-    paths: Object.keys(FEATURE_CATALOG).filter((key) => key.startsWith("card.")),
+    paths: Object.keys(FEATURE_CATALOG).filter((key) =>
+      key.startsWith("card."),
+    ),
   },
   {
     id: "buttons",
@@ -484,7 +488,9 @@ export const FEATURE_GROUPS = [
   {
     id: "privacy",
     label: "Gizlilik",
-    paths: Object.keys(FEATURE_CATALOG).filter((key) => key.startsWith("privacy.")),
+    paths: Object.keys(FEATURE_CATALOG).filter((key) =>
+      key.startsWith("privacy."),
+    ),
   },
   {
     id: "advanced",

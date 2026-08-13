@@ -128,7 +128,6 @@
 
 ## 5. Change Log (recent)
 
-
 ### 2026-08-09 — Docker runtime and magic-link delivery repair
 
 - Added a pinned Node/pnpm multi-stage Dockerfile, OpenSSL, non-root standalone

@@ -72,7 +72,10 @@ export async function generateMetadata({
       description: "Bu olnk profili parola ile korunuyor.",
       robots: { index: false, follow: false },
     };
-  const appearance = resolveAppearanceForPlan(profile.theme?.settings, pro).effective;
+  const appearance = resolveAppearanceForPlan(
+    profile.theme?.settings,
+    pro,
+  ).effective;
   const title = appearance.seo.title || profile.name || `@${profile.username}`;
   const description =
     appearance.seo.description ||
@@ -208,7 +211,10 @@ export default async function PublicProfilePage({
       {appearance.background.mode === "motion" && (
         <div className="olnk-gradient-motion absolute inset-0" />
       )}
-      <ProfileEffects effects={appearance.effects} color={appearance.colors.accent} />
+      <ProfileEffects
+        effects={appearance.effects}
+        color={appearance.colors.accent}
+      />
       <ProfileAmbientEffects
         effects={appearance.effects}
         particleColor={appearance.colors.particle}
@@ -227,39 +233,39 @@ export default async function PublicProfilePage({
       >
         {appearance.privacy.showShareActions && (
           <div
-          className="flex items-center justify-end gap-2"
-          style={{
-            order:
-              appearance.layout.socialPlacement === "aboveBio"
-                ? 1
-                : appearance.layout.socialPlacement === "belowBio"
-                  ? 3
-                  : 5,
-          }}
-        >
-          <details className="group relative">
-            <summary
-              className="grid size-10 cursor-pointer list-none place-items-center rounded-full border border-current/15 bg-white/50 backdrop-blur transition hover:scale-105"
-              aria-label="QR kodunu göster"
-            >
-              <QrCode className="size-4" />
-            </summary>
-            <div className="border-ink/10 bg-paper text-ink absolute top-12 right-0 z-30 w-64 rounded-3xl border p-4 shadow-2xl">
-              <img
-                src={`/api/qr/${profile.username}`}
-                alt={`${profile.username} profili QR kodu`}
-                className="w-full rounded-2xl"
-              />
-              <a
-                href={`/api/qr/${profile.username}`}
-                download={`${profile.username}-qr.png`}
-                className="bg-ink text-paper mt-3 flex h-10 items-center justify-center gap-2 rounded-full text-sm font-black"
+            className="flex items-center justify-end gap-2"
+            style={{
+              order:
+                appearance.layout.socialPlacement === "aboveBio"
+                  ? 1
+                  : appearance.layout.socialPlacement === "belowBio"
+                    ? 3
+                    : 5,
+            }}
+          >
+            <details className="group relative">
+              <summary
+                className="grid size-10 cursor-pointer list-none place-items-center rounded-full border border-current/15 bg-white/50 backdrop-blur transition hover:scale-105"
+                aria-label="QR kodunu göster"
               >
-                <Download className="size-4" /> QR kodunu indir
-              </a>
-            </div>
-          </details>
-          <ShareButton title={profile.name ?? profile.username} />
+                <QrCode className="size-4" />
+              </summary>
+              <div className="border-ink/10 bg-paper text-ink absolute top-12 right-0 z-30 w-64 rounded-3xl border p-4 shadow-2xl">
+                <img
+                  src={`/api/qr/${profile.username}`}
+                  alt={`${profile.username} profili QR kodu`}
+                  className="w-full rounded-2xl"
+                />
+                <a
+                  href={`/api/qr/${profile.username}`}
+                  download={`${profile.username}-qr.png`}
+                  className="bg-ink text-paper mt-3 flex h-10 items-center justify-center gap-2 rounded-full text-sm font-black"
+                >
+                  <Download className="size-4" /> QR kodunu indir
+                </a>
+              </div>
+            </details>
+            <ShareButton title={profile.name ?? profile.username} />
           </div>
         )}
         <section

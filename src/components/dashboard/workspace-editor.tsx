@@ -585,7 +585,8 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
             ? "Başka sekmede değişti"
             : "Kaydedilemedi — yeniden dene";
   const activeBuilderPanel =
-    builderPanels.find((panel) => panel.id === builderPanel) ?? builderPanels[0]!;
+    builderPanels.find((panel) => panel.id === builderPanel) ??
+    builderPanels[0]!;
 
   return (
     <main className="mx-auto max-w-[1600px]">
@@ -610,7 +611,10 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
           <div className="bg-ink text-paper grid size-11 place-items-center rounded-2xl">
             <PanelsTopLeft className="size-5" />
           </div>
-          <nav className="mt-7 flex w-full flex-col gap-2 px-2" aria-label="Sayfa oluşturucu">
+          <nav
+            className="mt-7 flex w-full flex-col gap-2 px-2"
+            aria-label="Sayfa oluşturucu"
+          >
             {builderPanels.map((panel) => (
               <button
                 key={panel.id}
@@ -628,7 +632,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
               </button>
             ))}
           </nav>
-          <span className="text-ink/35 mt-auto [writing-mode:vertical-rl] text-[9px] font-black tracking-[.2em] uppercase">
+          <span className="text-ink/35 mt-auto text-[9px] font-black tracking-[.2em] uppercase [writing-mode:vertical-rl]">
             olnk studio
           </span>
         </aside>
@@ -670,7 +674,10 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                 {label}
               </button>
             </div>
-            <nav className="dashboard-scrollbar mb-6 flex gap-2 overflow-x-auto pb-1 md:hidden" aria-label="Sayfa oluşturucu">
+            <nav
+              className="dashboard-scrollbar mb-6 flex gap-2 overflow-x-auto pb-1 md:hidden"
+              aria-label="Sayfa oluşturucu"
+            >
               {builderPanels.map((panel) => (
                 <button
                   key={panel.id}
@@ -698,141 +705,153 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                 {saveError}
               </div>
             )}
-            {builderPanel === "profile" && <section className="border-ink/10 rounded-3xl border bg-[#F8F7F1] p-4 sm:p-5">
-              <h2 className="text-sm font-black">Profil bilgileri</h2>
-              <div className="mt-4 space-y-4">
-                <Field label="Görünen ad">
-                  <input
-                    value={draft.name}
-                    maxLength={60}
-                    onChange={(event) =>
-                      setDraft({ ...draft, name: event.target.value })
+            {builderPanel === "profile" && (
+              <section className="border-ink/10 rounded-3xl border bg-[#F8F7F1] p-4 sm:p-5">
+                <h2 className="text-sm font-black">Profil bilgileri</h2>
+                <div className="mt-4 space-y-4">
+                  <Field label="Görünen ad">
+                    <input
+                      value={draft.name}
+                      maxLength={60}
+                      onChange={(event) =>
+                        setDraft({ ...draft, name: event.target.value })
+                      }
+                      className="input"
+                    />
+                  </Field>
+                  <Field label={`Biyografi · ${draft.bio.length}/160`}>
+                    <textarea
+                      value={draft.bio}
+                      maxLength={160}
+                      rows={3}
+                      onChange={(event) =>
+                        setDraft({ ...draft, bio: event.target.value })
+                      }
+                      className="border-ink/15 focus:border-ink w-full resize-none rounded-xl border bg-white p-3 outline-none"
+                    />
+                  </Field>
+                  <Field label="Profil fotoğrafı adresi">
+                    <input
+                      type="url"
+                      value={draft.image ?? ""}
+                      onChange={(event) =>
+                        setDraft({
+                          ...draft,
+                          image: event.target.value || null,
+                        })
+                      }
+                      placeholder="https://"
+                      className="input"
+                    />
+                  </Field>
+                  <AssetUpload
+                    purpose="avatar"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    onUploaded={(image) =>
+                      setDraft((current) => ({ ...current, image }))
                     }
-                    className="input"
                   />
-                </Field>
-                <Field label={`Biyografi · ${draft.bio.length}/160`}>
-                  <textarea
-                    value={draft.bio}
-                    maxLength={160}
-                    rows={3}
-                    onChange={(event) =>
-                      setDraft({ ...draft, bio: event.target.value })
-                    }
-                    className="border-ink/15 focus:border-ink w-full resize-none rounded-xl border bg-white p-3 outline-none"
-                  />
-                </Field>
-                <Field label="Profil fotoğrafı adresi">
-                  <input
-                    type="url"
-                    value={draft.image ?? ""}
-                    onChange={(event) =>
-                      setDraft({ ...draft, image: event.target.value || null })
-                    }
-                    placeholder="https://"
-                    className="input"
-                  />
-                </Field>
-                <AssetUpload
-                  purpose="avatar"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  onUploaded={(image) =>
-                    setDraft((current) => ({ ...current, image }))
-                  }
-                />
-              </div>
-            </section>}
-            {builderPanel === "links" && <section>
-              <div className="mb-3 flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-black">Bağlantılar</h2>
-                  <p className="text-ink/50 text-xs">
-                    Tutamacı sürükle; önizlemeden bir karta dokunup buraya dön.
-                  </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={addLink}
-                  disabled={draft.links.length >= 50}
-                  className="bg-orange inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-black text-white shadow-[3px_3px_0_#17211b] disabled:opacity-40"
-                >
-                  <Plus className="size-4" /> Ekle
-                </button>
-              </div>
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={dragEnd}
-              >
-                <SortableContext
-                  items={draft.links.map((link) => link.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="space-y-3">
-                    {draft.links.map((link) => (
-                      <SortableLink
-                        key={link.id}
-                        link={link}
-                        selected={selectedId === link.id}
-                        hasPro={initial.hasPro}
-                        onUpgrade={() => setUpgrade(true)}
-                        onSelect={() =>
-                          setSelectedId(selectedId === link.id ? null : link.id)
-                        }
-                        onChange={(patch) => updateLink(link.id, patch)}
-                        onDelete={() => {
-                          setDraft((current) => ({
-                            ...current,
-                            links: current.links.filter(
-                              (item) => item.id !== link.id,
-                            ),
-                          }));
-                          setSelectedId(null);
-                        }}
-                      />
-                    ))}
+              </section>
+            )}
+            {builderPanel === "links" && (
+              <section>
+                <div className="mb-3 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-black">Bağlantılar</h2>
+                    <p className="text-ink/50 text-xs">
+                      Tutamacı sürükle; önizlemeden bir karta dokunup buraya
+                      dön.
+                    </p>
                   </div>
-                </SortableContext>
-              </DndContext>
-              {!draft.links.length && (
-                <button
-                  type="button"
-                  onClick={addLink}
-                  className="border-ink/15 bg-cream/40 flex w-full flex-col items-center rounded-3xl border-2 border-dashed px-5 py-10"
+                  <button
+                    type="button"
+                    onClick={addLink}
+                    disabled={draft.links.length >= 50}
+                    className="bg-orange inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-black text-white shadow-[3px_3px_0_#17211b] disabled:opacity-40"
+                  >
+                    <Plus className="size-4" /> Ekle
+                  </button>
+                </div>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={dragEnd}
                 >
-                  <span className="bg-yellow grid size-11 place-items-center rounded-full">
-                    <Plus className="size-5" />
-                  </span>
-                  <strong className="mt-3">İlk bağlantını ekle</strong>
-                </button>
-              )}
-            </section>}
-            {builderPanel === "design" && <AppearanceEditor
-              appearance={draft.appearance}
-              customCss={draft.customCss}
-              hasPro={initial.hasPro}
-              onChange={(appearance) =>
-                setDraft((current) => ({ ...current, appearance }))
-              }
-              onMediaUploaded={(mediaUrl) =>
-                setDraft((current) => ({
-                  ...current,
-                  appearance: {
-                    ...current.appearance,
-                    background: {
-                      ...current.appearance.background,
-                      mediaUrl,
+                  <SortableContext
+                    items={draft.links.map((link) => link.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-3">
+                      {draft.links.map((link) => (
+                        <SortableLink
+                          key={link.id}
+                          link={link}
+                          selected={selectedId === link.id}
+                          hasPro={initial.hasPro}
+                          onUpgrade={() => setUpgrade(true)}
+                          onSelect={() =>
+                            setSelectedId(
+                              selectedId === link.id ? null : link.id,
+                            )
+                          }
+                          onChange={(patch) => updateLink(link.id, patch)}
+                          onDelete={() => {
+                            setDraft((current) => ({
+                              ...current,
+                              links: current.links.filter(
+                                (item) => item.id !== link.id,
+                              ),
+                            }));
+                            setSelectedId(null);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
+                {!draft.links.length && (
+                  <button
+                    type="button"
+                    onClick={addLink}
+                    className="border-ink/15 bg-cream/40 flex w-full flex-col items-center rounded-3xl border-2 border-dashed px-5 py-10"
+                  >
+                    <span className="bg-yellow grid size-11 place-items-center rounded-full">
+                      <Plus className="size-5" />
+                    </span>
+                    <strong className="mt-3">İlk bağlantını ekle</strong>
+                  </button>
+                )}
+              </section>
+            )}
+            {builderPanel === "design" && (
+              <AppearanceEditor
+                appearance={draft.appearance}
+                customCss={draft.customCss}
+                hasPro={initial.hasPro}
+                onChange={(appearance) =>
+                  setDraft((current) => ({ ...current, appearance }))
+                }
+                onMediaUploaded={(mediaUrl) =>
+                  setDraft((current) => ({
+                    ...current,
+                    appearance: {
+                      ...current.appearance,
+                      background: {
+                        ...current.appearance.background,
+                        mediaUrl,
+                      },
                     },
-                  },
-                }))
-              }
-              onCssChange={(customCss) =>
-                setDraft((current) => ({ ...current, customCss }))
-              }
-              onUpgrade={() => setUpgrade(true)}
-              profilePasswordProtected={profilePasswordProtected}
-              onProfilePasswordChange={setProfilePasswordProtected}
-            />}
+                  }))
+                }
+                onCssChange={(customCss) =>
+                  setDraft((current) => ({ ...current, customCss }))
+                }
+                onUpgrade={() => setUpgrade(true)}
+                profilePasswordProtected={profilePasswordProtected}
+                onProfilePasswordChange={setProfilePasswordProtected}
+              />
+            )}
           </div>
         </section>
         <section
