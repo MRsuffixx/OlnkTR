@@ -2,6 +2,8 @@ import {
   ArrowUpRight,
   BarChart3,
   GripVertical,
+  Headphones,
+  MessageCircle,
   Palette,
   Sparkles,
 } from "lucide-react";
@@ -27,10 +29,10 @@ export default function Home() {
           <div className="float-in max-w-3xl">
             <div className="border-ink/15 bg-paper/80 mb-6 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold backdrop-blur">
               <Sparkles className="text-orange size-4" aria-hidden="true" />
-              İnternetteki yeni adresin
+              İnternetteki dünyanı kendin oluştur
             </div>
             <h1 className="display-serif text-ink text-[clamp(3.8rem,9vw,7.7rem)] leading-[.83] font-bold">
-              Tek link.
+              Tek site.
               <br />
               <span className="text-orange relative inline-block">
                 Bütün sen.
@@ -38,15 +40,16 @@ export default function Home() {
               </span>
             </h1>
             <p className="text-ink/70 mt-7 max-w-xl text-lg leading-8 sm:text-xl">
-              Ürettiklerini, sattıklarını ve anlattıklarını tek bir sade sayfada
-              topla. Dakikalar içinde yayınla, neyin ilgi gördüğünü anında gör.
+              Profilini, projelerini, sosyal hesaplarını, müziğini ve görsel
+              dünyanı tek bir güçlü sitede birleştir. Kod yazmadan her ayrıntıyı
+              değiştir ve anında yayınla.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/register"
                 className="group bg-ink text-paper inline-flex min-h-14 items-center justify-center gap-2 rounded-full px-7 text-base font-bold shadow-[5px_5px_0_#F06432] transition hover:-translate-y-1"
               >
-                Ücretsiz sayfanı aç
+                Ücretsiz siteni oluştur
                 <ArrowUpRight
                   className="size-5 transition-transform group-hover:rotate-12"
                   aria-hidden="true"
@@ -86,6 +89,22 @@ export default function Home() {
                 <p className="text-ink/70 mt-2 text-sm leading-6">
                   Tasarım, şehir ve güzel fikirler üzerine ✦
                 </p>
+                <div className="mt-4 flex justify-center gap-2">
+                  {[
+                    ["D", "#5865F2"],
+                    ["IG", "#E4405F"],
+                    ["GH", "#181717"],
+                    ["SP", "#1DB954"],
+                  ].map(([label, color]) => (
+                    <span
+                      key={label}
+                      className="grid size-8 place-items-center rounded-full text-[9px] font-black text-white"
+                      style={{ backgroundColor: color }}
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
                 <div className="mt-7 space-y-3">
                   {demoLinks.map((label) => (
                     <div
@@ -97,6 +116,23 @@ export default function Home() {
                       <ArrowUpRight className="size-4" />
                     </div>
                   ))}
+                </div>
+                <div className="border-ink/10 bg-paper/85 mt-4 flex items-center gap-3 rounded-2xl border p-3 text-left shadow-sm backdrop-blur">
+                  <span className="grid size-9 place-items-center rounded-full bg-[#1DB954] text-white">
+                    <Headphones className="size-4" aria-hidden />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <strong className="block truncate text-xs">
+                      Profil müziği
+                    </strong>
+                    <span className="text-ink/50 block text-[10px]">
+                      Dokununca başlar
+                    </span>
+                  </span>
+                  <MessageCircle
+                    className="size-4 text-[#5865F2]"
+                    aria-hidden
+                  />
                 </div>
                 <div className="absolute inset-x-0 bottom-7 flex justify-center">
                   <Brand compact />
