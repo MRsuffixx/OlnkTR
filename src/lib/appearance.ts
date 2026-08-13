@@ -1010,7 +1010,14 @@ const COLOR_THEME_PRESETS = {
       { color: "#FFF3CA", position: 0 },
       { color: "#FFE600", position: 100 },
     ],
-    card: { enabled: true, opacity: 100, blur: 0, radius: 4, borderWidth: 3, shadow: "hard" },
+    card: {
+      enabled: true,
+      opacity: 100,
+      blur: 0,
+      radius: 4,
+      borderWidth: 3,
+      shadow: "hard",
+    },
     buttons: { fill: "threeD", shape: "square", hover: "lift" },
     avatar: { shape: "square", shadow: "hard" },
     typography: { headingFont: "Space Grotesk", bodyFont: "Manrope" },
@@ -1147,7 +1154,7 @@ export function applyAppearancePreset(
   next.layout = structuredClone(DEFAULT_APPEARANCE.layout);
   next.effects = structuredClone(DEFAULT_APPEARANCE.effects);
   if (preset in COLOR_THEME_PRESETS) {
-    const definition =
+    const definition: ColorThemePreset =
       COLOR_THEME_PRESETS[preset as keyof typeof COLOR_THEME_PRESETS];
     next.colors = { ...next.colors, ...definition.colors };
     next.background = {
@@ -1160,12 +1167,15 @@ export function applyAppearancePreset(
         stops: structuredClone(definition.stops),
       },
     };
-    next.card = { ...next.card, ...definition.card };
-    next.buttons = { ...next.buttons, ...definition.buttons };
-    next.avatar = { ...next.avatar, ...definition.avatar };
-    next.typography = { ...next.typography, ...definition.typography };
-    next.layout = { ...next.layout, ...definition.layout };
-    next.effects = { ...next.effects, ...definition.effects };
+    next.card = { ...next.card, ...(definition.card ?? {}) };
+    next.buttons = { ...next.buttons, ...(definition.buttons ?? {}) };
+    next.avatar = { ...next.avatar, ...(definition.avatar ?? {}) };
+    next.typography = {
+      ...next.typography,
+      ...(definition.typography ?? {}),
+    };
+    next.layout = { ...next.layout, ...(definition.layout ?? {}) };
+    next.effects = { ...next.effects, ...(definition.effects ?? {}) };
     return next;
   }
   if (preset === "frost") {

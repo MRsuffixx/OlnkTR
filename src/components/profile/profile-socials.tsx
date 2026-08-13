@@ -1,6 +1,11 @@
 /* eslint-disable @next/next/no-img-element -- Discord avatars come from Discord's public CDN. */
 
-import { ArrowUpRight, Gamepad2, Headphones, MessageCircle } from "lucide-react";
+import {
+  ArrowUpRight,
+  Gamepad2,
+  Headphones,
+  MessageCircle,
+} from "lucide-react";
 
 import { socialPlatformDefinition } from "~/config/social-platform-registry";
 import type { AppearanceSettings } from "~/lib/appearance";
@@ -118,7 +123,7 @@ export function ProfileSocials({
           );
         })}
       </nav>
-      {discord && (discordPresence || preview) && (
+      {discord && Boolean(discordPresence ?? preview) && (
         <DiscordPresenceCard
           account={discord}
           presence={discordPresence}
@@ -143,7 +148,9 @@ function DiscordPresenceCard({
 }) {
   const settings = account.settings.discord;
   const activity = settings.showActivity
-    ? presence?.activities.find((item) => item.type !== 4 && item.name !== "Spotify")
+    ? presence?.activities.find(
+        (item) => item.type !== 4 && item.name !== "Spotify",
+      )
     : null;
   const spotify = settings.showSpotify ? presence?.spotify : null;
   const displayName =
@@ -178,7 +185,9 @@ function DiscordPresenceCard({
           />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-black">{displayName}</span>
+          <span className="block truncate text-sm font-black">
+            {displayName}
+          </span>
           <span className="block text-[11px] opacity-60">
             {preview && !presence
               ? "Canlı Discord durumu burada görünür"
@@ -192,7 +201,7 @@ function DiscordPresenceCard({
           <Gamepad2 className="size-4 shrink-0" />
           <span className="min-w-0">
             <strong className="block truncate">{activity.name}</strong>
-            {(activity.details || activity.state) && (
+            {Boolean(activity.details ?? activity.state) && (
               <span className="block truncate opacity-60">
                 {activity.details ?? activity.state}
               </span>
