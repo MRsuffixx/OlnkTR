@@ -63,13 +63,13 @@ an internal SMTP endpoint and a loopback-only development inbox.
 
 1. **Middleware (`src/proxy.ts`)** rewrites `/` to `/{username}` for custom-domain hosts; rejects unknown hosts with a controlled `404`/`410`.
 2. The App-Router renders `src/app/[username]/page.tsx` (RSC).
-3. `cache(getProfile)` (request-scoped memo) looks up `db.user.findUnique({ where: { usernameNormalized } })` plus `theme`, `subscription`, and active links.
+3. `cache(getProfile)` (request-scoped memo) looks up `db.user.findUnique({ where: { usernameNormalized } })` plus `theme`, `subscription`, active links, and ordered social accounts.
 4. If `username` is missing → `notFound()`.
 5. `hasProAccess()` and `resolveAppearanceForPlan()` lock Pro paths.
 6. A Pro whole-profile gate verifies a versioned HttpOnly HMAC cookie before bio, theme, or link UI is rendered. `/go/[id]` repeats this check.
 7. `recordProfileView()` is scheduled via `next/server`'s `after()` — non-blocking; the response returns immediately.
 8. Optional public counters read honest daily buckets or a rolling 30-minute distinct pseudonymous count aligned with view deduplication.
-9. Spotify/SoundCloud APIs and canvas effect chunks load only when the resolved appearance enables them. Audio always starts from an explicit visitor gesture.
+9. Spotify/SoundCloud APIs and canvas effect chunks load only when the resolved appearance enables them. Audio always starts from an explicit visitor gesture. Opt-in Discord presence uses a 30-second server fetch cache, strict response schema, and a 1.2-second timeout; failure never blocks the social link.
 10. The Prisma lookup is dynamic; React `cache()` only deduplicates metadata/page reads within the same render request.
 
 ### 2.2 Dashboard (`/dashboard/*`)
@@ -80,7 +80,7 @@ an internal SMTP endpoint and a loopback-only development inbox.
 2. RSC pages (`page.tsx`) call server-side tRPC procedures (`api.workspace.get`, `api.analytics.overview`, `api.billing.overview`, `api.customization.domainOverview`) via the cached caller in `src/trpc/server.ts`.
 3. The page hydrates with the resulting state; subsequent mutations use the client `httpBatchStreamLink`.
 4. `WorkspaceEditor` is a full website builder: profile, link, social, design, and music tools feed the active inspector and a shared live preview. Mobile keeps the same tools and switches between editor and preview; preview frames cover phone, tablet, and desktop.
-5. Identity and real content stay relational (`User`, `ProfileLink`). Presentation, layout, effects, typography, audio, SEO, and privacy preferences are validated as one versioned `Theme.settings` document.
+5. Identity and real content stay relational (`User`, `ProfileLink`, `SocialAccount`). Presentation, layout, effects, typography, audio, SEO, and privacy preferences are validated as one versioned `Theme.settings` document.
 6. The dashboard layout sets `metadata.robots = { index: false, follow: false }`.
 
 ### 2.2.1 Appearance document v3
@@ -93,7 +93,7 @@ an internal SMTP endpoint and a loopback-only development inbox.
 - The Free baseline includes semantic colors, linear/radial multi-stop gradients, image backgrounds, core card/avatar controls, and basic Bento/terminal layouts. Conic gradients, video/motion backgrounds, and advanced effects remain centrally gated.
 - `font-registry.ts` owns approved font IDs and CSS families. `effect-registry.tsx` owns lazy ambient-effect plugins. `ProfileBackground` and `ProfileIdentity` are shared by public and preview renderers.
 - Security-sensitive gates remain relational. `privacy` controls indexing, analytics ingestion, and share controls but cannot replace `User.profilePasswordHash` enforcement.
-- Links, future social accounts, badges, sections, and widgets are content and must use separate models rather than being embedded in `Theme.settings`.
+- Links and social accounts are relational content; future badges, sections, and widgets must follow the same boundary rather than being embedded in `Theme.settings`.
 
 ### 2.3 Auth flow
 

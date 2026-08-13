@@ -131,6 +131,19 @@
 
 ## 5. Change Log (recent)
 
+### 2026-08-13 — Full builder themes, social accounts, Discord, and music visibility
+
+- Promoted Social and Music into dedicated top-level builder workspaces instead of hiding audio
+  behind the Design inspector.
+- Added an additive `SocialAccount` model/migration, 27-platform registry, drag/drop ordering,
+  labels, tooltips, platform/custom colors, and icon-only presentation.
+- Added opt-in Discord status/activity/Spotify privacy controls and a cached, timeout-bounded
+  public presence card with graceful provider failure behavior.
+- Expanded the same versioned appearance engine from 5 to 17 working theme presets and added
+  visual theme swatches.
+- Exposed all previously missing appearance leaves except the document version and the gradient
+  internals already owned by the reusable gradient editor.
+
 ### 2026-08-13 — Existing-product audit and builder registries
 
 - Audited the real registration, username, dashboard save, public render, redirect, upload,

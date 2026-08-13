@@ -844,7 +844,7 @@ const COLOR_THEME_PRESETS = {
     ],
     card: { enabled: false },
     buttons: { fill: "solid", shape: "pill", hover: "grow" },
-    typography: { headingFont: "Space Grotesk", bodyFont: "Inter" },
+    typography: { headingFont: "Manrope", bodyFont: "Inter" },
   },
   auroraGlow: {
     colors: {
@@ -956,7 +956,7 @@ const COLOR_THEME_PRESETS = {
       { color: "#1E1F22", position: 100 },
     ],
     card: { enabled: true, opacity: 96, blur: 0, radius: 12 },
-    buttons: { fill: "solid", shape: "rounded", radius: 8 },
+    buttons: { fill: "solid", shape: "rounded" },
     avatar: { shape: "circle", shadow: "soft" },
     typography: { headingFont: "Manrope", bodyFont: "Inter" },
   },
@@ -1018,9 +1018,9 @@ const COLOR_THEME_PRESETS = {
       borderWidth: 3,
       shadow: "hard",
     },
-    buttons: { fill: "threeD", shape: "square", hover: "lift" },
+    buttons: { fill: "shadow", shape: "square", hover: "lift" },
     avatar: { shape: "square", shadow: "hard" },
-    typography: { headingFont: "Space Grotesk", bodyFont: "Manrope" },
+    typography: { headingFont: "Manrope", bodyFont: "Manrope" },
   },
   ocean: {
     colors: {
@@ -1046,7 +1046,7 @@ const COLOR_THEME_PRESETS = {
       { color: "#031525", position: 100 },
     ],
     card: { enabled: true, opacity: 66, blur: 18 },
-    buttons: { fill: "glass", shape: "rounded" },
+    buttons: { fill: "outline", shape: "rounded" },
     typography: { headingEffect: "gradient" },
   },
   sakura: {
@@ -1073,7 +1073,7 @@ const COLOR_THEME_PRESETS = {
       { color: "#E9D5FF", position: 100 },
     ],
     card: { enabled: true, opacity: 76, blur: 14, radius: 36 },
-    buttons: { fill: "glass", shape: "pill" },
+    buttons: { fill: "shadow", shape: "pill" },
     avatar: { shape: "circle", shadow: "soft" },
     typography: { headingFont: "Fraunces" },
   },
@@ -1127,9 +1127,9 @@ const COLOR_THEME_PRESETS = {
       { color: "#0D1117", position: 100 },
     ],
     card: { enabled: true, opacity: 98, blur: 0, radius: 10 },
-    buttons: { fill: "outline", shape: "rounded", radius: 8 },
+    buttons: { fill: "outline", shape: "rounded" },
     avatar: { shape: "rounded", shadow: "none" },
-    typography: { headingFont: "Space Grotesk", bodyFont: "Roboto Mono" },
+    typography: { headingFont: "Manrope", bodyFont: "Roboto Mono" },
     layout: { alignment: "left", mobileAlignment: "left" },
   },
 } as const satisfies Record<

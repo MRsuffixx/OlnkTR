@@ -195,7 +195,11 @@ function SortableSocialAccount({
         >
           {definition.shortLabel}
         </span>
-        <button type="button" onClick={onToggle} className="min-w-0 flex-1 text-left">
+        <button
+          type="button"
+          onClick={onToggle}
+          className="min-w-0 flex-1 text-left"
+        >
           <strong className="block truncate text-sm">{account.label}</strong>
           <span className="text-ink/45 block truncate text-xs">
             {account.username || definition.label}
@@ -211,8 +215,15 @@ function SortableSocialAccount({
             className={`absolute top-1 size-4 rounded-full bg-white transition ${account.enabled ? "left-6" : "left-1"}`}
           />
         </button>
-        <button type="button" onClick={onToggle} className="p-2" aria-label="Hesabı düzenle">
-          <ChevronDown className={`size-4 transition ${open ? "rotate-180" : ""}`} />
+        <button
+          type="button"
+          onClick={onToggle}
+          className="p-2"
+          aria-label="Hesabı düzenle"
+        >
+          <ChevronDown
+            className={`size-4 transition ${open ? "rotate-180" : ""}`}
+          />
         </button>
       </div>
       {open && (
@@ -323,7 +334,8 @@ function DiscordSettings({
         <strong className="text-sm">Discord canlı kartı</strong>
         <p className="text-ink/50 mt-1 text-xs leading-5">
           Kimlik ve gizlilik seçimleri sana aittir. Sağlayıcı yanıt vermezse
-          sosyal bağlantın çalışmaya devam eder.
+          sosyal bağlantın çalışmaya devam eder. Canlı durum için Discord
+          hesabının Lanyard ağına katılmış olması gerekir.
         </p>
       </div>
       <TextField

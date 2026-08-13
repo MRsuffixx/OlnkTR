@@ -257,6 +257,11 @@ data from a provider adapter; they do not call provider APIs from the public bro
 Each adapter defines timeouts, cache lifetime, stale fallback, privacy switches, revocation,
 and error normalization. A provider outage hides/degrades only that widget.
 
+Discord social accounts are stored in `SocialAccount`; public visibility choices live in
+validated `settings.discord`. Live presence is opt-in and read through
+`server/integrations/discord-presence.ts` with a 1.2-second timeout, 30-second cache, response
+schema validation, and null fallback. The social link remains usable if presence is unavailable.
+
 ## 14. Editor state and reset behavior
 
 The editor keeps a local typed draft, a dirty/saving/error/conflict state, and batched save

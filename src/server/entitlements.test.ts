@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { FEATURE_CATALOG } from "~/config/feature-catalog";
-import { DEFAULT_APPEARANCE } from "~/lib/appearance";
+import {
+  applyAppearancePreset,
+  DEFAULT_APPEARANCE,
+  PROFILE_PRESETS,
+} from "~/lib/appearance";
 import { hasProAccess, resolveAppearanceForPlan } from "~/server/entitlements";
 
 const now = new Date("2026-07-20T12:00:00.000Z");
@@ -147,5 +151,17 @@ describe("subscription entitlements", () => {
     expect(resolved.effective.layout.template).toBe("bento");
     expect(resolved.effective.layout.mobileAlignment).toBe("left");
     expect(resolved.effective.avatar.size).toBe(132);
+  });
+
+  it("keeps every Free theme visually intact after server entitlement enforcement", () => {
+    for (const [preset, definition] of Object.entries(PROFILE_PRESETS)) {
+      if (definition.tier !== "free") continue;
+      const themed = applyAppearancePreset(
+        DEFAULT_APPEARANCE,
+        preset as keyof typeof PROFILE_PRESETS,
+      );
+      const resolved = resolveAppearanceForPlan(themed, false);
+      expect(resolved.effective, preset).toEqual(themed);
+    }
   });
 });

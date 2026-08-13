@@ -35,7 +35,7 @@
 
 ---
 
-## 2. Models (22)
+## 2. Models (23)
 
 ### 2.1 Index
 
@@ -63,6 +63,7 @@
 | 20  | `VerificationToken`      | TTL                   | magic-link tokens                              |
 | 21  | `ManualEntitlement`      | `revokedAt`           | time-bounded, auditable Pro grant              |
 | 22  | `AdminAuditLog`          | —                     | immutable admin/security event ledger          |
+| 23  | `SocialAccount`          | `deletedAt`           | ordered platform/custom social content         |
 
 ### 2.2 User
 
@@ -172,6 +173,14 @@ model ProfileLink {
 - `position` is a 0-indexed sort order maintained by the drag-and-drop editor.
 - `passwordHash` uses scrypt; setting or rotating it bumps `accessVersion` (invalidating the 12h unlock cookie).
 - Soft delete: `workspace.save` sets `enabled: false, deletedAt: new Date()` for any link that disappears from the draft. Restoring is possible by re-publishing with the same UUID.
+
+### 2.4.1 SocialAccount
+
+`SocialAccount` stores real, ordered social content separately from visual configuration.
+Platform IDs come from `social-platform-registry.ts`; labels, tooltip, icon mode, platform/custom
+color, public URL, and validated provider-specific settings are persisted per account. Discord
+presence/activity/Spotify visibility is opt-in in `settings.discord`. Rows are owner-scoped,
+soft-deleted, and deterministically ordered by `position`.
 
 ### 2.5 ClickEvent, ProfileViewEvent, AnalyticsDailyBucket
 
@@ -563,12 +572,12 @@ The custom adapter in `src/server/auth/config.ts` overrides `createUser`, `getUs
 
 ## 4. Cascading Rules
 
-| Parent        | Child                                                                                                                                                                                        | onDelete                                                |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| `User`        | `Theme`, `ProfileLink`, `ClickEvent`, `ProfileViewEvent`, `Subscription`, `PaymentIntent`, `BillingInvoice`, `CustomDomain`, `DomainReclaimChallenge`, `UploadedAsset`, `Account`, `Session` | `Cascade`                                               |
-| `ProfileLink` | `ClickEvent`                                                                                                                                                                                 | `Cascade`                                               |
-| —             | `AccountDeletionJob.userId`                                                                                                                                                                  | not a FK — survives deletion                            |
-| —             | `AnalyticsDailyBucket.userId`                                                                                                                                                                | no FK — manually deleted by `processAccountDeletionJob` |
+| Parent        | Child                                                                                                                                                                                                         | onDelete                                                |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| `User`        | `Theme`, `ProfileLink`, `SocialAccount`, `ClickEvent`, `ProfileViewEvent`, `Subscription`, `PaymentIntent`, `BillingInvoice`, `CustomDomain`, `DomainReclaimChallenge`, `UploadedAsset`, `Account`, `Session` | `Cascade`                                               |
+| `ProfileLink` | `ClickEvent`                                                                                                                                                                                                  | `Cascade`                                               |
+| —             | `AccountDeletionJob.userId`                                                                                                                                                                                   | not a FK — survives deletion                            |
+| —             | `AnalyticsDailyBucket.userId`                                                                                                                                                                                 | no FK — manually deleted by `processAccountDeletionJob` |
 
 ---
 
@@ -689,7 +698,8 @@ A deeply-typed, versioned Zod document. Version `3` separates semantic `colors`,
 
 Every editable leaf is represented in `FEATURE_CATALOG` (`src/config/feature-catalog.ts`). Pro-only paths are gated by `tier: "pro"` plus optional `proValues` lists. Full-profile presets call the same typed settings model; they do not bypass leaf-level entitlement resolution. Approved typography IDs and Zod enums come from `src/config/font-registry.ts`; quotas and numeric product limits come from `src/config/plan-limits.ts`.
 
-This builder-foundation pass changes validation, policy, and rendering only. It adds no Prisma field and therefore requires no database migration.
+The social-account pass adds one relational content model through an additive migration; no
+existing user, link, theme, or uploaded asset data is rewritten.
 
 ---
 
@@ -704,6 +714,7 @@ This builder-foundation pass changes validation, policy, and rendering only. It 
 | `20260724233000_profile_extras`                  | Profile audio + gate        | Adds `AUDIO`/`ENTRY_SOUND` asset purposes and versioned profile-password fields                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `20260724234500_align_uploaded_asset_updated_at` | Migration-history alignment | Drops the legacy DB default from Prisma-managed `UploadedAsset.updatedAt`; no row data changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `20260724120000_admin_control_room`              | Admin control room          | Adds role/account-state/activity fields, manual Pro entitlements, immutable admin audit events, invoice refund flags, supporting indexes, and cascade-safe relations                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `20260813141921_add_social_accounts`             | Social accounts             | Adds the owner-scoped `SocialAccount` content model with deterministic ordering, soft deletion, presentation metadata, provider settings JSON, and supporting indexes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 ---
 

@@ -72,7 +72,7 @@
 ├── tsconfig.json                 # strict + `~/*` alias
 ├── next.config.js                # CSP, serverExternalPackages, env side-effect
 ├── prisma.config.ts              # Prisma datasource URL
-├── prisma/schema.prisma          # 22 models, 21 enums
+├── prisma/schema.prisma          # 23 models, 21 enums
 ├── prisma/migrations/            # Append-only migrations — DO NOT edit applied ones
 ├── eslint.config.js              # flat config; `--max-warnings=0`
 ├── prettier.config.js            # `prettier-plugin-tailwindcss` only
@@ -211,6 +211,8 @@
   central limit helpers; enforce capabilities again on the server.
 - Fonts use `src/config/font-registry.ts`. Effects use the profile effect registry. Future
   widgets use a versioned widget registry with per-type Zod configuration.
+- Social platforms use `src/config/social-platform-registry.ts`; provider visibility is
+  validated per account and privacy controls remain Free.
 - Public and preview rendering share profile primitives. A layout or preset configures the
   renderer; it does not duplicate the profile page.
 - Privacy, security, account protection, deletion, and accessibility controls are never

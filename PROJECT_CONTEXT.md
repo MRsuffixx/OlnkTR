@@ -15,6 +15,8 @@
 - **Authentication:** Google OAuth and passwordless email via Nodemailer (Auth.js v5 / NextAuth `database` session strategy).
 - **Public websites:** responsive, server-rendered sites with mobile/tablet/desktop builder previews.
 - **Editable links:** drag-and-drop reorder, per-link icon, scheduling, password protection, YouTube and Spotify embeds, click recording.
+- **Social accounts:** 27 registry-backed platforms with relational ordering, presentation controls, and opt-in Discord live data privacy.
+- **Themes and music:** 17 schema-compatible themes and a dedicated Spotify/SoundCloud/direct-audio workspace.
 - **Design engine:** versioned `AppearanceSettings` JSON with semantic colour tokens, cards, layout templates, presets, backgrounds, buttons, typography, effects, audio, SEO, privacy, and custom CSS for Pro.
 - **Analytics:** click + view tracking, dedupe keys, daily buckets, 7/30/90-day dashboards. Advanced block (countries, devices, sources) is Pro-gated.
 - **Pro billing:** USD $3/mo and $22/yr via Stripe and Adyen; ₺129/₺949 via iyzico and PayTR. PayTR is manual renewal.

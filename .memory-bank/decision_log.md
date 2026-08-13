@@ -355,7 +355,7 @@ profile stylesheet cannot replace application animation definitions by name.
 
 ---
 
-## ADR-022 — The profile becomes a versioned mini-site document
+## ADR-022 — The profile becomes a versioned website appearance document
 
 **Date:** 2026-08-13
 **Status:** Accepted
@@ -428,3 +428,27 @@ signature.
   numbers.
 - Free users can build a credible profile while Pro continues to unlock depth and expensive media.
 - Renamed executable text cannot become a ready image solely by spoofing `Content-Type`.
+
+---
+
+## ADR-025 — Social content is relational and Discord presence is optional
+
+**Date:** 2026-08-13
+**Status:** Accepted
+**Context:** A full website builder needs many ordered social accounts and Discord presentation,
+but platform content does not belong in `Theme.settings`, and live presence must not expose data
+without explicit per-profile privacy choices or slow public pages indefinitely.
+
+**Decision:** Add owner-scoped, soft-deleted `SocialAccount` rows and a central 27-platform
+registry. Store only bounded platform settings in each account's validated `settings` object.
+Discord profile linking works independently; presence, activity, and Spotify visibility are three
+separate Free switches. The initial presence adapter uses Lanyard's public REST contract with a
+strict response schema, 30-second cache, 1.2-second timeout, and null fallback.
+
+**Consequences:**
+
+- Social ordering and ownership remain queryable and can grow without appearance-schema churn.
+- Existing profiles migrate additively and render an empty social collection without backfill.
+- Provider failure cannot break the public profile or the ordinary Discord link.
+- A future first-party Discord OAuth connection can replace the adapter without changing the
+  social rendering contract.

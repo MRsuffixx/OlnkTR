@@ -46,7 +46,7 @@ export async function getDiscordPresence(userId: string) {
       {
         headers: { accept: "application/json" },
         next: { revalidate: 30 },
-        signal: AbortSignal.timeout(2_500),
+        signal: AbortSignal.timeout(1_200),
       },
     );
     if (!response.ok) return null;

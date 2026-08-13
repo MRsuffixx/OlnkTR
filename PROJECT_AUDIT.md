@@ -124,12 +124,13 @@ There is no client-only link rule that can bypass the server redirect boundary.
 - Identity: `User.name`, `username`, `bio`, `image`.
 - Links: `ProfileLink` with ordering, scheduling, password state, embed type, and bounded
   per-link customization.
+- Social accounts: owner-scoped `SocialAccount` rows with platform-registry IDs, deterministic
+  ordering, soft deletion, presentation metadata, and validated provider privacy settings.
 - Assets: `UploadedAsset` lifecycle records.
 - Domains, analytics, subscriptions, sessions, and audit records are separate models.
 
 ### Content models not yet present
 
-- social accounts;
 - sections;
 - widgets;
 - badge definitions and assignments;
@@ -273,7 +274,8 @@ documented.
 ## 11. Safe implementation order
 
 1. Complete shared renderer/editor primitives and keep Phase 1-2 gates green.
-2. Add relational socials and badges, then sections and a versioned widget registry.
+2. Add relational badges, then sections and a versioned widget registry; socials are now
+   relational and shipped.
 3. Add deterministic Bento placement with keyboard-accessible drag/drop and overlap
    validation.
 4. Add reusable theme records/import codes after private-field stripping is proven.
