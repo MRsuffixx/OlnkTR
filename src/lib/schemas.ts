@@ -87,7 +87,9 @@ export const workspaceSocialInput = z
   .superRefine((account, context) => {
     if (
       account.platform === "DISCORD" &&
-      account.settings.discord.showPresence &&
+      (account.settings.discord.showPresence ||
+        account.settings.discord.showActivity ||
+        account.settings.discord.showSpotify) &&
       !account.settings.discord.userId
     )
       context.addIssue({

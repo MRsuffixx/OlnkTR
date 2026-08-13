@@ -43,7 +43,9 @@ export function ProfileSocials({
   const discord = visible.find(
     (account) =>
       account.platform === "DISCORD" &&
-      account.settings.discord.showPresence &&
+      (account.settings.discord.showPresence ||
+        account.settings.discord.showActivity ||
+        account.settings.discord.showSpotify) &&
       account.settings.discord.userId,
   );
   const order =

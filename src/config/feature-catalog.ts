@@ -22,7 +22,15 @@ export const FEATURE_CATALOG = {
     label: "Tema paketi",
     tier: "free",
     fallback: "custom",
-    proValues: ["frost", "midnight", "cyber"],
+    proValues: [
+      "frost",
+      "midnight",
+      "cyber",
+      "neon",
+      "auroraGlow",
+      "vaporwave",
+      "y2k",
+    ],
   },
   "colors.primary": { label: "Ana renk", tier: "free", fallback: "#F06432" },
   "colors.secondary": {

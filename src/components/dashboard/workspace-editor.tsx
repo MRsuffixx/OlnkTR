@@ -26,6 +26,7 @@ import {
   GripVertical,
   Link2,
   LoaderCircle,
+  Music2,
   Monitor,
   MonitorSmartphone,
   Palette,
@@ -33,6 +34,7 @@ import {
   Plus,
   RotateCcw,
   Sparkles,
+  Share2,
   Smartphone,
   Tablet,
   Trash2,
@@ -45,6 +47,7 @@ import { useEffect, useRef, useState } from "react";
 import { AppearanceEditor } from "~/components/dashboard/appearance-editor";
 import { AssetUpload } from "~/components/dashboard/asset-upload";
 import { ProfilePreview } from "~/components/dashboard/profile-preview";
+import { SocialAccountEditor } from "~/components/dashboard/social-account-editor";
 import { ModalDialog } from "~/components/ui/modal-dialog";
 import { workspaceInput, type WorkspaceInput } from "~/lib/schemas";
 import type { RouterOutputs } from "~/trpc/react";
@@ -54,7 +57,7 @@ type Workspace = RouterOutputs["workspace"]["get"];
 type Draft = Omit<WorkspaceInput, "revision">;
 type DraftLink = Draft["links"][number];
 type SaveStatus = "saved" | "waiting" | "saving" | "error" | "conflict";
-type BuilderPanel = "profile" | "links" | "design";
+type BuilderPanel = "profile" | "links" | "socials" | "design" | "music";
 
 const builderPanels: Array<{
   id: BuilderPanel;
@@ -75,10 +78,22 @@ const builderPanels: Array<{
     icon: Link2,
   },
   {
+    id: "socials",
+    label: "Sosyal",
+    description: "Sosyal hesaplar ve Discord",
+    icon: Share2,
+  },
+  {
     id: "design",
     label: "Tasarım",
     description: "Tema ve görünüm motoru",
     icon: Palette,
+  },
+  {
+    id: "music",
+    label: "Müzik",
+    description: "Spotify, SoundCloud ve ses",
+    icon: Music2,
   },
 ];
 
@@ -404,6 +419,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
     appearance: initial.effectiveAppearance,
     customCss: initial.customCss,
     links: initial.links,
+    socials: initial.socials,
   });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [builderPanel, setBuilderPanel] = useState<BuilderPanel>("profile");
@@ -650,7 +666,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
               <div>
                 <div className="flex items-center gap-2">
                   <p className="text-orange-ink text-xs font-black tracking-[.15em] uppercase">
-                    Mini site oluşturucu
+                    Tam site oluşturucu
                   </p>
                   <span
                     className={`rounded-full px-2 py-0.5 text-[9px] font-black ${initial.hasPro ? "bg-yellow" : "bg-cream"}`}
@@ -840,6 +856,14 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                 )}
               </section>
             )}
+            {builderPanel === "socials" && (
+              <SocialAccountEditor
+                accounts={draft.socials}
+                onChange={(socials) =>
+                  setDraft((current) => ({ ...current, socials }))
+                }
+              />
+            )}
             {builderPanel === "design" && (
               <AppearanceEditor
                 appearance={draft.appearance}
@@ -866,6 +890,36 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                 onUpgrade={() => setUpgrade(true)}
                 profilePasswordProtected={profilePasswordProtected}
                 onProfilePasswordChange={setProfilePasswordProtected}
+              />
+            )}
+            {builderPanel === "music" && (
+              <AppearanceEditor
+                appearance={draft.appearance}
+                customCss={draft.customCss}
+                hasPro={initial.hasPro}
+                onChange={(appearance) =>
+                  setDraft((current) => ({ ...current, appearance }))
+                }
+                onMediaUploaded={(mediaUrl) =>
+                  setDraft((current) => ({
+                    ...current,
+                    appearance: {
+                      ...current.appearance,
+                      background: {
+                        ...current.appearance.background,
+                        mediaUrl,
+                      },
+                    },
+                  }))
+                }
+                onCssChange={(customCss) =>
+                  setDraft((current) => ({ ...current, customCss }))
+                }
+                onUpgrade={() => setUpgrade(true)}
+                profilePasswordProtected={profilePasswordProtected}
+                onProfilePasswordChange={setProfilePasswordProtected}
+                focusedCategory="audio"
+                heading="Müzik ve ses stüdyosu"
               />
             )}
           </div>

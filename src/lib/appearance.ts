@@ -56,7 +56,26 @@ export const appearanceSchema = z.object({
     .literal(APPEARANCE_SETTINGS_VERSION)
     .default(APPEARANCE_SETTINGS_VERSION),
   preset: z
-    .enum(["custom", "frost", "midnight", "cyber", "terminal", "minimal"])
+    .enum([
+      "custom",
+      "frost",
+      "midnight",
+      "cyber",
+      "terminal",
+      "minimal",
+      "neon",
+      "pureBlack",
+      "auroraGlow",
+      "vaporwave",
+      "spotify",
+      "discord",
+      "y2k",
+      "brutal",
+      "ocean",
+      "sakura",
+      "sunset",
+      "developer",
+    ])
     .default("custom"),
   colors: z
     .object({
@@ -691,9 +710,428 @@ export const PROFILE_PRESETS = {
     description: "Sessiz ve tipografi odaklı",
     tier: "free",
   },
+  neon: {
+    label: "Neon Purple",
+    description: "Mor neon, koyu cam ve güçlü parlama",
+    tier: "pro",
+  },
+  pureBlack: {
+    label: "Pure Black",
+    description: "OLED siyahı ve keskin beyaz tipografi",
+    tier: "free",
+  },
+  auroraGlow: {
+    label: "Aurora Glow",
+    description: "Kuzey ışıkları ve yumuşak cam yüzeyler",
+    tier: "pro",
+  },
+  vaporwave: {
+    label: "Vaporwave",
+    description: "Pembe, mor ve okyanus mavisi nostaljisi",
+    tier: "pro",
+  },
+  spotify: {
+    label: "Spotify Inspired",
+    description: "Müzik odaklı yeşil ve koyu yüzeyler",
+    tier: "free",
+  },
+  discord: {
+    label: "Discord Inspired",
+    description: "Topluluk profilleri için tanıdık koyu palet",
+    tier: "free",
+  },
+  y2k: {
+    label: "Y2K Chrome",
+    description: "Parlak dijital renkler ve milenyum enerjisi",
+    tier: "pro",
+  },
+  brutal: {
+    label: "Bold Brutal",
+    description: "Kalın kenarlık, sert gölge ve yüksek kontrast",
+    tier: "free",
+  },
+  ocean: {
+    label: "Deep Ocean",
+    description: "Derin mavi, turkuaz ve sakin kontrast",
+    tier: "free",
+  },
+  sakura: {
+    label: "Sakura",
+    description: "Yumuşak pembe tonlar ve zarif tipografi",
+    tier: "free",
+  },
+  sunset: {
+    label: "Sunset Pop",
+    description: "Turuncu, mercan ve mor gün batımı",
+    tier: "free",
+  },
+  developer: {
+    label: "Developer Dark",
+    description: "Kod, proje ve teknik portfolyolar için",
+    tier: "free",
+  },
 } as const;
 
 export type ProfilePresetId = keyof typeof PROFILE_PRESETS;
+
+type ColorThemePreset = {
+  colors: Partial<AppearanceSettings["colors"]>;
+  stops: AppearanceSettings["background"]["gradient"]["stops"];
+  angle: number;
+  mode?: "gradient" | "motion";
+  card?: Partial<AppearanceSettings["card"]>;
+  buttons?: Partial<AppearanceSettings["buttons"]>;
+  avatar?: Partial<AppearanceSettings["avatar"]>;
+  typography?: Partial<AppearanceSettings["typography"]>;
+  layout?: Partial<AppearanceSettings["layout"]>;
+  effects?: Partial<AppearanceSettings["effects"]>;
+};
+
+const COLOR_THEME_PRESETS = {
+  neon: {
+    colors: {
+      primary: "#B026FF",
+      secondary: "#FF2BD6",
+      accent: "#00F0FF",
+      background: "#080111",
+      backgroundSecondary: "#24003B",
+      card: "#160724",
+      cardBorder: "#B026FF",
+      textPrimary: "#FFFFFF",
+      textSecondary: "#E8C7FF",
+      textMuted: "#A88AB8",
+      username: "#F4D7FF",
+      button: "#220637",
+      buttonText: "#FFFFFF",
+      glow: "#FF2BD6",
+      shadow: "#00F0FF",
+      particle: "#00F0FF",
+    },
+    angle: 135,
+    mode: "motion",
+    stops: [
+      { color: "#080111", position: 0 },
+      { color: "#3D065F", position: 52 },
+      { color: "#071C33", position: 100 },
+    ],
+    card: { enabled: true, opacity: 68, blur: 20, shadow: "glow" },
+    buttons: { fill: "outline", hover: "glow", shape: "pill" },
+    typography: { headingFont: "Space Grotesk", headingEffect: "glow" },
+    effects: { mouseParticles: "subtle" },
+  },
+  pureBlack: {
+    colors: {
+      primary: "#FFFFFF",
+      secondary: "#A3A3A3",
+      accent: "#FFFFFF",
+      background: "#000000",
+      backgroundSecondary: "#111111",
+      card: "#050505",
+      cardBorder: "#333333",
+      textPrimary: "#FFFFFF",
+      textSecondary: "#D4D4D4",
+      textMuted: "#858585",
+      username: "#FFFFFF",
+      button: "#FFFFFF",
+      buttonText: "#000000",
+      glow: "#FFFFFF",
+      shadow: "#000000",
+    },
+    angle: 180,
+    stops: [
+      { color: "#111111", position: 0 },
+      { color: "#000000", position: 100 },
+    ],
+    card: { enabled: false },
+    buttons: { fill: "solid", shape: "pill", hover: "grow" },
+    typography: { headingFont: "Space Grotesk", bodyFont: "Inter" },
+  },
+  auroraGlow: {
+    colors: {
+      primary: "#56F2C3",
+      secondary: "#7A8CFF",
+      accent: "#D16BFF",
+      background: "#06131A",
+      backgroundSecondary: "#15284A",
+      card: "#0B1B25",
+      cardBorder: "#56F2C3",
+      textPrimary: "#F2FFFB",
+      textSecondary: "#C3EDE0",
+      textMuted: "#86AFA4",
+      username: "#A6FFE4",
+      button: "#12362F",
+      buttonText: "#F2FFFB",
+      glow: "#56F2C3",
+      particle: "#D16BFF",
+    },
+    angle: 125,
+    mode: "motion",
+    stops: [
+      { color: "#06131A", position: 0 },
+      { color: "#174F4B", position: 46 },
+      { color: "#39285E", position: 100 },
+    ],
+    card: { enabled: true, opacity: 55, blur: 28, shadow: "soft" },
+    buttons: { fill: "glass", shape: "rounded" },
+    avatar: { shape: "squircle", shadow: "glow" },
+    typography: { headingEffect: "gradient" },
+  },
+  vaporwave: {
+    colors: {
+      primary: "#FF71CE",
+      secondary: "#B967FF",
+      accent: "#01CDFE",
+      background: "#14072A",
+      backgroundSecondary: "#3B176A",
+      card: "#261142",
+      cardBorder: "#FF71CE",
+      textPrimary: "#FFF5FF",
+      textSecondary: "#F1CCFF",
+      textMuted: "#B99BC8",
+      username: "#FFFB96",
+      button: "#6B2D8F",
+      buttonText: "#FFFFFF",
+      glow: "#01CDFE",
+      particle: "#FFFB96",
+    },
+    angle: 145,
+    mode: "motion",
+    stops: [
+      { color: "#14072A", position: 0 },
+      { color: "#752C8C", position: 52 },
+      { color: "#075985", position: 100 },
+    ],
+    card: { enabled: true, opacity: 70, blur: 14, shadow: "glow" },
+    buttons: { fill: "threeD", shape: "custom", radius: 12 },
+    typography: { headingFont: "Space Grotesk", headingEffect: "gradient" },
+    effects: { scanlines: true },
+  },
+  spotify: {
+    colors: {
+      primary: "#1DB954",
+      secondary: "#1ED760",
+      accent: "#1DB954",
+      background: "#090909",
+      backgroundSecondary: "#202020",
+      card: "#181818",
+      cardBorder: "#353535",
+      textPrimary: "#FFFFFF",
+      textSecondary: "#D7D7D7",
+      textMuted: "#A7A7A7",
+      username: "#FFFFFF",
+      button: "#1DB954",
+      buttonText: "#000000",
+      glow: "#1DB954",
+    },
+    angle: 155,
+    stops: [
+      { color: "#1E4930", position: 0 },
+      { color: "#090909", position: 68 },
+      { color: "#000000", position: 100 },
+    ],
+    card: { enabled: true, opacity: 82, blur: 12, radius: 24 },
+    buttons: { fill: "solid", shape: "pill", hover: "grow" },
+    typography: { headingFont: "Manrope", bodyFont: "Inter" },
+  },
+  discord: {
+    colors: {
+      primary: "#5865F2",
+      secondary: "#23A55A",
+      accent: "#5865F2",
+      background: "#1E1F22",
+      backgroundSecondary: "#2B2D31",
+      card: "#2B2D31",
+      cardBorder: "#3F4147",
+      textPrimary: "#F2F3F5",
+      textSecondary: "#DBDEE1",
+      textMuted: "#949BA4",
+      username: "#FFFFFF",
+      button: "#5865F2",
+      buttonText: "#FFFFFF",
+      glow: "#5865F2",
+    },
+    angle: 145,
+    stops: [
+      { color: "#313338", position: 0 },
+      { color: "#1E1F22", position: 100 },
+    ],
+    card: { enabled: true, opacity: 96, blur: 0, radius: 12 },
+    buttons: { fill: "solid", shape: "rounded", radius: 8 },
+    avatar: { shape: "circle", shadow: "soft" },
+    typography: { headingFont: "Inter", bodyFont: "Inter" },
+  },
+  y2k: {
+    colors: {
+      primary: "#C8FF00",
+      secondary: "#FF4FD8",
+      accent: "#67E8F9",
+      background: "#E7E5FF",
+      backgroundSecondary: "#B4A7FF",
+      card: "#F7F6FF",
+      cardBorder: "#2D1E4F",
+      textPrimary: "#20143D",
+      textSecondary: "#4C3675",
+      textMuted: "#745F93",
+      username: "#6C22E8",
+      button: "#C8FF00",
+      buttonText: "#20143D",
+      glow: "#FF4FD8",
+    },
+    angle: 130,
+    stops: [
+      { color: "#E7E5FF", position: 0 },
+      { color: "#FFB8EC", position: 50 },
+      { color: "#A5F3FC", position: 100 },
+    ],
+    card: { enabled: true, opacity: 78, blur: 18, shadow: "hard" },
+    buttons: { fill: "threeD", shape: "pill", hover: "tilt" },
+    avatar: { shape: "squircle", hover: "tilt" },
+    typography: { headingFont: "Space Grotesk", headingEffect: "gradient" },
+  },
+  brutal: {
+    colors: {
+      primary: "#FF5C35",
+      secondary: "#FFE600",
+      accent: "#2B59FF",
+      background: "#FFF3CA",
+      backgroundSecondary: "#FFE600",
+      card: "#FFFFFF",
+      cardBorder: "#111111",
+      textPrimary: "#111111",
+      textSecondary: "#222222",
+      textMuted: "#555555",
+      username: "#111111",
+      button: "#FF5C35",
+      buttonText: "#111111",
+      shadow: "#111111",
+    },
+    angle: 135,
+    stops: [
+      { color: "#FFF3CA", position: 0 },
+      { color: "#FFE600", position: 100 },
+    ],
+    card: { enabled: true, opacity: 100, blur: 0, radius: 4, borderWidth: 3, shadow: "hard" },
+    buttons: { fill: "threeD", shape: "square", hover: "lift" },
+    avatar: { shape: "square", shadow: "hard" },
+    typography: { headingFont: "Space Grotesk", bodyFont: "Manrope" },
+  },
+  ocean: {
+    colors: {
+      primary: "#22D3EE",
+      secondary: "#38BDF8",
+      accent: "#2DD4BF",
+      background: "#031525",
+      backgroundSecondary: "#063B5C",
+      card: "#092D42",
+      cardBorder: "#22D3EE",
+      textPrimary: "#ECFEFF",
+      textSecondary: "#BAE6FD",
+      textMuted: "#7DD3FC",
+      username: "#67E8F9",
+      button: "#0E7490",
+      buttonText: "#ECFEFF",
+      glow: "#22D3EE",
+    },
+    angle: 165,
+    stops: [
+      { color: "#0E7490", position: 0 },
+      { color: "#063B5C", position: 48 },
+      { color: "#031525", position: 100 },
+    ],
+    card: { enabled: true, opacity: 66, blur: 18 },
+    buttons: { fill: "glass", shape: "rounded" },
+    typography: { headingEffect: "gradient" },
+  },
+  sakura: {
+    colors: {
+      primary: "#E85D8E",
+      secondary: "#F5A9C7",
+      accent: "#8C5A7C",
+      background: "#FFF0F5",
+      backgroundSecondary: "#FFD6E5",
+      card: "#FFF9FB",
+      cardBorder: "#F5A9C7",
+      textPrimary: "#4E293A",
+      textSecondary: "#714357",
+      textMuted: "#9E7185",
+      username: "#B73E6D",
+      button: "#E85D8E",
+      buttonText: "#FFFFFF",
+      glow: "#F5A9C7",
+    },
+    angle: 145,
+    stops: [
+      { color: "#FFF0F5", position: 0 },
+      { color: "#FFD6E5", position: 58 },
+      { color: "#E9D5FF", position: 100 },
+    ],
+    card: { enabled: true, opacity: 76, blur: 14, radius: 36 },
+    buttons: { fill: "glass", shape: "pill" },
+    avatar: { shape: "circle", shadow: "soft" },
+    typography: { headingFont: "Fraunces" },
+  },
+  sunset: {
+    colors: {
+      primary: "#FF6B35",
+      secondary: "#FFB703",
+      accent: "#8338EC",
+      background: "#2B123C",
+      backgroundSecondary: "#7A2E4D",
+      card: "#3A1748",
+      cardBorder: "#FF8C69",
+      textPrimary: "#FFF7ED",
+      textSecondary: "#FED7AA",
+      textMuted: "#E2A88B",
+      username: "#FFB703",
+      button: "#FF6B35",
+      buttonText: "#FFFFFF",
+      glow: "#FFB703",
+    },
+    angle: 145,
+    stops: [
+      { color: "#FF6B35", position: 0 },
+      { color: "#9D174D", position: 48 },
+      { color: "#2B123C", position: 100 },
+    ],
+    card: { enabled: true, opacity: 64, blur: 18 },
+    buttons: { fill: "solid", shape: "pill", hover: "lift" },
+    typography: { headingEffect: "gradient" },
+  },
+  developer: {
+    colors: {
+      primary: "#58A6FF",
+      secondary: "#3FB950",
+      accent: "#D2A8FF",
+      background: "#0D1117",
+      backgroundSecondary: "#161B22",
+      card: "#161B22",
+      cardBorder: "#30363D",
+      textPrimary: "#F0F6FC",
+      textSecondary: "#C9D1D9",
+      textMuted: "#8B949E",
+      username: "#58A6FF",
+      button: "#21262D",
+      buttonText: "#F0F6FC",
+      glow: "#58A6FF",
+    },
+    angle: 150,
+    stops: [
+      { color: "#161B22", position: 0 },
+      { color: "#0D1117", position: 100 },
+    ],
+    card: { enabled: true, opacity: 98, blur: 0, radius: 10 },
+    buttons: { fill: "outline", shape: "rounded", radius: 8 },
+    avatar: { shape: "rounded", shadow: "none" },
+    typography: { headingFont: "Space Grotesk", bodyFont: "Roboto Mono" },
+    layout: { alignment: "left", mobileAlignment: "left" },
+  },
+} as const satisfies Record<
+  Exclude<
+    ProfilePresetId,
+    "frost" | "midnight" | "cyber" | "terminal" | "minimal"
+  >,
+  ColorThemePreset
+>;
 
 export function applyAppearancePreset(
   current: AppearanceSettings,
@@ -708,6 +1146,28 @@ export function applyAppearancePreset(
   next.typography = structuredClone(DEFAULT_APPEARANCE.typography);
   next.layout = structuredClone(DEFAULT_APPEARANCE.layout);
   next.effects = structuredClone(DEFAULT_APPEARANCE.effects);
+  if (preset in COLOR_THEME_PRESETS) {
+    const definition =
+      COLOR_THEME_PRESETS[preset as keyof typeof COLOR_THEME_PRESETS];
+    next.colors = { ...next.colors, ...definition.colors };
+    next.background = {
+      ...next.background,
+      mode: definition.mode ?? "gradient",
+      preset: "custom",
+      gradient: {
+        type: "linear",
+        angle: definition.angle,
+        stops: structuredClone(definition.stops),
+      },
+    };
+    next.card = { ...next.card, ...definition.card };
+    next.buttons = { ...next.buttons, ...definition.buttons };
+    next.avatar = { ...next.avatar, ...definition.avatar };
+    next.typography = { ...next.typography, ...definition.typography };
+    next.layout = { ...next.layout, ...definition.layout };
+    next.effects = { ...next.effects, ...definition.effects };
+    return next;
+  }
   if (preset === "frost") {
     next.colors = {
       ...DEFAULT_APPEARANCE.colors,

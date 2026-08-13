@@ -13,6 +13,7 @@ import { ProfileBackground } from "~/components/profile/profile-background";
 import { ProfileAudioPlayer } from "~/components/profile/profile-audio-player";
 import { ProfileGate } from "~/components/profile/profile-gate";
 import { ProfileIdentity } from "~/components/profile/profile-identity";
+import { ProfileSocials } from "~/components/profile/profile-socials";
 import { ShareButton } from "~/components/profile/share-button";
 import { VisitorCounter } from "~/components/profile/visitor-counter";
 import {
@@ -20,7 +21,12 @@ import {
   appearanceCssVariables,
   appearanceLayoutVariables,
 } from "~/lib/appearance";
-import { linkCustomizationSchema } from "~/lib/schemas";
+import {
+  linkCustomizationSchema,
+  socialAccountSettingsSchema,
+  socialPlatformSchema,
+  type WorkspaceSocialInput,
+} from "~/lib/schemas";
 import { getAppOrigin, isCustomProfileHost } from "~/lib/app-url";
 import { normalizeUsername } from "~/lib/username";
 import {
@@ -36,6 +42,7 @@ import { recordProfileView } from "~/server/analytics/ingest";
 import { getPublicVisitCount } from "~/server/analytics/public-count";
 import { canPublishAccount } from "~/server/auth/account-access";
 import { hasProAccess, resolveAppearanceForPlan } from "~/server/entitlements";
+import { getDiscordPresence } from "~/server/integrations/discord-presence";
 import {
   profileAccessCookieName,
   verifyProfileAccessToken,
@@ -50,6 +57,10 @@ const getProfile = cache((username: string) =>
       manualEntitlement: true,
       links: {
         where: { enabled: true, deletedAt: null, url: { not: "" } },
+        orderBy: { position: "asc" },
+      },
+      socialAccounts: {
+        where: { enabled: true, deletedAt: null },
         orderBy: { position: "asc" },
       },
     },
@@ -175,12 +186,44 @@ export default async function PublicProfilePage({
       ? "compact"
       : appearance.layout.density,
   );
-  const visitorCount = appearance.socialProof.enabled
-    ? await getPublicVisitCount(
-        profile.id,
-        appearance.socialProof.metric,
-      ).catch(() => null)
-    : null;
+  const socialAccounts = profile.socialAccounts.flatMap((account) => {
+    const platform = socialPlatformSchema.safeParse(account.platform);
+    const settings = socialAccountSettingsSchema.safeParse(account.settings);
+    if (!platform.success || !settings.success) return [];
+    return [
+      {
+        id: account.id,
+        platform: platform.data,
+        label: account.label,
+        username: account.username ?? "",
+        url: account.url,
+        enabled: account.enabled,
+        iconOnly: account.iconOnly,
+        usePlatformColor: account.usePlatformColor,
+        customColor: account.customColor,
+        tooltip: account.tooltip ?? "",
+        settings: settings.data,
+      } satisfies WorkspaceSocialInput,
+    ];
+  });
+  const discordAccount = socialAccounts.find((account) => {
+    if (account.platform !== "DISCORD") return false;
+    const discord = account.settings.discord;
+    return Boolean(
+      discord.userId &&
+        (discord.showPresence || discord.showActivity || discord.showSpotify),
+    );
+  });
+  const [visitorCount, discordPresence] = await Promise.all([
+    appearance.socialProof.enabled
+      ? getPublicVisitCount(profile.id, appearance.socialProof.metric).catch(
+          () => null,
+        )
+      : null,
+    discordAccount
+      ? getDiscordPresence(discordAccount.settings.discord.userId)
+      : null,
+  ]);
 
   return (
     <main
@@ -286,6 +329,11 @@ export default async function PublicProfilePage({
               />
             ) : null
           }
+        />
+        <ProfileSocials
+          accounts={socialAccounts}
+          appearance={appearance}
+          discordPresence={discordPresence}
         />
         <nav
           className={`grid ${appearance.layout.template === "bento" ? "grid-cols-2" : "grid-cols-1"}`}

@@ -14,6 +14,7 @@ import {
 
 import { ProfileBackground } from "~/components/profile/profile-background";
 import { ProfileIdentity } from "~/components/profile/profile-identity";
+import { ProfileSocials } from "~/components/profile/profile-socials";
 import { appearanceCardStyle, appearanceCssVariables } from "~/lib/appearance";
 import {
   profileButtonStyle,
@@ -194,6 +195,11 @@ export function ProfilePreview({
               </p>
             ) : null
           }
+        />
+        <ProfileSocials
+          accounts={draft.socials}
+          appearance={appearance}
+          preview
         />
         <div
           className={`relative w-full ${appearance.layout.template === "bento" ? "grid-cols-2" : "grid-cols-1"}`}

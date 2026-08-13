@@ -19,6 +19,7 @@ import {
 import { BODY_FONT_IDS, HEADING_FONT_IDS } from "~/config/font-registry";
 import {
   applyAppearancePreset,
+  appearanceBackground,
   BACKGROUND_PRESETS,
   PROFILE_PRESETS,
   type AppearanceSettings,
@@ -126,6 +127,8 @@ export function AppearanceEditor({
   onUpgrade,
   profilePasswordProtected,
   onProfilePasswordChange,
+  focusedCategory,
+  heading = "Görünüm stüdyosu",
 }: {
   appearance: AppearanceSettings;
   customCss: string;
@@ -136,8 +139,11 @@ export function AppearanceEditor({
   onUpgrade: () => void;
   profilePasswordProtected: boolean;
   onProfilePasswordChange: (protectedProfile: boolean) => void;
+  focusedCategory?: Category;
+  heading?: string;
 }) {
   const [category, setCategory] = useState<Category>("presets");
+  const activeCategory = focusedCategory ?? category;
   const [profilePassword, setProfilePassword] = useState("");
   const [profilePasswordError, setProfilePasswordError] = useState<
     string | null
@@ -218,7 +224,7 @@ export function AppearanceEditor({
     <section className="border-ink/10 rounded-3xl border bg-[#F8F7F1] p-4 sm:p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-lg font-black">Görünüm stüdyosu</h2>
+          <h2 className="text-lg font-black">{heading}</h2>
           <p className="text-ink/50 mt-1 text-xs">
             Her ayrıntı aynı yapılandırılmış tema belgesinde saklanır.
           </p>
@@ -229,25 +235,31 @@ export function AppearanceEditor({
           {hasPro ? "PRO AÇIK" : "FREE"}
         </span>
       </div>
-      <div className="dashboard-scrollbar mt-5 flex gap-2 overflow-x-auto pb-2">
-        {categories.map((item) => (
-          <button
-            type="button"
-            key={item.id}
-            onClick={() => setCategory(item.id)}
-            aria-pressed={category === item.id}
-            className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-black ${category === item.id ? "bg-ink text-paper" : "border-ink/10 border bg-white"}`}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+      {!focusedCategory && (
+        <div className="dashboard-scrollbar mt-5 flex gap-2 overflow-x-auto pb-2">
+          {categories.map((item) => (
+            <button
+              type="button"
+              key={item.id}
+              onClick={() => setCategory(item.id)}
+              aria-pressed={category === item.id}
+              className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-black ${category === item.id ? "bg-ink text-paper" : "border-ink/10 border bg-white"}`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="mt-5 space-y-5">
-        {category === "presets" && (
+        {activeCategory === "presets" && (
           <div className="grid gap-3 sm:grid-cols-2">
             {Object.entries(PROFILE_PRESETS).map(([id, preset]) => {
               const locked = preset.tier === "pro" && !hasPro;
               const active = appearance.preset === id;
+              const preview = applyAppearancePreset(
+                appearance,
+                id as ProfilePresetId,
+              );
               return (
                 <button
                   type="button"
@@ -263,12 +275,17 @@ export function AppearanceEditor({
                           ),
                         )
                   }
-                  className={`relative min-h-28 overflow-hidden rounded-2xl border p-4 text-left transition ${
+                  className={`relative min-h-36 overflow-hidden rounded-2xl border p-4 pt-16 text-left transition ${
                     active
                       ? "border-ink bg-ink text-paper shadow-[4px_4px_0_#F06432]"
                       : "border-ink/10 bg-white hover:-translate-y-0.5"
                   }`}
                 >
+                  <span
+                    className="absolute inset-x-0 top-0 h-12 border-b border-black/10"
+                    style={appearanceBackground(preview)}
+                    aria-hidden
+                  />
                   <span className="text-sm font-black">{preset.label}</span>
                   <span
                     className={`mt-2 block text-xs leading-5 ${active ? "text-paper/65" : "text-ink/50"}`}
@@ -285,7 +302,7 @@ export function AppearanceEditor({
             })}
           </div>
         )}
-        {category === "colors" && (
+        {activeCategory === "colors" && (
           <>
             <div className="border-mint bg-mint/20 rounded-2xl border p-4 text-xs leading-5">
               Renkler tek bir semantik token sisteminden üretilir. Tema, kart,
@@ -305,7 +322,7 @@ export function AppearanceEditor({
             </div>
           </>
         )}
-        {category === "background" && (
+        {activeCategory === "background" && (
           <>
             <Choice
               label="Tür"
@@ -502,7 +519,7 @@ export function AppearanceEditor({
             />
           </>
         )}
-        {category === "card" && (
+        {activeCategory === "card" && (
           <>
             <Toggle
               label="Profil kartını göster"
@@ -617,7 +634,7 @@ export function AppearanceEditor({
             />
           </>
         )}
-        {category === "avatar" && (
+        {activeCategory === "avatar" && (
           <>
             <Choice
               label="Avatar şekli"
@@ -722,7 +739,7 @@ export function AppearanceEditor({
             />
           </>
         )}
-        {category === "buttons" && (
+        {activeCategory === "buttons" && (
           <>
             <Choice
               label="Şekil"
@@ -829,7 +846,7 @@ export function AppearanceEditor({
             />
           </>
         )}
-        {category === "typography" && (
+        {activeCategory === "typography" && (
           <>
             <SelectField
               label="Başlık yazı tipi"
@@ -916,7 +933,7 @@ export function AppearanceEditor({
             />
           </>
         )}
-        {category === "layout" && (
+        {activeCategory === "layout" && (
           <>
             <Choice
               label="Profil düzeni"
@@ -1023,7 +1040,7 @@ export function AppearanceEditor({
             />
           </>
         )}
-        {category === "effects" && (
+        {activeCategory === "effects" && (
           <>
             <Choice
               label="İmleç"
@@ -1138,7 +1155,7 @@ export function AppearanceEditor({
             />
           </>
         )}
-        {category === "audio" && (
+        {activeCategory === "audio" && (
           <>
             <div className="border-mint bg-mint/20 rounded-2xl border p-4 text-xs leading-5">
               Ses, ziyaretçi oynat düğmesine dokunana kadar başlamaz. Oynatıcıda
@@ -1277,7 +1294,7 @@ export function AppearanceEditor({
             </div>
           </>
         )}
-        {category === "socialProof" && (
+        {activeCategory === "socialProof" && (
           <>
             <div className="border-mint bg-mint/20 rounded-2xl border p-4 text-xs leading-5">
               Sayaç yalnızca botlardan arındırılmış, 30 dakikalık tekrarları
@@ -1324,7 +1341,7 @@ export function AppearanceEditor({
             />
           </>
         )}
-        {category === "publish" && (
+        {activeCategory === "publish" && (
           <>
             <div className="border-mint bg-mint/20 rounded-2xl border p-4 text-xs leading-5">
               Arama görünümü ve ziyaretçi gizliliği profil ayar belgesinde ayrı
@@ -1378,7 +1395,7 @@ export function AppearanceEditor({
             />
           </>
         )}
-        {category === "advanced" && (
+        {activeCategory === "advanced" && (
           <>
             <ProNotice />
             <Toggle

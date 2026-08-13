@@ -38,6 +38,7 @@ function workspace(links: ReturnType<typeof link>[]) {
     appearance: DEFAULT_APPEARANCE,
     customCss: "",
     links,
+    socials: [],
   };
 }
 
@@ -57,6 +58,37 @@ describe("workspace payload validation", () => {
       workspaceInput.safeParse(workspace(links.slice(0, 50))).success,
     ).toBe(true);
     expect(workspaceInput.safeParse(workspace(links)).success).toBe(false);
+  });
+
+  it("requires a Discord identity when live data is enabled", () => {
+    const value = workspace([]);
+    expect(
+      workspaceInput.safeParse({
+        ...value,
+        socials: [
+          {
+            id: "f6695850-c634-441b-a7dd-3e2534f51ec0",
+            platform: "DISCORD",
+            label: "Discord",
+            username: "",
+            url: "",
+            enabled: true,
+            iconOnly: true,
+            usePlatformColor: true,
+            customColor: null,
+            tooltip: "",
+            settings: {
+              discord: {
+                userId: "",
+                showPresence: true,
+                showActivity: false,
+                showSpotify: false,
+              },
+            },
+          },
+        ],
+      }).success,
+    ).toBe(false);
   });
 });
 

@@ -6,6 +6,7 @@ import {
   appearanceBackgroundEffects,
   DEFAULT_APPEARANCE,
   parseAppearance,
+  PROFILE_PRESETS,
 } from "~/lib/appearance";
 
 describe("appearance schema evolution", () => {
@@ -174,5 +175,16 @@ describe("appearance schema evolution", () => {
     expect(themed.card.enabled).toBe(true);
     expect(themed.background.blur).toBe(0);
     expect(themed.avatar.animation).toBe("none");
+  });
+
+  it("keeps every catalog theme compatible with the authoritative schema", () => {
+    expect(Object.keys(PROFILE_PRESETS).length).toBeGreaterThanOrEqual(17);
+    for (const preset of Object.keys(PROFILE_PRESETS)) {
+      const themed = applyAppearancePreset(
+        DEFAULT_APPEARANCE,
+        preset as keyof typeof PROFILE_PRESETS,
+      );
+      expect(parseAppearance(themed).preset).toBe(preset);
+    }
   });
 });
