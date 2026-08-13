@@ -27,10 +27,13 @@ import {
   Link2,
   LoaderCircle,
   MonitorSmartphone,
+  Palette,
+  PanelsTopLeft,
   Plus,
   RotateCcw,
   Sparkles,
   Trash2,
+  UserRound,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -48,6 +51,33 @@ type Workspace = RouterOutputs["workspace"]["get"];
 type Draft = Omit<WorkspaceInput, "revision">;
 type DraftLink = Draft["links"][number];
 type SaveStatus = "saved" | "waiting" | "saving" | "error" | "conflict";
+type BuilderPanel = "profile" | "links" | "design";
+
+const builderPanels: Array<{
+  id: BuilderPanel;
+  label: string;
+  description: string;
+  icon: typeof UserRound;
+}> = [
+  {
+    id: "profile",
+    label: "Profil",
+    description: "Kimlik ve biyografi",
+    icon: UserRound,
+  },
+  {
+    id: "links",
+    label: "İçerik",
+    description: "Bağlantılar ve sıralama",
+    icon: Link2,
+  },
+  {
+    id: "design",
+    label: "Tasarım",
+    description: "Tema ve görünüm motoru",
+    icon: Palette,
+  },
+];
 
 const NEW_LINK: Omit<DraftLink, "id"> = {
   title: "Yeni bağlantı",
@@ -373,6 +403,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
     links: initial.links,
   });
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [builderPanel, setBuilderPanel] = useState<BuilderPanel>("profile");
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
   const [status, setStatus] = useState<SaveStatus>("saved");
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -505,6 +536,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
       return;
     }
     const id = crypto.randomUUID();
+    setBuilderPanel("links");
     setDraft((current) => ({
       ...current,
       links: [...current.links, { id, ...NEW_LINK }],
@@ -514,6 +546,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
   function focusLink(id: string | null) {
     if (id === "new") return addLink();
     setSelectedId(id);
+    setBuilderPanel(id ? "links" : "profile");
     if (id) {
       setMobileTab("edit");
       window.setTimeout(

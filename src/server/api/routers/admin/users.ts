@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 
 import { Prisma } from "../../../../../generated/prisma/client";
 import { USERNAME_UNAVAILABLE_MESSAGE } from "~/config/username-policy";
+import { APPEARANCE_SETTINGS_VERSION } from "~/lib/appearance";
 import {
   adminAccountStatusInput,
   adminDeleteUserInput,
@@ -464,11 +465,13 @@ export const adminUsersRouter = createTRPCRouter({
             userId: target.id,
             ...input.workspace.theme,
             settings: input.workspace.appearance,
+            settingsVersion: APPEARANCE_SETTINGS_VERSION,
             customCss,
           },
           update: {
             ...input.workspace.theme,
             settings: input.workspace.appearance,
+            settingsVersion: APPEARANCE_SETTINGS_VERSION,
             customCss,
           },
         });
