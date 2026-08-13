@@ -75,6 +75,7 @@
 | **Live checkout result overlay**                  | stabilisation | The `/dashboard/billing?checkout=…&intent=…` states already pass to `<BillingSettings/>`; refine the success / failure copy and link to the updated settings panel. |
 | **PayTR local-mode pricing display**              | stabilisation | `LOCAL_PRO_*_TRY` defaults to `12900` / `94900`; verify against the production PayTR dashboard before launch.                                                       |
 | **Mobile profile editor**                         | planning      | Editor is currently desktop-first; long-term goal is a feature-parity mobile experience.                                                                            |
+| **Mini-site builder foundation**                  | codex         | Evolve the versioned appearance document with layout templates, profile-card surfaces, semantic colour tokens, reusable presets, and a sectioned builder dashboard. |
 
 ---
 

@@ -14,16 +14,22 @@ import { ProfileAudioPlayer } from "~/components/profile/profile-audio-player";
 import { ProfileGate } from "~/components/profile/profile-gate";
 import { ShareButton } from "~/components/profile/share-button";
 import { VisitorCounter } from "~/components/profile/visitor-counter";
-import { appearanceBackground } from "~/lib/appearance";
+import {
+  appearanceBackground,
+  appearanceCardStyle,
+  appearanceCssVariables,
+} from "~/lib/appearance";
 import { linkCustomizationSchema } from "~/lib/schemas";
 import { getAppOrigin, isCustomProfileHost } from "~/lib/app-url";
 import { normalizeUsername } from "~/lib/username";
 import {
   profileAvatarRadius,
   profileButtonStyle,
+  profileCardMargin,
   profileDensity,
   profileEmbedUrl,
   profileFontFamily,
+  profileHeadingStyle,
 } from "~/lib/profile-rendering";
 import { db } from "~/server/db";
 import { recordProfileView } from "~/server/analytics/ingest";
@@ -66,8 +72,12 @@ export async function generateMetadata({
       description: "Bu olnk profili parola ile korunuyor.",
       robots: { index: false, follow: false },
     };
-  const title = profile.name ?? `@${profile.username}`;
-  const description = profile.bio || `${title} bağlantılarını olnk'te keşfet.`;
+  const appearance = resolveAppearanceForPlan(profile.theme?.settings, pro).effective;
+  const title = appearance.seo.title || profile.name || `@${profile.username}`;
+  const description =
+    appearance.seo.description ||
+    profile.bio ||
+    `${title} bağlantılarını olnk'te keşfet.`;
   return {
     title,
     description,
@@ -77,8 +87,12 @@ export async function generateMetadata({
       description,
       type: "profile",
       url: `/${profile.username}`,
+      ...(appearance.seo.imageUrl ? { images: [appearance.seo.imageUrl] } : {}),
     },
-    robots: { index: true, follow: true },
+    robots: {
+      index: appearance.privacy.allowIndexing,
+      follow: appearance.privacy.allowIndexing,
+    },
   };
 }
 
@@ -95,9 +109,6 @@ export default async function PublicProfilePage({
   if (!profile?.username || !canPublishAccount(profile)) notFound();
   const pro = hasProAccess(profile.subscription, profile.manualEntitlement);
   const requestHeaders = await headers();
-  after(() =>
-    recordProfileView(profile.id, requestHeaders).catch(() => undefined),
-  );
   if (pro && profile.profilePasswordHash) {
     const cookieStore = await cookies();
     const unlocked = verifyProfileAccessToken(
@@ -118,6 +129,10 @@ export default async function PublicProfilePage({
     profile.theme?.settings,
     pro,
   ).effective;
+  if (appearance.privacy.analyticsEnabled)
+    after(() =>
+      recordProfileView(profile.id, requestHeaders).catch(() => undefined),
+    );
   const now = new Date();
   const links = profile.links.filter(
     (link) =>
@@ -140,10 +155,18 @@ export default async function PublicProfilePage({
       url: profileUrl,
     },
   }).replace(/</g, "\\u003c");
-  const alignment =
+  const desktopAlignment =
     appearance.layout.alignment === "left"
+      ? "md:text-left md:items-start"
+      : appearance.layout.alignment === "right"
+        ? "md:text-right md:items-end"
+        : "md:text-center md:items-center";
+  const mobileAlignment =
+    appearance.layout.mobileAlignment === "left"
       ? "text-left items-start"
-      : "text-center items-center";
+      : appearance.layout.mobileAlignment === "right"
+        ? "text-right items-end"
+        : "text-center items-center";
   const background = appearanceBackground(appearance);
   const density = profileDensity(appearance.layout.density);
   const visitorCount = appearance.socialProof.enabled
@@ -160,8 +183,9 @@ export default async function PublicProfilePage({
         appearance.audio.enabled || appearance.audio.entryEnabled ? "pb-44" : ""
       }`}
       style={{
+        ...appearanceCssVariables(appearance),
         ...background,
-        color: appearance.typography.color,
+        color: appearance.colors.textPrimary,
         fontFamily: profileFontFamily(appearance.typography.bodyFont),
         fontSize: appearance.typography.bodySize,
         fontWeight: appearance.typography.weight,
@@ -184,16 +208,25 @@ export default async function PublicProfilePage({
       {appearance.background.mode === "motion" && (
         <div className="olnk-gradient-motion absolute inset-0" />
       )}
-      <ProfileEffects effects={appearance.effects} />
-      <ProfileAmbientEffects effects={appearance.effects} />
+      <ProfileEffects effects={appearance.effects} color={appearance.colors.accent} />
+      <ProfileAmbientEffects
+        effects={appearance.effects}
+        particleColor={appearance.colors.particle}
+      />
       {(appearance.audio.enabled || appearance.audio.entryEnabled) && (
         <ProfileAudioPlayer settings={appearance.audio} />
       )}
       <div
-        className="relative mx-auto flex min-h-[calc(100dvh-3.5rem)] w-full flex-col"
-        style={{ maxWidth: appearance.layout.contentWidth }}
+        className={`relative flex w-full flex-col ${appearance.card.enabled ? "" : "min-h-[calc(100dvh-3.5rem)]"}`}
+        data-olnk-template={appearance.layout.template}
+        style={{
+          maxWidth: appearance.layout.contentWidth,
+          ...profileCardMargin(appearance.layout.cardPosition),
+          ...appearanceCardStyle(appearance),
+        }}
       >
-        <div
+        {appearance.privacy.showShareActions && (
+          <div
           className="flex items-center justify-end gap-2"
           style={{
             order:
@@ -227,9 +260,10 @@ export default async function PublicProfilePage({
             </div>
           </details>
           <ShareButton title={profile.name ?? profile.username} />
-        </div>
+          </div>
+        )}
         <section
-          className={`mt-4 flex flex-col ${alignment}`}
+          className={`mt-4 flex flex-col ${mobileAlignment} ${desktopAlignment}`}
           data-olnk-tilt="profile"
           style={{ order: 2 }}
         >
@@ -239,7 +273,7 @@ export default async function PublicProfilePage({
               width: appearance.layout.avatarSize,
               height: appearance.layout.avatarSize,
               borderRadius: profileAvatarRadius(appearance.layout.avatarShape),
-              border: `${appearance.layout.avatarBorderWidth}px solid ${appearance.layout.avatarBorderColor}`,
+              border: `${appearance.layout.avatarBorderWidth}px solid ${appearance.colors.cardBorder}`,
               clipPath:
                 appearance.layout.avatarShape === "hexagon"
                   ? "polygon(25% 6.7%,75% 6.7%,100% 50%,75% 93.3%,25% 93.3%,0 50%)"
@@ -271,6 +305,7 @@ export default async function PublicProfilePage({
               fontFamily: profileFontFamily(appearance.typography.headingFont),
               fontSize: appearance.typography.headingSize,
               letterSpacing: appearance.typography.letterSpacing,
+              ...profileHeadingStyle(appearance),
             }}
           >
             {profile.name ?? `@${profile.username}`}
@@ -292,7 +327,7 @@ export default async function PublicProfilePage({
           )}
         </section>
         <nav
-          className="grid"
+          className={`grid ${appearance.layout.template === "bento" ? "grid-cols-2" : "grid-cols-1"}`}
           style={{
             gap: appearance.buttons.spacing,
             marginTop: density.linksTop,
@@ -318,7 +353,7 @@ export default async function PublicProfilePage({
             return (
               <div
                 key={link.id}
-                className="olnk-link"
+                className={`olnk-link ${appearance.layout.template === "bento" && index % 3 === 2 ? "col-span-2" : ""}`}
                 data-olnk-tilt="link"
                 data-hover={appearance.buttons.hover}
                 data-press={appearance.buttons.press}

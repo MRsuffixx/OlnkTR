@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
 import type { Prisma } from "../../../../generated/prisma/client";
+import { APPEARANCE_SETTINGS_VERSION } from "~/lib/appearance";
 import {
   linkCustomizationSchema,
   setLinkPasswordInput,
@@ -177,12 +178,14 @@ export const workspaceRouter = createTRPCRouter({
               ...input.theme,
               showBranding: pro ? input.theme.showBranding : true,
               settings: appearance,
+              settingsVersion: APPEARANCE_SETTINGS_VERSION,
               customCss,
             },
             update: {
               ...input.theme,
               showBranding: pro ? input.theme.showBranding : true,
               settings: appearance,
+              settingsVersion: APPEARANCE_SETTINGS_VERSION,
               customCss,
             },
           });

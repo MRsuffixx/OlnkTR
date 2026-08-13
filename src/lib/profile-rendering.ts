@@ -37,8 +37,8 @@ export function profileButtonStyle(
   custom: LinkCustomization,
 ): React.CSSProperties {
   const button = settings.buttons;
-  const color = custom.buttonColor ?? button.color;
-  const textColor = custom.textColor ?? button.textColor;
+  const color = custom.buttonColor ?? settings.colors.button;
+  const textColor = custom.textColor ?? settings.colors.buttonText;
   const borderRadius =
     button.shape === "pill"
       ? 999
@@ -63,7 +63,7 @@ export function profileButtonStyle(
       ...style,
       background: "transparent",
       color: textColor,
-      border: `2px solid ${button.borderColor}`,
+      border: `2px solid ${settings.colors.cardBorder}`,
     };
   if (button.fill === "glass")
     return {
@@ -73,13 +73,43 @@ export function profileButtonStyle(
       backdropFilter: "blur(14px)",
     };
   if (button.fill === "shadow")
-    return { ...style, boxShadow: `4px 5px 0 ${button.shadowColor}` };
+    return { ...style, boxShadow: `4px 5px 0 ${settings.colors.shadow}` };
   if (button.fill === "threeD")
     return {
       ...style,
-      boxShadow: `inset 0 -5px 0 rgba(0,0,0,.24), 0 6px 0 ${button.shadowColor}`,
+      boxShadow: `inset 0 -5px 0 rgba(0,0,0,.24), 0 6px 0 ${settings.colors.shadow}`,
     };
   return style;
+}
+
+export function profileCardMargin(
+  position: AppearanceSettings["layout"]["cardPosition"],
+) {
+  if (position === "left") return { marginRight: "auto" };
+  if (position === "right") return { marginLeft: "auto" };
+  return { marginInline: "auto" };
+}
+
+export function profileHeadingStyle(
+  settings: AppearanceSettings,
+): React.CSSProperties {
+  const effect = settings.typography.headingEffect;
+  const base: React.CSSProperties = { color: settings.colors.username };
+  if (effect === "gradient" || effect === "shimmer")
+    return {
+      ...base,
+      color: "transparent",
+      backgroundImage: `linear-gradient(110deg, ${settings.colors.primary}, ${settings.colors.secondary}, ${settings.colors.accent})`,
+      backgroundSize: effect === "shimmer" ? "220% 100%" : undefined,
+      backgroundClip: "text",
+      WebkitBackgroundClip: "text",
+    };
+  if (effect === "glow")
+    return {
+      ...base,
+      textShadow: `0 0 18px ${settings.colors.glow}`,
+    };
+  return base;
 }
 
 export function profileDensity(

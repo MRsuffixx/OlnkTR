@@ -25,8 +25,10 @@ class AmbientEffectBoundary extends Component<
 
 export function ProfileAmbientEffects({
   effects,
+  particleColor,
 }: {
   effects: AppearanceSettings["effects"];
+  particleColor: string;
 }) {
   const filtersEnabled =
     effects.cardTilt !== "off" ||
@@ -46,7 +48,7 @@ export function ProfileAmbientEffects({
         {effects.mouseParticles !== "off" && (
           <MouseParticles
             intensity={effects.mouseParticles}
-            color={effects.cursorColor}
+            color={particleColor}
           />
         )}
         {effects.matrixRain !== "off" && (

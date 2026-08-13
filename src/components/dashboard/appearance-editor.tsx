@@ -15,28 +15,67 @@ import {
   type AppearanceFeature,
   type AppearanceFeaturePath,
 } from "~/config/feature-catalog";
-import { BACKGROUND_PRESETS, type AppearanceSettings } from "~/lib/appearance";
+import {
+  applyAppearancePreset,
+  BACKGROUND_PRESETS,
+  PROFILE_PRESETS,
+  type AppearanceSettings,
+  type ProfilePresetId,
+} from "~/lib/appearance";
 import { api } from "~/trpc/react";
 
 type Category =
+  | "presets"
+  | "colors"
   | "background"
+  | "card"
   | "buttons"
   | "typography"
   | "layout"
   | "effects"
   | "audio"
   | "socialProof"
+  | "publish"
   | "advanced";
 const categories: Array<{ id: Category; label: string }> = [
+  { id: "presets", label: "Temalar" },
+  { id: "colors", label: "Renkler" },
   { id: "background", label: "Arka plan" },
+  { id: "card", label: "Profil kartı" },
   { id: "buttons", label: "Düğmeler" },
   { id: "typography", label: "Yazı" },
   { id: "layout", label: "Düzen" },
   { id: "effects", label: "Efektler" },
   { id: "audio", label: "Ses" },
   { id: "socialProof", label: "Sayaç" },
+  { id: "publish", label: "Yayın" },
   { id: "advanced", label: "Gelişmiş" },
 ];
+
+const colorFields = [
+  ["colors.primary", "Ana renk"],
+  ["colors.secondary", "İkincil renk"],
+  ["colors.accent", "Vurgu"],
+  ["colors.background", "Arka plan"],
+  ["colors.backgroundSecondary", "İkincil arka plan"],
+  ["colors.surface", "Yüzey"],
+  ["colors.surfaceHover", "Yüzey vurgusu"],
+  ["colors.card", "Kart"],
+  ["colors.cardBorder", "Kart kenarlığı"],
+  ["colors.textPrimary", "Ana metin"],
+  ["colors.textSecondary", "İkincil metin"],
+  ["colors.textMuted", "Soluk metin"],
+  ["colors.icon", "İkon"],
+  ["colors.link", "Bağlantı"],
+  ["colors.linkHover", "Bağlantı vurgusu"],
+  ["colors.glow", "Parlama"],
+  ["colors.shadow", "Gölge"],
+  ["colors.particle", "Parçacık"],
+  ["colors.username", "Kullanıcı adı"],
+  ["colors.badge", "Rozet"],
+  ["colors.button", "Düğme"],
+  ["colors.buttonText", "Düğme metni"],
+] as const satisfies ReadonlyArray<readonly [AppearanceFeaturePath, string]>;
 
 function read(settings: AppearanceSettings, path: AppearanceFeaturePath) {
   return path
@@ -94,7 +133,7 @@ export function AppearanceEditor({
   profilePasswordProtected: boolean;
   onProfilePasswordChange: (protectedProfile: boolean) => void;
 }) {
-  const [category, setCategory] = useState<Category>("background");
+  const [category, setCategory] = useState<Category>("presets");
   const [profilePassword, setProfilePassword] = useState("");
   const [profilePasswordError, setProfilePasswordError] = useState<
     string | null
@@ -112,18 +151,30 @@ export function AppearanceEditor({
         BACKGROUND_PRESETS[value as keyof typeof BACKGROUND_PRESETS];
       onChange({
         ...appearance,
+        preset: "custom",
+        colors:
+          preset.mode === "solid" && "color" in preset
+            ? { ...appearance.colors, background: preset.color ?? appearance.colors.background }
+            : appearance.colors,
         background: {
           ...appearance.background,
           mode: preset.mode,
           preset: value as keyof typeof BACKGROUND_PRESETS,
-          ...(preset.mode === "solid" && "color" in preset
-            ? { solidColor: preset.color }
+          ...(preset.stops
+            ? {
+                gradient: {
+                  type: preset.type ?? "linear",
+                  angle: preset.angle ?? 145,
+                  stops: preset.stops,
+                },
+              }
             : {}),
         },
       });
       return;
     }
     const next = write(appearance, path, value);
+    if (path !== "preset") next.preset = "custom";
     if (path.startsWith("background.gradient."))
       next.background.preset = "custom";
     onChange(next);
@@ -181,6 +232,63 @@ export function AppearanceEditor({
         ))}
       </div>
       <div className="mt-5 space-y-5">
+        {category === "presets" && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {Object.entries(PROFILE_PRESETS).map(([id, preset]) => {
+              const locked = preset.tier === "pro" && !hasPro;
+              const active = appearance.preset === id;
+              return (
+                <button
+                  type="button"
+                  key={id}
+                  aria-pressed={active}
+                  onClick={() =>
+                    locked
+                      ? onUpgrade()
+                      : onChange(
+                          applyAppearancePreset(appearance, id as ProfilePresetId),
+                        )
+                  }
+                  className={`relative min-h-28 overflow-hidden rounded-2xl border p-4 text-left transition ${
+                    active
+                      ? "border-ink bg-ink text-paper shadow-[4px_4px_0_#F06432]"
+                      : "border-ink/10 bg-white hover:-translate-y-0.5"
+                  }`}
+                >
+                  <span className="text-sm font-black">{preset.label}</span>
+                  <span className={`mt-2 block text-xs leading-5 ${active ? "text-paper/65" : "text-ink/50"}`}>
+                    {preset.description}
+                  </span>
+                  {preset.tier === "pro" && (
+                    <span className="bg-yellow text-ink absolute top-3 right-3 rounded-full px-2 py-1 text-[9px] font-black">
+                      PRO
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {category === "colors" && (
+          <>
+            <div className="border-mint bg-mint/20 rounded-2xl border p-4 text-xs leading-5">
+              Renkler tek bir semantik token sisteminden üretilir. Tema, kart, metin ve
+              düğmeler aynı değişkenleri kullanır.
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {colorFields.map(([path, label]) => (
+                <ColorField
+                  key={path}
+                  label={label}
+                  path={path}
+                  value={value(path)}
+                  hasPro={hasPro}
+                  onChange={update}
+                />
+              ))}
+            </div>
+          </>
+        )}
         {category === "background" && (
           <>
             <Choice
@@ -201,8 +309,8 @@ export function AppearanceEditor({
             {value("background.mode") === "solid" && (
               <ColorField
                 label="Arka plan rengi"
-                path="background.solidColor"
-                value={value("background.solidColor")}
+                path="colors.background"
+                value={value("colors.background")}
                 hasPro={hasPro}
                 onChange={update}
               />
@@ -218,6 +326,7 @@ export function AppearanceEditor({
                   options={[
                     ["linear", "Doğrusal"],
                     ["radial", "Dairesel"],
+                    ["conic", "Konik"],
                   ]}
                 />
                 <Range
@@ -300,6 +409,46 @@ export function AppearanceEditor({
             />
           </>
         )}
+        {category === "card" && (
+          <>
+            <Toggle
+              label="Profil kartını göster"
+              path="card.enabled"
+              checked={value("card.enabled")}
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <ColorField
+                label="Kart rengi"
+                path="colors.card"
+                value={value("colors.card")}
+                hasPro={hasPro}
+                onChange={update}
+              />
+              <ColorField
+                label="Kenar rengi"
+                path="colors.cardBorder"
+                value={value("colors.cardBorder")}
+                hasPro={hasPro}
+                onChange={update}
+              />
+            </div>
+            <Range label="Opaklık" path="card.opacity" value={value("card.opacity")} min={0} max={100} suffix="%" hasPro={hasPro} onChange={update} />
+            <Range label="Arka plan bulanıklığı" path="card.blur" value={value("card.blur")} min={0} max={40} suffix="px" hasPro={hasPro} onChange={update} />
+            <Range label="Köşe yarıçapı" path="card.radius" value={value("card.radius")} min={0} max={48} suffix="px" hasPro={hasPro} onChange={update} />
+            <Range label="Kenar kalınlığı" path="card.borderWidth" value={value("card.borderWidth")} min={0} max={6} suffix="px" hasPro={hasPro} onChange={update} />
+            <Range label="İç boşluk" path="card.padding" value={value("card.padding")} min={16} max={64} suffix="px" hasPro={hasPro} onChange={update} />
+            <Choice
+              label="Gölge"
+              path="card.shadow"
+              current={value("card.shadow")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[["none", "Yok"], ["soft", "Yumuşak"], ["hard", "Keskin"], ["glow", "Parlama"]]}
+            />
+          </>
+        )}
         {category === "buttons" && (
           <>
             <Choice
@@ -344,29 +493,29 @@ export function AppearanceEditor({
             <div className="grid grid-cols-2 gap-3">
               <ColorField
                 label="Düğme"
-                path="buttons.color"
-                value={value("buttons.color")}
+                path="colors.button"
+                value={value("colors.button")}
                 hasPro={hasPro}
                 onChange={update}
               />
               <ColorField
                 label="Metin"
-                path="buttons.textColor"
-                value={value("buttons.textColor")}
+                path="colors.buttonText"
+                value={value("colors.buttonText")}
                 hasPro={hasPro}
                 onChange={update}
               />
               <ColorField
                 label="Kenarlık"
-                path="buttons.borderColor"
-                value={value("buttons.borderColor")}
+                path="colors.cardBorder"
+                value={value("colors.cardBorder")}
                 hasPro={hasPro}
                 onChange={update}
               />
               <ColorField
                 label="Gölge"
-                path="buttons.shadowColor"
-                value={value("buttons.shadowColor")}
+                path="colors.shadow"
+                value={value("colors.shadow")}
                 hasPro={hasPro}
                 onChange={update}
               />
@@ -488,15 +637,53 @@ export function AppearanceEditor({
             />
             <ColorField
               label="Profil metni"
-              path="typography.color"
-              value={value("typography.color")}
+              path="colors.textPrimary"
+              value={value("colors.textPrimary")}
               hasPro={hasPro}
               onChange={update}
+            />
+            <Choice
+              label="Başlık efekti"
+              path="typography.headingEffect"
+              current={value("typography.headingEffect")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["none", "Yok"],
+                ["gradient", "Gradient"],
+                ["glow", "Parlama"],
+                ["shimmer", "Işıltı"],
+              ]}
             />
           </>
         )}
         {category === "layout" && (
           <>
+            <Choice
+              label="Profil düzeni"
+              path="layout.template"
+              current={value("layout.template")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["stack", "Akış"],
+                ["compact", "Kompakt"],
+                ["bento", "Bento"],
+                ["terminal", "Terminal"],
+              ]}
+            />
+            <Choice
+              label="Kart konumu"
+              path="layout.cardPosition"
+              current={value("layout.cardPosition")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["left", "Sol"],
+                ["center", "Orta"],
+                ["right", "Sağ"],
+              ]}
+            />
             <Choice
               label="Avatar şekli"
               path="layout.avatarShape"
@@ -533,8 +720,8 @@ export function AppearanceEditor({
             />
             <ColorField
               label="Avatar kenarlık rengi"
-              path="layout.avatarBorderColor"
-              value={value("layout.avatarBorderColor")}
+              path="colors.cardBorder"
+              value={value("colors.cardBorder")}
               hasPro={hasPro}
               onChange={update}
             />
@@ -547,6 +734,19 @@ export function AppearanceEditor({
               options={[
                 ["left", "Sol"],
                 ["center", "Orta"],
+                ["right", "Sağ"],
+              ]}
+            />
+            <Choice
+              label="Mobil hizalama"
+              path="layout.mobileAlignment"
+              current={value("layout.mobileAlignment")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["left", "Sol"],
+                ["center", "Orta"],
+                ["right", "Sağ"],
               ]}
             />
             <Choice
@@ -591,8 +791,8 @@ export function AppearanceEditor({
             />
             <ColorField
               label="İmleç rengi"
-              path="effects.cursorColor"
-              value={value("effects.cursorColor")}
+              path="colors.accent"
+              value={value("colors.accent")}
               hasPro={hasPro}
               onChange={update}
             />
@@ -869,6 +1069,59 @@ export function AppearanceEditor({
               path="socialProof.label"
               value={value("socialProof.label")}
               placeholder="toplam ziyaret"
+              hasPro={hasPro}
+              onChange={update}
+            />
+          </>
+        )}
+        {category === "publish" && (
+          <>
+            <div className="border-mint bg-mint/20 rounded-2xl border p-4 text-xs leading-5">
+              Arama görünümü ve ziyaretçi gizliliği profil ayar belgesinde ayrı
+              alanlarda tutulur. Profil parolası ise sunucuda korunmaya devam eder.
+            </div>
+            <TextField
+              label="Arama başlığı"
+              path="seo.title"
+              value={value("seo.title")}
+              placeholder="Boşsa görünen ad kullanılır"
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <TextField
+              label="Arama açıklaması"
+              path="seo.description"
+              value={value("seo.description")}
+              placeholder="Boşsa biyografi kullanılır"
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <TextField
+              label="Paylaşım görseli adresi"
+              path="seo.imageUrl"
+              value={value("seo.imageUrl")}
+              placeholder="https://"
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Toggle
+              label="Arama motorlarında göster"
+              path="privacy.allowIndexing"
+              checked={value("privacy.allowIndexing")}
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Toggle
+              label="Ziyaret analitiğini kaydet"
+              path="privacy.analyticsEnabled"
+              checked={value("privacy.analyticsEnabled")}
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Toggle
+              label="QR ve paylaşım araçlarını göster"
+              path="privacy.showShareActions"
+              checked={value("privacy.showShareActions")}
               hasPro={hasPro}
               onChange={update}
             />

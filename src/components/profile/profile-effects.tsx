@@ -12,8 +12,10 @@ function restartAnimation(element: HTMLElement) {
 
 export function ProfileEffects({
   effects,
+  color,
 }: {
   effects: AppearanceSettings["effects"];
+  color: string;
 }) {
   const cursor = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -31,7 +33,7 @@ export function ProfileEffects({
         : Array.from({ length: 16 }, () => {
             const particle = document.createElement("span");
             particle.className = `olnk-cursor-trail olnk-cursor-trail--${effects.trail}`;
-            particle.style.background = effects.cursorColor;
+            particle.style.background = color;
             particle.style.opacity = "0";
             document.body.append(particle);
             return particle;
@@ -40,7 +42,7 @@ export function ProfileEffects({
       ? Array.from({ length: 4 }, () => {
           const ripple = document.createElement("span");
           ripple.className = "olnk-click-ripple";
-          ripple.style.borderColor = effects.cursorColor;
+          ripple.style.borderColor = color;
           ripple.style.opacity = "0";
           document.body.append(ripple);
           return ripple;
@@ -78,17 +80,16 @@ export function ProfileEffects({
       window.removeEventListener("click", click);
       [...trail, ...ripples].forEach((element) => element.remove());
     };
-  }, [effects.clickRipple, effects.cursor, effects.cursorColor, effects.trail]);
+  }, [color, effects.clickRipple, effects.cursor, effects.trail]);
   if (effects.cursor === "default") return null;
   return (
     <div
       ref={cursor}
       className={`olnk-custom-cursor olnk-custom-cursor--${effects.cursor}`}
       style={{
-        color: effects.cursorColor,
-        borderColor: effects.cursorColor,
-        backgroundColor:
-          effects.cursor === "dot" ? effects.cursorColor : undefined,
+        color,
+        borderColor: color,
+        backgroundColor: effects.cursor === "dot" ? color : undefined,
       }}
       aria-hidden
     />

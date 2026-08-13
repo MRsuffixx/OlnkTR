@@ -12,7 +12,11 @@ import {
   Share2,
 } from "lucide-react";
 
-import { appearanceBackground } from "~/lib/appearance";
+import {
+  appearanceBackground,
+  appearanceCardStyle,
+  appearanceCssVariables,
+} from "~/lib/appearance";
 import { ProfileBackgroundVideo } from "~/components/profile/profile-background-video";
 import {
   profileAvatarRadius,
@@ -20,6 +24,7 @@ import {
   profileDensity,
   profileEmbedUrl,
   profileFontFamily,
+  profileHeadingStyle,
 } from "~/lib/profile-rendering";
 import type { WorkspaceInput } from "~/lib/schemas";
 
@@ -49,16 +54,19 @@ export function ProfilePreview({
       (!link.scheduledEnd || new Date(link.scheduledEnd) > now),
   );
   const align =
-    appearance.layout.alignment === "left"
+    appearance.layout.mobileAlignment === "left"
       ? "text-left items-start"
-      : "text-center items-center";
+      : appearance.layout.mobileAlignment === "right"
+        ? "text-right items-end"
+        : "text-center items-center";
   return (
     <div
       data-olnk-profile
-      className={`relative flex min-h-full flex-col overflow-hidden px-5 py-10 ${align}`}
+      className="relative flex min-h-full flex-col overflow-hidden px-5 py-10"
       style={{
+        ...appearanceCssVariables(appearance),
         ...appearanceBackground(appearance),
-        color: appearance.typography.color,
+        color: appearance.colors.textPrimary,
         fontFamily: profileFontFamily(appearance.typography.bodyFont),
         fontSize: appearance.typography.bodySize,
         fontWeight: appearance.typography.weight,
@@ -113,6 +121,11 @@ export function ProfilePreview({
       )}
       <div className="bg-ink absolute top-3 left-1/2 h-5 w-24 -translate-x-1/2 rounded-full" />
       <div
+        className={`relative flex w-full flex-1 flex-col ${align}`}
+        data-olnk-template={appearance.layout.template}
+        style={{ ...appearanceCardStyle(appearance) }}
+      >
+      {appearance.privacy.showShareActions && <div
         className="relative flex w-full justify-end gap-2"
         style={{
           order:
@@ -132,7 +145,7 @@ export function ProfilePreview({
             <Icon className="size-3.5" />
           </span>
         ))}
-      </div>
+      </div>}
       <button
         type="button"
         onClick={(event) => {
@@ -144,7 +157,7 @@ export function ProfilePreview({
           width: appearance.layout.avatarSize,
           height: appearance.layout.avatarSize,
           borderRadius: profileAvatarRadius(appearance.layout.avatarShape),
-          border: `${appearance.layout.avatarBorderWidth}px solid ${appearance.layout.avatarBorderColor}`,
+          border: `${appearance.layout.avatarBorderWidth}px solid ${appearance.colors.cardBorder}`,
           clipPath:
             appearance.layout.avatarShape === "hexagon"
               ? "polygon(25% 6.7%,75% 6.7%,100% 50%,75% 93.3%,25% 93.3%,0 50%)"
@@ -174,6 +187,7 @@ export function ProfilePreview({
           fontFamily: profileFontFamily(appearance.typography.headingFont),
           fontSize: appearance.typography.headingSize,
           letterSpacing: appearance.typography.letterSpacing,
+          ...profileHeadingStyle(appearance),
           order: 2,
         }}
       >
@@ -208,7 +222,7 @@ export function ProfilePreview({
         </p>
       )}
       <div
-        className="relative w-full"
+        className={`relative w-full ${appearance.layout.template === "bento" ? "grid-cols-2" : "grid-cols-1"}`}
         style={{
           display: "grid",
           gap: appearance.buttons.spacing,
@@ -234,7 +248,14 @@ export function ProfilePreview({
               ? profileEmbedUrl(link.embedType, link.url)
               : null;
           return (
-            <div key={link.id}>
+            <div
+              key={link.id}
+              className={
+                appearance.layout.template === "bento" && index % 3 === 2
+                  ? "col-span-2"
+                  : ""
+              }
+            >
               {embed && (
                 <iframe
                   src={embed}
@@ -290,6 +311,7 @@ export function ProfilePreview({
           olnk.tr/{username}
         </div>
       )}
+      </div>
       {(appearance.audio.enabled || appearance.audio.entryEnabled) && (
         <div className="absolute right-3 bottom-3 left-3 z-30 flex items-center gap-2 rounded-xl border border-black/10 bg-white/90 p-2 text-left shadow-xl backdrop-blur">
           <span

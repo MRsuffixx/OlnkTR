@@ -8,16 +8,87 @@ export type AppearanceFeature = {
 };
 
 export const FEATURE_CATALOG = {
+  preset: {
+    label: "Tema paketi",
+    tier: "free",
+    fallback: "custom",
+    proValues: ["cyber", "terminal"],
+  },
+  "colors.primary": { label: "Ana renk", tier: "free", fallback: "#F06432" },
+  "colors.secondary": {
+    label: "İkincil renk",
+    tier: "free",
+    fallback: "#F8C95C",
+  },
+  "colors.accent": { label: "Vurgu rengi", tier: "free", fallback: "#B9DDC7" },
+  "colors.background": {
+    label: "Arka plan rengi",
+    tier: "free",
+    fallback: "#F5F0DE",
+  },
+  "colors.backgroundSecondary": {
+    label: "İkincil arka plan",
+    tier: "pro",
+    fallback: "#F8C95C",
+  },
+  "colors.surface": { label: "Yüzey", tier: "free", fallback: "#FDFCF7" },
+  "colors.surfaceHover": {
+    label: "Yüzey vurgusu",
+    tier: "pro",
+    fallback: "#FFFFFF",
+  },
+  "colors.card": { label: "Kart rengi", tier: "free", fallback: "#FDFCF7" },
+  "colors.cardBorder": {
+    label: "Kart kenarlığı",
+    tier: "free",
+    fallback: "#FFFFFF",
+  },
+  "colors.textPrimary": {
+    label: "Ana metin",
+    tier: "free",
+    fallback: "#17211B",
+  },
+  "colors.textSecondary": {
+    label: "İkincil metin",
+    tier: "free",
+    fallback: "#36463D",
+  },
+  "colors.textMuted": {
+    label: "Soluk metin",
+    tier: "pro",
+    fallback: "#64726A",
+  },
+  "colors.icon": { label: "İkon rengi", tier: "pro", fallback: "#17211B" },
+  "colors.link": { label: "Bağlantı rengi", tier: "pro", fallback: "#17211B" },
+  "colors.linkHover": {
+    label: "Bağlantı vurgusu",
+    tier: "pro",
+    fallback: "#F06432",
+  },
+  "colors.glow": { label: "Parlama rengi", tier: "pro", fallback: "#F8C95C" },
+  "colors.shadow": { label: "Gölge rengi", tier: "pro", fallback: "#17211B" },
+  "colors.particle": {
+    label: "Parçacık rengi",
+    tier: "pro",
+    fallback: "#FFFFFF",
+  },
+  "colors.username": {
+    label: "Kullanıcı adı",
+    tier: "pro",
+    fallback: "#17211B",
+  },
+  "colors.badge": { label: "Rozet rengi", tier: "pro", fallback: "#F8C95C" },
+  "colors.button": { label: "Düğme rengi", tier: "free", fallback: "#17211B" },
+  "colors.buttonText": {
+    label: "Düğme metni",
+    tier: "free",
+    fallback: "#FFFFFF",
+  },
   "background.mode": {
     label: "Arka plan türü",
     tier: "free",
     fallback: "gradient",
     proValues: ["image", "video", "particles", "motion"],
-  },
-  "background.solidColor": {
-    label: "Düz renk",
-    tier: "free",
-    fallback: "#F5F0DE",
   },
   "background.gradient.type": {
     label: "Geçiş türü",
@@ -58,6 +129,13 @@ export const FEATURE_CATALOG = {
     fallback: "sunrise",
     proValues: ["aurora", "midnight", "mesh", "confetti", "custom"],
   },
+  "card.enabled": { label: "Profil kartı", tier: "free", fallback: false },
+  "card.opacity": { label: "Kart opaklığı", tier: "free", fallback: 72 },
+  "card.blur": { label: "Kart bulanıklığı", tier: "pro", fallback: 18 },
+  "card.radius": { label: "Kart köşeleri", tier: "free", fallback: 32 },
+  "card.borderWidth": { label: "Kart kenarlığı", tier: "pro", fallback: 1 },
+  "card.shadow": { label: "Kart gölgesi", tier: "pro", fallback: "soft" },
+  "card.padding": { label: "Kart iç boşluğu", tier: "pro", fallback: 28 },
   "buttons.shape": {
     label: "Düğme şekli",
     tier: "free",
@@ -70,22 +148,6 @@ export const FEATURE_CATALOG = {
     tier: "free",
     fallback: "shadow",
     proValues: ["glass", "threeD"],
-  },
-  "buttons.color": { label: "Düğme rengi", tier: "free", fallback: "#17211B" },
-  "buttons.textColor": {
-    label: "Düğme metni",
-    tier: "free",
-    fallback: "#FFFFFF",
-  },
-  "buttons.borderColor": {
-    label: "Düğme kenarlığı",
-    tier: "pro",
-    fallback: "#17211B",
-  },
-  "buttons.shadowColor": {
-    label: "Düğme gölgesi",
-    tier: "pro",
-    fallback: "#F06432",
   },
   "buttons.height": { label: "Düğme yüksekliği", tier: "pro", fallback: 58 },
   "buttons.spacing": { label: "Düğme aralığı", tier: "free", fallback: 12 },
@@ -132,10 +194,21 @@ export const FEATURE_CATALOG = {
     tier: "pro",
     fallback: 0,
   },
-  "typography.color": {
-    label: "Profil metin rengi",
+  "typography.headingEffect": {
+    label: "Başlık efekti",
+    tier: "pro",
+    fallback: "none",
+  },
+  "layout.template": {
+    label: "Profil düzeni",
     tier: "free",
-    fallback: "#17211B",
+    fallback: "stack",
+    proValues: ["bento", "terminal"],
+  },
+  "layout.cardPosition": {
+    label: "Kart konumu",
+    tier: "pro",
+    fallback: "center",
   },
   "layout.avatarShape": {
     label: "Avatar şekli",
@@ -149,11 +222,6 @@ export const FEATURE_CATALOG = {
     tier: "pro",
     fallback: 3,
   },
-  "layout.avatarBorderColor": {
-    label: "Avatar kenarlık rengi",
-    tier: "pro",
-    fallback: "#FFFFFF",
-  },
   "layout.bioPlacement": {
     label: "Biyografi konumu",
     tier: "pro",
@@ -162,6 +230,11 @@ export const FEATURE_CATALOG = {
   "layout.alignment": {
     label: "Profil hizası",
     tier: "free",
+    fallback: "center",
+  },
+  "layout.mobileAlignment": {
+    label: "Mobil hizalama",
+    tier: "pro",
     fallback: "center",
   },
   "layout.density": {
@@ -181,11 +254,6 @@ export const FEATURE_CATALOG = {
     fallback: "belowBio",
   },
   "effects.cursor": { label: "Özel imleç", tier: "pro", fallback: "default" },
-  "effects.cursorColor": {
-    label: "İmleç rengi",
-    tier: "pro",
-    fallback: "#F06432",
-  },
   "effects.trail": { label: "İmleç izi", tier: "pro", fallback: "none" },
   "effects.clickRipple": {
     label: "Tıklama dalgası",
@@ -311,6 +379,24 @@ export const FEATURE_CATALOG = {
     tier: "free",
     fallback: "",
   },
+  "seo.title": { label: "SEO başlığı", tier: "free", fallback: "" },
+  "seo.description": { label: "SEO açıklaması", tier: "free", fallback: "" },
+  "seo.imageUrl": { label: "SEO görseli", tier: "pro", fallback: "" },
+  "privacy.allowIndexing": {
+    label: "Arama motorlarında görünürlük",
+    tier: "free",
+    fallback: true,
+  },
+  "privacy.analyticsEnabled": {
+    label: "Ziyaret analitiği",
+    tier: "free",
+    fallback: true,
+  },
+  "privacy.showShareActions": {
+    label: "Paylaşım araçları",
+    tier: "free",
+    fallback: true,
+  },
   "advanced.removeBranding": {
     label: "olnk markasını kaldır",
     tier: "pro",
@@ -332,11 +418,21 @@ export type AppearanceFeaturePath = keyof typeof FEATURE_CATALOG;
 
 export const FEATURE_GROUPS = [
   {
+    id: "colors",
+    label: "Renk sistemi",
+    paths: Object.keys(FEATURE_CATALOG).filter((key) => key.startsWith("colors.")),
+  },
+  {
     id: "background",
     label: "Arka plan",
     paths: Object.keys(FEATURE_CATALOG).filter((key) =>
       key.startsWith("background."),
     ),
+  },
+  {
+    id: "card",
+    label: "Profil kartı",
+    paths: Object.keys(FEATURE_CATALOG).filter((key) => key.startsWith("card.")),
   },
   {
     id: "buttons",
@@ -379,6 +475,16 @@ export const FEATURE_GROUPS = [
     paths: Object.keys(FEATURE_CATALOG).filter((key) =>
       key.startsWith("socialProof."),
     ),
+  },
+  {
+    id: "seo",
+    label: "SEO",
+    paths: Object.keys(FEATURE_CATALOG).filter((key) => key.startsWith("seo.")),
+  },
+  {
+    id: "privacy",
+    label: "Gizlilik",
+    paths: Object.keys(FEATURE_CATALOG).filter((key) => key.startsWith("privacy.")),
   },
   {
     id: "advanced",
