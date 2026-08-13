@@ -29,6 +29,7 @@ type Category =
   | "colors"
   | "background"
   | "card"
+  | "avatar"
   | "buttons"
   | "typography"
   | "layout"
@@ -42,6 +43,7 @@ const categories: Array<{ id: Category; label: string }> = [
   { id: "colors", label: "Renkler" },
   { id: "background", label: "Arka plan" },
   { id: "card", label: "Profil kartı" },
+  { id: "avatar", label: "Avatar" },
   { id: "buttons", label: "Düğmeler" },
   { id: "typography", label: "Yazı" },
   { id: "layout", label: "Düzen" },
@@ -178,6 +180,10 @@ export function AppearanceEditor({
     }
     const next = write(appearance, path, value);
     if (path !== "preset") next.preset = "custom";
+    if (path === "avatar.animation" && value !== "none")
+      next.avatar.hover = "none";
+    if (path === "avatar.hover" && value !== "none")
+      next.avatar.animation = "none";
     if (path.startsWith("background.gradient."))
       next.background.preset = "custom";
     onChange(next);
@@ -397,7 +403,116 @@ export function AppearanceEditor({
                   disabled={!hasPro}
                   onUploaded={onMediaUploaded}
                 />
+                <Choice
+                  label="Medya boyutlandırma"
+                  path="background.fit"
+                  current={value("background.fit")}
+                  hasPro={hasPro}
+                  onChoose={update}
+                  options={[
+                    ["cover", "Alanı kapla"],
+                    ["contain", "Tamamını göster"],
+                  ]}
+                />
+                <Choice
+                  label="Medya konumu"
+                  path="background.position"
+                  current={value("background.position")}
+                  hasPro={hasPro}
+                  onChoose={update}
+                  options={[
+                    ["center", "Orta"],
+                    ["top", "Üst"],
+                    ["bottom", "Alt"],
+                    ["left", "Sol"],
+                    ["right", "Sağ"],
+                  ]}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <ColorField
+                    label="Kaplama rengi"
+                    path="background.overlayColor"
+                    value={value("background.overlayColor")}
+                    hasPro={hasPro}
+                    onChange={update}
+                  />
+                  <Range
+                    label="Kaplama"
+                    path="background.overlayOpacity"
+                    value={value("background.overlayOpacity")}
+                    min={0}
+                    max={90}
+                    suffix="%"
+                    hasPro={hasPro}
+                    onChange={update}
+                  />
+                </div>
               </>
+            )}
+            {value("background.mode") !== "solid" && (
+              <div className="border-ink/10 space-y-4 rounded-2xl border bg-white p-4">
+                <p className="text-xs font-black">Görüntü ayarları</p>
+                <Range
+                  label="Bulanıklık"
+                  path="background.blur"
+                  value={value("background.blur")}
+                  min={0}
+                  max={24}
+                  suffix="px"
+                  hasPro={hasPro}
+                  onChange={update}
+                />
+                <Range
+                  label="Parlaklık"
+                  path="background.brightness"
+                  value={value("background.brightness")}
+                  min={50}
+                  max={150}
+                  suffix="%"
+                  hasPro={hasPro}
+                  onChange={update}
+                />
+                <Range
+                  label="Kontrast"
+                  path="background.contrast"
+                  value={value("background.contrast")}
+                  min={50}
+                  max={150}
+                  suffix="%"
+                  hasPro={hasPro}
+                  onChange={update}
+                />
+                <Range
+                  label="Doygunluk"
+                  path="background.saturation"
+                  value={value("background.saturation")}
+                  min={0}
+                  max={200}
+                  suffix="%"
+                  hasPro={hasPro}
+                  onChange={update}
+                />
+                <Range
+                  label="Renk dönüşü"
+                  path="background.hueRotate"
+                  value={value("background.hueRotate")}
+                  min={0}
+                  max={360}
+                  suffix="°"
+                  hasPro={hasPro}
+                  onChange={update}
+                />
+                <Range
+                  label="Yakınlaştırma"
+                  path="background.scale"
+                  value={value("background.scale")}
+                  min={100}
+                  max={130}
+                  suffix="%"
+                  hasPro={hasPro}
+                  onChange={update}
+                />
+              </div>
             )}
             <Choice
               label="Hazır paket"
@@ -503,6 +618,136 @@ export function AppearanceEditor({
                 ["soft", "Yumuşak"],
                 ["hard", "Keskin"],
                 ["glow", "Parlama"],
+              ]}
+            />
+            <Choice
+              label="Kenar biçimi"
+              path="card.borderStyle"
+              current={value("card.borderStyle")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["solid", "Düz"],
+                ["dashed", "Kesikli"],
+                ["double", "Çift"],
+              ]}
+            />
+            <Choice
+              label="Kart etkileşimi"
+              path="card.hover"
+              current={value("card.hover")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["none", "Yok"],
+                ["lift", "Yüksel"],
+                ["tilt", "Eğil"],
+                ["glow", "Parla"],
+              ]}
+            />
+          </>
+        )}
+        {category === "avatar" && (
+          <>
+            <Choice
+              label="Avatar şekli"
+              path="avatar.shape"
+              current={value("avatar.shape")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["circle", "Daire"],
+                ["rounded", "Yumuşak"],
+                ["square", "Kare"],
+                ["squircle", "Squircle"],
+                ["hexagon", "Altıgen"],
+              ]}
+            />
+            <Range
+              label="Avatar boyutu"
+              path="avatar.size"
+              value={value("avatar.size")}
+              min={64}
+              max={180}
+              suffix="px"
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Range
+              label="Kenar kalınlığı"
+              path="avatar.borderWidth"
+              value={value("avatar.borderWidth")}
+              min={0}
+              max={10}
+              suffix="px"
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <ColorField
+                label="Kenar rengi"
+                path="colors.cardBorder"
+                value={value("colors.cardBorder")}
+                hasPro={hasPro}
+                onChange={update}
+              />
+              <ColorField
+                label="Parlama rengi"
+                path="colors.glow"
+                value={value("colors.glow")}
+                hasPro={hasPro}
+                onChange={update}
+              />
+            </div>
+            <Choice
+              label="Kenar biçimi"
+              path="avatar.borderStyle"
+              current={value("avatar.borderStyle")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["solid", "Düz"],
+                ["dashed", "Kesikli"],
+                ["double", "Çift"],
+              ]}
+            />
+            <Choice
+              label="Gölge"
+              path="avatar.shadow"
+              current={value("avatar.shadow")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["none", "Yok"],
+                ["soft", "Yumuşak"],
+                ["hard", "Keskin"],
+                ["glow", "Parlama"],
+              ]}
+            />
+            <Choice
+              label="Animasyon"
+              path="avatar.animation"
+              current={value("avatar.animation")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["none", "Yok"],
+                ["pulse", "Nabız"],
+                ["float", "Süzül"],
+                ["spin", "Dön"],
+              ]}
+            />
+            <Choice
+              label="Üzerine gelme"
+              path="avatar.hover"
+              current={value("avatar.hover")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["none", "Yok"],
+                ["zoom", "Yaklaş"],
+                ["tilt", "Eğil"],
+                ["glow", "Parla"],
               ]}
             />
           </>
@@ -743,47 +988,6 @@ export function AppearanceEditor({
               ]}
             />
             <Choice
-              label="Avatar şekli"
-              path="layout.avatarShape"
-              current={value("layout.avatarShape")}
-              hasPro={hasPro}
-              onChoose={update}
-              options={[
-                ["circle", "Daire"],
-                ["rounded", "Yumuşak"],
-                ["square", "Kare"],
-                ["squircle", "Squircle"],
-                ["hexagon", "Altıgen"],
-              ]}
-            />
-            <Range
-              label="Avatar boyutu"
-              path="layout.avatarSize"
-              value={value("layout.avatarSize")}
-              min={64}
-              max={160}
-              suffix="px"
-              hasPro={hasPro}
-              onChange={update}
-            />
-            <Range
-              label="Avatar kenarlığı"
-              path="layout.avatarBorderWidth"
-              value={value("layout.avatarBorderWidth")}
-              min={0}
-              max={10}
-              suffix="px"
-              hasPro={hasPro}
-              onChange={update}
-            />
-            <ColorField
-              label="Avatar kenarlık rengi"
-              path="colors.cardBorder"
-              value={value("colors.cardBorder")}
-              hasPro={hasPro}
-              onChange={update}
-            />
-            <Choice
               label="Hizalama"
               path="layout.alignment"
               current={value("layout.alignment")}
@@ -828,6 +1032,38 @@ export function AppearanceEditor({
               suffix="px"
               hasPro={hasPro}
               onChange={update}
+            />
+            <Range
+              label="Masaüstü sayfa boşluğu"
+              path="layout.pagePadding"
+              value={value("layout.pagePadding")}
+              min={16}
+              max={80}
+              suffix="px"
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Range
+              label="Mobil sayfa boşluğu"
+              path="layout.mobilePagePadding"
+              value={value("layout.mobilePagePadding")}
+              min={12}
+              max={36}
+              suffix="px"
+              hasPro={hasPro}
+              onChange={update}
+            />
+            <Choice
+              label="Kart dikey konumu"
+              path="layout.verticalAlign"
+              current={value("layout.verticalAlign")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["top", "Üst"],
+                ["center", "Orta"],
+                ["bottom", "Alt"],
+              ]}
             />
           </>
         )}

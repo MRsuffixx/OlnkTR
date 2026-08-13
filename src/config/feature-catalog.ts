@@ -334,7 +334,7 @@ export const FEATURE_CATALOG = {
     fallback: 20,
   },
   "layout.verticalAlign": {
-    label: "Dikey konum",
+    label: "Kart dikey konumu",
     tier: "pro",
     fallback: "top",
   },

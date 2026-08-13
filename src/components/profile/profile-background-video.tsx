@@ -1,8 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 
-export function ProfileBackgroundVideo({ src }: { src: string }) {
+export function ProfileBackgroundVideo({
+  src,
+  fit = "cover",
+  position = "center",
+  style,
+}: {
+  src: string;
+  fit?: "cover" | "contain";
+  position?: "center" | "top" | "bottom" | "left" | "right";
+  style?: CSSProperties;
+}) {
   const video = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -21,10 +31,11 @@ export function ProfileBackgroundVideo({ src }: { src: string }) {
       muted
       loop
       playsInline
-      controls
-      controlsList="nodownload noremoteplayback"
-      className="absolute inset-0 size-full object-cover"
-      aria-label="Profil arka plan videosu"
+      preload="metadata"
+      className="pointer-events-none absolute inset-0 size-full"
+      style={{ ...style, objectFit: fit, objectPosition: position }}
+      aria-hidden="true"
+      tabIndex={-1}
     />
   );
 }

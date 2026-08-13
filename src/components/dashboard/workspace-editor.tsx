@@ -26,12 +26,14 @@ import {
   GripVertical,
   Link2,
   LoaderCircle,
+  Monitor,
   MonitorSmartphone,
   Palette,
   PanelsTopLeft,
   Plus,
   RotateCcw,
   Sparkles,
+  Smartphone,
   Trash2,
   UserRound,
   X,
@@ -405,6 +407,9 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [builderPanel, setBuilderPanel] = useState<BuilderPanel>("profile");
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
+  const [previewDevice, setPreviewDevice] = useState<"mobile" | "desktop">(
+    "mobile",
+  );
   const [status, setStatus] = useState<SaveStatus>("saved");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [upgrade, setUpgrade] = useState(false);
@@ -708,6 +713,16 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
             {builderPanel === "profile" && (
               <section className="border-ink/10 rounded-3xl border bg-[#F8F7F1] p-4 sm:p-5">
                 <h2 className="text-sm font-black">Profil bilgileri</h2>
+                <Link
+                  href={`/${initial.username ?? ""}`}
+                  target="_blank"
+                  className="border-ink/10 bg-paper mt-3 flex items-center justify-between rounded-2xl border px-3 py-2.5 text-xs"
+                >
+                  <span className="text-ink/45 font-bold">Profil adresi</span>
+                  <span className="font-black">
+                    olnk.tr/{initial.username ?? "profilin"}
+                  </span>
+                </Link>
                 <div className="mt-4 space-y-4">
                   <Field label="Görünen ad">
                     <input
@@ -860,17 +875,58 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
           <div className="text-ink/35 absolute top-5 left-6 hidden text-xs font-black tracking-[.15em] uppercase md:block">
             Canlı önizleme
           </div>
-          <div className="border-ink bg-ink w-[320px] rounded-[3.6rem] border-[9px] p-2 shadow-[0_30px_70px_rgba(23,33,27,.22)] lg:w-[350px]">
-            <div className="bg-cream h-[660px] overflow-hidden rounded-[2.75rem]">
-              <ProfilePreview
-                draft={draft}
-                username={initial.username ?? "profilin"}
-                customCss={previewCss}
-                selectedId={selectedId}
-                onSelect={focusLink}
-              />
-            </div>
+          <div className="border-ink/10 bg-paper absolute top-4 right-5 z-30 hidden items-center gap-1 rounded-full border p-1 shadow-sm md:flex">
+            <button
+              type="button"
+              onClick={() => setPreviewDevice("mobile")}
+              aria-pressed={previewDevice === "mobile"}
+              className={`grid size-9 place-items-center rounded-full ${previewDevice === "mobile" ? "bg-ink text-paper" : "text-ink/45"}`}
+              aria-label="Mobil önizleme"
+            >
+              <Smartphone className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setPreviewDevice("desktop")}
+              aria-pressed={previewDevice === "desktop"}
+              className={`grid size-9 place-items-center rounded-full ${previewDevice === "desktop" ? "bg-ink text-paper" : "text-ink/45"}`}
+              aria-label="Masaüstü önizleme"
+            >
+              <Monitor className="size-4" />
+            </button>
           </div>
+          {previewDevice === "mobile" ? (
+            <div className="border-ink bg-ink w-[320px] rounded-[3.6rem] border-[9px] p-2 shadow-[0_30px_70px_rgba(23,33,27,.22)] lg:w-[350px]">
+              <div className="bg-cream h-[660px] overflow-hidden rounded-[2.75rem]">
+                <ProfilePreview
+                  draft={draft}
+                  username={initial.username ?? "profilin"}
+                  customCss={previewCss}
+                  selectedId={selectedId}
+                  onSelect={focusLink}
+                  viewport="mobile"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="border-ink bg-ink w-full max-w-[760px] rounded-[1.75rem] border-[8px] p-2 shadow-[0_30px_70px_rgba(23,33,27,.22)]">
+              <div className="flex h-8 items-center gap-1.5 px-3" aria-hidden>
+                <span className="bg-orange size-2.5 rounded-full" />
+                <span className="bg-yellow size-2.5 rounded-full" />
+                <span className="bg-mint size-2.5 rounded-full" />
+              </div>
+              <div className="bg-cream h-[620px] overflow-hidden rounded-[1.1rem]">
+                <ProfilePreview
+                  draft={draft}
+                  username={initial.username ?? "profilin"}
+                  customCss={previewCss}
+                  selectedId={selectedId}
+                  onSelect={focusLink}
+                  viewport="desktop"
+                />
+              </div>
+            </div>
+          )}
         </section>
       </div>
       {upgrade && (

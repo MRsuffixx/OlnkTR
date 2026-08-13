@@ -78,7 +78,7 @@
 | **Live checkout result overlay**                  | stabilisation | The `/dashboard/billing?checkout=…&intent=…` states already pass to `<BillingSettings/>`; refine the success / failure copy and link to the updated settings panel. |
 | **PayTR local-mode pricing display**              | stabilisation | `LOCAL_PRO_*_TRY` defaults to `12900` / `94900`; verify against the production PayTR dashboard before launch.                                                       |
 | **Mobile profile editor**                         | planning      | Editor is currently desktop-first; long-term goal is a feature-parity mobile experience.                                                                            |
-| **Advanced profile renderer parity**              | codex         | Move avatar styling out of layout, add media filters/card interactions/responsive spacing, and make dashboard desktop/mobile previews match the public renderer.     |
+| **Advanced profile renderer parity**              | codex         | Move avatar styling out of layout, add media filters/card interactions/responsive spacing, and make dashboard desktop/mobile previews match the public renderer.    |
 
 ---
 

@@ -83,10 +83,12 @@ an internal SMTP endpoint and a loopback-only development inbox.
 5. Identity and real content stay relational (`User`, `ProfileLink`). Presentation, layout, effects, typography, audio, SEO, and privacy preferences are validated as one versioned `Theme.settings` document.
 6. The dashboard layout sets `metadata.robots = { index: false, follow: false }`.
 
-### 2.2.1 Appearance document v2
+### 2.2.1 Appearance document v3
 
-- `src/lib/appearance.ts` owns parsing, v1 → v2 migration, defaults, full-profile presets, semantic CSS-variable generation, and profile-card rendering.
+- `src/lib/appearance.ts` owns parsing, v1/v2 → v3 migration, defaults, full-profile presets, semantic CSS-variable generation, and profile-surface rendering.
 - `colors` is the visual token source of truth; components consume semantic values such as `button`, `textPrimary`, `cardBorder`, and `particle` instead of duplicating colour fields across feature groups.
+- Avatar geometry and interaction live in a dedicated `avatar` group; `layout` only controls placement, density, responsive padding, and alignment.
+- Background media renders in an isolated layer so blur, brightness, contrast, saturation, hue, scale, fit, and position never filter profile content.
 - `FEATURE_CATALOG` tiers every editable leaf. Free downgrades keep stored Pro choices while `resolveAppearanceForPlan()` produces deterministic public fallbacks.
 - Security-sensitive gates remain relational. `privacy` controls indexing, analytics ingestion, and share controls but cannot replace `User.profilePasswordHash` enforcement.
 - Links, future social accounts, badges, sections, and widgets are content and must use separate models rather than being embedded in `Theme.settings`.

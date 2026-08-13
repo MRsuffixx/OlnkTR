@@ -16,20 +16,24 @@ import { ShareButton } from "~/components/profile/share-button";
 import { VisitorCounter } from "~/components/profile/visitor-counter";
 import {
   appearanceBackground,
+  appearanceBackgroundEffects,
   appearanceCardStyle,
   appearanceCssVariables,
+  appearanceLayoutVariables,
+  appearanceVideoOverlay,
 } from "~/lib/appearance";
 import { linkCustomizationSchema } from "~/lib/schemas";
 import { getAppOrigin, isCustomProfileHost } from "~/lib/app-url";
 import { normalizeUsername } from "~/lib/username";
 import {
-  profileAvatarRadius,
+  profileAvatarStyle,
   profileButtonStyle,
   profileCardMargin,
   profileDensity,
   profileEmbedUrl,
   profileFontFamily,
   profileHeadingStyle,
+  profileVerticalMargin,
 } from "~/lib/profile-rendering";
 import { db } from "~/server/db";
 import { recordProfileView } from "~/server/analytics/ingest";
@@ -189,16 +193,19 @@ export default async function PublicProfilePage({
   return (
     <main
       data-olnk-profile
-      className={`relative min-h-dvh overflow-hidden px-4 py-7 ${
-        appearance.audio.enabled || appearance.audio.entryEnabled ? "pb-44" : ""
-      }`}
+      className="olnk-profile-page relative flex min-h-dvh flex-col overflow-hidden"
       style={{
         ...appearanceCssVariables(appearance),
-        ...background,
+        ...appearanceLayoutVariables(appearance),
+        backgroundColor: appearance.colors.background,
         color: appearance.colors.textPrimary,
         fontFamily: profileFontFamily(appearance.typography.bodyFont),
         fontSize: appearance.typography.bodySize,
         fontWeight: appearance.typography.weight,
+        paddingBottom:
+          appearance.audio.enabled || appearance.audio.entryEnabled
+            ? 176
+            : undefined,
       }}
     >
       <script
@@ -209,9 +216,29 @@ export default async function PublicProfilePage({
         appearance.advanced.customCssEnabled &&
         profile.theme?.customCss && <style>{profile.theme.customCss}</style>}
       {appearance.background.mode === "video" &&
-        appearance.background.mediaUrl && (
-          <ProfileBackgroundVideo src={appearance.background.mediaUrl} />
-        )}
+      appearance.background.mediaUrl ? (
+        <div className="pointer-events-none absolute -inset-8" aria-hidden>
+          <ProfileBackgroundVideo
+            src={appearance.background.mediaUrl}
+            fit={appearance.background.fit}
+            position={appearance.background.position}
+            style={appearanceBackgroundEffects(appearance)}
+          />
+          <div
+            className="absolute inset-0"
+            style={appearanceVideoOverlay(appearance)}
+          />
+        </div>
+      ) : (
+        <div
+          className="pointer-events-none absolute -inset-8"
+          style={{
+            ...background,
+            ...appearanceBackgroundEffects(appearance),
+          }}
+          aria-hidden
+        />
+      )}
       {appearance.background.mode === "particles" && (
         <div className="olnk-particles absolute inset-0" />
       )}
@@ -232,9 +259,14 @@ export default async function PublicProfilePage({
       <div
         className={`relative flex w-full flex-col ${appearance.card.enabled ? "" : "min-h-[calc(100dvh-3.5rem)]"}`}
         data-olnk-template={appearance.layout.template}
+        data-card-hover={appearance.card.hover}
         style={{
           maxWidth: appearance.layout.contentWidth,
           ...profileCardMargin(appearance.layout.cardPosition),
+          ...profileVerticalMargin(
+            appearance.layout.verticalAlign,
+            appearance.card.enabled,
+          ),
           ...appearanceCardStyle(appearance),
         }}
       >
@@ -281,16 +313,11 @@ export default async function PublicProfilePage({
           style={{ order: 2 }}
         >
           <div
-            className="bg-orange grid place-items-center overflow-hidden text-4xl font-black text-white shadow-[4px_5px_0_rgba(23,33,27,.55)]"
+            className="olnk-avatar bg-orange grid place-items-center overflow-hidden text-4xl font-black text-white"
+            data-avatar-animation={appearance.avatar.animation}
+            data-avatar-hover={appearance.avatar.hover}
             style={{
-              width: appearance.layout.avatarSize,
-              height: appearance.layout.avatarSize,
-              borderRadius: profileAvatarRadius(appearance.layout.avatarShape),
-              border: `${appearance.layout.avatarBorderWidth}px solid ${appearance.colors.cardBorder}`,
-              clipPath:
-                appearance.layout.avatarShape === "hexagon"
-                  ? "polygon(25% 6.7%,75% 6.7%,100% 50%,75% 93.3%,25% 93.3%,0 50%)"
-                  : undefined,
+              ...profileAvatarStyle(appearance),
             }}
           >
             {profile.image ? (
@@ -305,8 +332,11 @@ export default async function PublicProfilePage({
           </div>
           {appearance.layout.bioPlacement === "aboveName" && profile.bio && (
             <p
-              className="max-w-md leading-7 opacity-70"
-              style={{ marginTop: density.profileGap }}
+              className="max-w-md leading-7"
+              style={{
+                marginTop: density.profileGap,
+                color: appearance.colors.textSecondary,
+              }}
             >
               {profile.bio}
             </p>
@@ -324,10 +354,21 @@ export default async function PublicProfilePage({
           >
             {profile.name ?? `@${profile.username}`}
           </h1>
+          {profile.name && (
+            <p
+              className="mt-1 text-sm font-semibold"
+              style={{ color: appearance.colors.textMuted }}
+            >
+              @{profile.username}
+            </p>
+          )}
           {appearance.layout.bioPlacement === "belowName" && profile.bio && (
             <p
-              className="max-w-md leading-7 opacity-70"
-              style={{ marginTop: Math.max(8, density.profileGap / 2) }}
+              className="max-w-md leading-7"
+              style={{
+                marginTop: Math.max(8, density.profileGap / 2),
+                color: appearance.colors.textSecondary,
+              }}
             >
               {profile.bio}
             </p>

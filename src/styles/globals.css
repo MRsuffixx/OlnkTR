@@ -86,6 +86,57 @@ a {
   scrollbar-color: rgba(23, 33, 27, 0.25) transparent;
 }
 
+.olnk-profile-page {
+  padding: var(--olnk-mobile-page-padding, 20px);
+}
+
+.olnk-avatar,
+[data-card-hover] {
+  transition:
+    transform 220ms ease,
+    filter 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.olnk-avatar[data-avatar-animation="pulse"] {
+  animation: olnk-avatar-pulse 2.4s ease-in-out infinite;
+}
+
+.olnk-avatar[data-avatar-animation="float"] {
+  animation: olnk-avatar-float 3.2s ease-in-out infinite;
+}
+
+.olnk-avatar[data-avatar-animation="spin"] {
+  animation: olnk-avatar-spin 9s linear infinite;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .olnk-avatar[data-avatar-hover="zoom"]:hover {
+    transform: scale(1.06);
+  }
+  .olnk-avatar[data-avatar-hover="tilt"]:hover {
+    transform: rotate(-3deg) scale(1.03);
+  }
+  .olnk-avatar[data-avatar-hover="glow"]:hover {
+    filter: drop-shadow(0 0 18px var(--color-glow));
+  }
+  [data-card-hover="lift"]:hover {
+    transform: translateY(-6px);
+  }
+  [data-card-hover="tilt"]:hover {
+    transform: perspective(900px) rotateX(1.5deg) rotateY(-1.5deg);
+  }
+  [data-card-hover="glow"]:hover {
+    filter: drop-shadow(0 0 24px var(--color-glow));
+  }
+}
+
+@media (min-width: 768px) {
+  .olnk-profile-page {
+    padding: var(--olnk-page-padding, 28px);
+  }
+}
+
 .input {
   height: 2.75rem;
   width: 100%;
@@ -344,6 +395,24 @@ a {
 @keyframes olnk-heading-shimmer {
   to {
     background-position: -220% 0;
+  }
+}
+
+@keyframes olnk-avatar-pulse {
+  50% {
+    transform: scale(1.045);
+  }
+}
+
+@keyframes olnk-avatar-float {
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes olnk-avatar-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 

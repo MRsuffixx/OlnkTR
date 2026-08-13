@@ -2,12 +2,27 @@ import { describe, expect, it } from "vitest";
 
 import { DEFAULT_APPEARANCE } from "~/lib/appearance";
 import {
+  profileAvatarStyle,
   profileButtonStyle,
   profileEmbedUrl,
   profileFontFamily,
 } from "~/lib/profile-rendering";
 
 describe("shared profile rendering", () => {
+  it("renders avatar geometry from the dedicated avatar group", () => {
+    const appearance = structuredClone(DEFAULT_APPEARANCE);
+    appearance.avatar.shape = "hexagon";
+    appearance.avatar.size = 128;
+    appearance.avatar.borderStyle = "double";
+    appearance.avatar.shadow = "glow";
+
+    const style = profileAvatarStyle(appearance);
+    expect(style.width).toBe(128);
+    expect(style.border).toBe("3px double #FFFFFF");
+    expect(style.clipPath).toContain("polygon");
+    expect(style.boxShadow).toContain(appearance.colors.glow);
+  });
+
   it("preserves configured outline text and border colors", () => {
     const appearance = structuredClone(DEFAULT_APPEARANCE);
     appearance.buttons.fill = "outline";

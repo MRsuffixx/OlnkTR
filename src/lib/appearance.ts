@@ -477,13 +477,7 @@ const legacyAppearanceSchema = z.object({
     color: hexColor,
   }),
   layout: z.object({
-    avatarShape: z.enum([
-      "circle",
-      "rounded",
-      "square",
-      "squircle",
-      "hexagon",
-    ]),
+    avatarShape: z.enum(["circle", "rounded", "square", "squircle", "hexagon"]),
     avatarSize: z.number().int().min(64).max(160),
     avatarBorderWidth: z.number().int().min(0).max(10),
     avatarBorderColor: hexColor,
@@ -574,9 +568,7 @@ function migrateLegacyAppearance(
   });
 }
 
-function migrateV2Appearance(
-  value: z.infer<typeof legacyV2AppearanceSchema>,
-) {
+function migrateV2Appearance(value: z.infer<typeof legacyV2AppearanceSchema>) {
   return appearanceSchema.parse({
     ...value,
     version: APPEARANCE_SETTINGS_VERSION,
@@ -718,6 +710,13 @@ export function applyAppearancePreset(
 ): AppearanceSettings {
   const next = structuredClone(current);
   next.preset = preset;
+  next.background = structuredClone(DEFAULT_APPEARANCE.background);
+  next.card = structuredClone(DEFAULT_APPEARANCE.card);
+  next.avatar = structuredClone(DEFAULT_APPEARANCE.avatar);
+  next.buttons = structuredClone(DEFAULT_APPEARANCE.buttons);
+  next.typography = structuredClone(DEFAULT_APPEARANCE.typography);
+  next.layout = structuredClone(DEFAULT_APPEARANCE.layout);
+  next.effects = structuredClone(DEFAULT_APPEARANCE.effects);
   if (preset === "frost") {
     next.colors = {
       ...DEFAULT_APPEARANCE.colors,
@@ -746,6 +745,7 @@ export function applyAppearancePreset(
       padding: 28,
     };
     next.buttons = { ...next.buttons, fill: "glass", shape: "rounded" };
+    next.avatar = { ...next.avatar, shape: "rounded", shadow: "soft" };
     next.typography = {
       ...next.typography,
       headingFont: "Fraunces",
@@ -788,6 +788,7 @@ export function applyAppearancePreset(
       shadow: "soft",
     };
     next.buttons = { ...next.buttons, fill: "solid", shape: "pill" };
+    next.avatar = { ...next.avatar, shadow: "soft" };
     return next;
   }
   if (preset === "cyber") {
@@ -842,6 +843,12 @@ export function applyAppearancePreset(
       radius: 10,
       hover: "glow",
     };
+    next.avatar = {
+      ...next.avatar,
+      shape: "squircle",
+      shadow: "glow",
+      hover: "glow",
+    };
     next.typography = {
       ...next.typography,
       headingFont: "Space Grotesk",
@@ -893,6 +900,12 @@ export function applyAppearancePreset(
       shape: "square",
       hover: "glow",
     };
+    next.avatar = {
+      ...next.avatar,
+      shape: "square",
+      shadow: "glow",
+      borderStyle: "double",
+    };
     next.typography = {
       ...next.typography,
       headingFont: "Manrope",
@@ -929,6 +942,7 @@ export function applyAppearancePreset(
     shape: "pill",
     hover: "lift",
   };
+  next.avatar = { ...next.avatar, shadow: "none" };
   next.typography = {
     ...next.typography,
     headingFont: "Manrope",
@@ -963,8 +977,9 @@ export function appearanceBackground(settings: AppearanceSettings) {
           2,
           "0",
         )}), url("${background.mediaUrl.replace(/["\\]/g, "")}")`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
+      backgroundSize: background.fit,
+      backgroundPosition: background.position,
+      backgroundRepeat: "no-repeat",
     };
   const preset =
     background.preset === "custom"
@@ -988,6 +1003,24 @@ export function appearanceBackground(settings: AppearanceSettings) {
           ? `conic-gradient(from ${gradient.angle}deg, ${stops})`
           : `linear-gradient(${gradient.angle}deg, ${stops})`,
   };
+}
+
+export function appearanceBackgroundEffects(
+  settings: AppearanceSettings,
+): CSSProperties {
+  const background = settings.background;
+  return {
+    filter: `blur(${background.blur}px) brightness(${background.brightness}%) contrast(${background.contrast}%) saturate(${background.saturation}%) hue-rotate(${background.hueRotate}deg)`,
+    transform: `scale(${background.scale / 100})`,
+    transformOrigin: "center",
+  };
+}
+
+export function appearanceVideoOverlay(settings: AppearanceSettings) {
+  return {
+    backgroundColor: settings.background.overlayColor,
+    opacity: settings.background.overlayOpacity / 100,
+  } satisfies CSSProperties;
 }
 
 export function appearanceCssVariables(settings: AppearanceSettings) {
@@ -1018,6 +1051,13 @@ export function appearanceCssVariables(settings: AppearanceSettings) {
   } as CSSProperties;
 }
 
+export function appearanceLayoutVariables(settings: AppearanceSettings) {
+  return {
+    "--olnk-page-padding": `${settings.layout.pagePadding}px`,
+    "--olnk-mobile-page-padding": `${settings.layout.mobilePagePadding}px`,
+  } as CSSProperties;
+}
+
 export function appearanceCardStyle(
   settings: AppearanceSettings,
 ): CSSProperties {
@@ -1032,7 +1072,7 @@ export function appearanceCardStyle(
   return {
     padding: card.padding,
     borderRadius: card.radius,
-    border: `${card.borderWidth}px solid ${colors.cardBorder}`,
+    border: `${card.borderWidth}px ${card.borderStyle} ${colors.cardBorder}`,
     background: `color-mix(in srgb, ${colors.card} ${card.opacity}%, transparent)`,
     backdropFilter: `blur(${card.blur}px)`,
     WebkitBackdropFilter: `blur(${card.blur}px)`,

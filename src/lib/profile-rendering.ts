@@ -23,13 +23,36 @@ export function profileFontFamily(
 }
 
 export function profileAvatarRadius(
-  shape: AppearanceSettings["layout"]["avatarShape"],
+  shape: AppearanceSettings["avatar"]["shape"],
 ) {
   if (shape === "circle") return "50%";
   if (shape === "square") return "4px";
   if (shape === "squircle") return "32%";
   if (shape === "hexagon") return "0";
   return "22%";
+}
+
+export function profileAvatarStyle(
+  settings: AppearanceSettings,
+): React.CSSProperties {
+  const { avatar, colors } = settings;
+  const shadows = {
+    none: "none",
+    soft: `0 12px 32px color-mix(in srgb, ${colors.shadow} 28%, transparent)`,
+    hard: `4px 5px 0 ${colors.shadow}`,
+    glow: `0 0 28px color-mix(in srgb, ${colors.glow} 72%, transparent)`,
+  };
+  return {
+    width: avatar.size,
+    height: avatar.size,
+    borderRadius: profileAvatarRadius(avatar.shape),
+    border: `${avatar.borderWidth}px ${avatar.borderStyle} ${colors.cardBorder}`,
+    boxShadow: shadows[avatar.shadow],
+    clipPath:
+      avatar.shape === "hexagon"
+        ? "polygon(25% 6.7%,75% 6.7%,100% 50%,75% 93.3%,25% 93.3%,0 50%)"
+        : undefined,
+  };
 }
 
 export function profileButtonStyle(
@@ -88,6 +111,16 @@ export function profileCardMargin(
   if (position === "left") return { marginRight: "auto" };
   if (position === "right") return { marginLeft: "auto" };
   return { marginInline: "auto" };
+}
+
+export function profileVerticalMargin(
+  position: AppearanceSettings["layout"]["verticalAlign"],
+  cardEnabled: boolean,
+): React.CSSProperties {
+  if (!cardEnabled) return {};
+  if (position === "center") return { marginBlock: "auto" };
+  if (position === "bottom") return { marginTop: "auto" };
+  return { marginBottom: "auto" };
 }
 
 export function profileHeadingStyle(

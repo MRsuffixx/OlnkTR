@@ -14,17 +14,21 @@ import {
 
 import {
   appearanceBackground,
+  appearanceBackgroundEffects,
   appearanceCardStyle,
   appearanceCssVariables,
+  appearanceVideoOverlay,
 } from "~/lib/appearance";
 import { ProfileBackgroundVideo } from "~/components/profile/profile-background-video";
 import {
-  profileAvatarRadius,
+  profileAvatarStyle,
   profileButtonStyle,
+  profileCardMargin,
   profileDensity,
   profileEmbedUrl,
   profileFontFamily,
   profileHeadingStyle,
+  profileVerticalMargin,
 } from "~/lib/profile-rendering";
 import type { WorkspaceInput } from "~/lib/schemas";
 
@@ -36,12 +40,14 @@ export function ProfilePreview({
   customCss,
   selectedId,
   onSelect,
+  viewport = "mobile",
 }: {
   draft: PreviewDraft;
   username: string;
   customCss: string;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  viewport?: "mobile" | "desktop";
 }) {
   const initial =
     draft.name.trim().slice(0, 1).toLocaleUpperCase("tr-TR") || "O";
@@ -57,10 +63,14 @@ export function ProfilePreview({
       (!link.scheduledStart || new Date(link.scheduledStart) <= now) &&
       (!link.scheduledEnd || new Date(link.scheduledEnd) > now),
   );
+  const activeAlignment =
+    viewport === "mobile"
+      ? appearance.layout.mobileAlignment
+      : appearance.layout.alignment;
   const align =
-    appearance.layout.mobileAlignment === "left"
+    activeAlignment === "left"
       ? "text-left items-start"
-      : appearance.layout.mobileAlignment === "right"
+      : activeAlignment === "right"
         ? "text-right items-end"
         : "text-center items-center";
   return (
@@ -69,7 +79,15 @@ export function ProfilePreview({
       className="relative flex min-h-full flex-col overflow-hidden px-5 py-10"
       style={{
         ...appearanceCssVariables(appearance),
-        ...appearanceBackground(appearance),
+        padding:
+          viewport === "mobile"
+            ? appearance.layout.mobilePagePadding
+            : appearance.layout.pagePadding,
+        paddingBottom:
+          appearance.audio.enabled || appearance.audio.entryEnabled
+            ? 96
+            : undefined,
+        backgroundColor: appearance.colors.background,
         color: appearance.colors.textPrimary,
         fontFamily: profileFontFamily(appearance.typography.bodyFont),
         fontSize: appearance.typography.bodySize,
@@ -81,9 +99,29 @@ export function ProfilePreview({
         <style>{customCss}</style>
       )}
       {appearance.background.mode === "video" &&
-        appearance.background.mediaUrl && (
-          <ProfileBackgroundVideo src={appearance.background.mediaUrl} />
-        )}
+      appearance.background.mediaUrl ? (
+        <div className="pointer-events-none absolute -inset-8" aria-hidden>
+          <ProfileBackgroundVideo
+            src={appearance.background.mediaUrl}
+            fit={appearance.background.fit}
+            position={appearance.background.position}
+            style={appearanceBackgroundEffects(appearance)}
+          />
+          <div
+            className="absolute inset-0"
+            style={appearanceVideoOverlay(appearance)}
+          />
+        </div>
+      ) : (
+        <div
+          className="pointer-events-none absolute -inset-8"
+          style={{
+            ...appearanceBackground(appearance),
+            ...appearanceBackgroundEffects(appearance),
+          }}
+          aria-hidden
+        />
+      )}
       {appearance.background.mode === "particles" && (
         <div className="olnk-particles absolute inset-0" />
       )}
@@ -125,9 +163,18 @@ export function ProfilePreview({
       )}
       <div className="bg-ink absolute top-3 left-1/2 h-5 w-24 -translate-x-1/2 rounded-full" />
       <div
-        className={`relative flex w-full flex-1 flex-col ${align}`}
+        className={`relative flex w-full flex-col ${appearance.card.enabled ? "" : "flex-1"} ${align}`}
         data-olnk-template={appearance.layout.template}
-        style={{ ...appearanceCardStyle(appearance) }}
+        data-card-hover={appearance.card.hover}
+        style={{
+          maxWidth: appearance.layout.contentWidth,
+          ...profileCardMargin(appearance.layout.cardPosition),
+          ...profileVerticalMargin(
+            appearance.layout.verticalAlign,
+            appearance.card.enabled,
+          ),
+          ...appearanceCardStyle(appearance),
+        }}
       >
         {appearance.privacy.showShareActions && (
           <div
@@ -158,16 +205,11 @@ export function ProfilePreview({
             event.stopPropagation();
             onSelect(null);
           }}
-          className="bg-orange relative mt-2 grid shrink-0 place-items-center overflow-hidden text-3xl font-black text-white shadow-[3px_4px_0_rgba(23,33,27,.55)]"
+          className="olnk-avatar bg-orange relative mt-2 grid shrink-0 place-items-center overflow-hidden text-3xl font-black text-white"
+          data-avatar-animation={appearance.avatar.animation}
+          data-avatar-hover={appearance.avatar.hover}
           style={{
-            width: appearance.layout.avatarSize,
-            height: appearance.layout.avatarSize,
-            borderRadius: profileAvatarRadius(appearance.layout.avatarShape),
-            border: `${appearance.layout.avatarBorderWidth}px solid ${appearance.colors.cardBorder}`,
-            clipPath:
-              appearance.layout.avatarShape === "hexagon"
-                ? "polygon(25% 6.7%,75% 6.7%,100% 50%,75% 93.3%,25% 93.3%,0 50%)"
-                : undefined,
+            ...profileAvatarStyle(appearance),
             order: 2,
           }}
           aria-label="Profil bilgilerini düzenle"
@@ -180,8 +222,12 @@ export function ProfilePreview({
         </button>
         {appearance.layout.bioPlacement === "aboveName" && (
           <p
-            className="relative max-w-[280px] leading-6 opacity-70"
-            style={{ marginTop: density.profileGap, order: 2 }}
+            className="relative max-w-[280px] leading-6"
+            style={{
+              marginTop: density.profileGap,
+              order: 2,
+              color: appearance.colors.textSecondary,
+            }}
           >
             {draft.bio || "Kendini birkaç kelimeyle anlat."}
           </p>
@@ -197,13 +243,19 @@ export function ProfilePreview({
             ...profileHeadingStyle(appearance),
             order: 2,
           }}
-        >
-          {draft.name || "Görünen adın"}
-        </h2>
-        {appearance.layout.bioPlacement === "belowName" && (
+      >
+        {draft.name || "Görünen adın"}
+      </h2>
+      <p
+        className="relative mt-1 text-[11px] font-semibold"
+        style={{ order: 2, color: appearance.colors.textMuted }}
+      >
+        @{username}
+      </p>
+      {appearance.layout.bioPlacement === "belowName" && (
           <p
-            className="relative mt-2 max-w-[280px] leading-6 opacity-70"
-            style={{ order: 2 }}
+            className="relative mt-2 max-w-[280px] leading-6"
+            style={{ order: 2, color: appearance.colors.textSecondary }}
           >
             {draft.bio || "Kendini birkaç kelimeyle anlat."}
           </p>
