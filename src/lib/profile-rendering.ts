@@ -1,3 +1,4 @@
+import { fontFamilyFor } from "~/config/font-registry";
 import type { AppearanceSettings } from "~/lib/appearance";
 import type { LinkCustomization } from "~/lib/schemas";
 
@@ -7,19 +8,7 @@ export function profileFontFamily(
     | AppearanceSettings["typography"]["bodyFont"]
     | LinkCustomization["fontFamily"],
 ) {
-  const families: Record<string, string> = {
-    Fraunces: "var(--font-fraunces), serif",
-    Manrope: "var(--font-manrope), sans-serif",
-    "Space Grotesk": "var(--font-space-grotesk), sans-serif",
-    "Playfair Display": "var(--font-playfair), serif",
-    "DM Serif Display": "var(--font-dm-serif), serif",
-    "Bebas Neue": "var(--font-bebas), sans-serif",
-    Inter: "var(--font-inter), sans-serif",
-    Montserrat: "var(--font-montserrat), sans-serif",
-    Lora: "var(--font-lora), serif",
-    "Roboto Mono": "var(--font-roboto-mono), monospace",
-  };
-  return font === "inherit" ? undefined : families[font];
+  return font === "inherit" ? undefined : fontFamilyFor(font);
 }
 
 export function profileAvatarRadius(

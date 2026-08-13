@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import { z } from "zod";
 
+import { bodyFontSchema, headingFontSchema } from "~/config/font-registry";
+
 export const APPEARANCE_SETTINGS_VERSION = 3;
 export const hexColor = z.string().regex(/^#[\dA-Fa-f]{6}$/);
 
@@ -19,7 +21,10 @@ const gradientStops = z
     }),
   )
   .min(2)
-  .max(5);
+  .max(5)
+  .transform((stops) =>
+    [...stops].sort((left, right) => left.position - right.position),
+  );
 
 const defaultColors = {
   primary: "#F06432",
@@ -169,22 +174,8 @@ export const appearanceSchema = z.object({
     press: z.enum(["none", "compress", "sink"]),
   }),
   typography: z.object({
-    headingFont: z.enum([
-      "Fraunces",
-      "Manrope",
-      "Space Grotesk",
-      "Playfair Display",
-      "DM Serif Display",
-      "Bebas Neue",
-    ]),
-    bodyFont: z.enum([
-      "Manrope",
-      "Fraunces",
-      "Inter",
-      "Montserrat",
-      "Lora",
-      "Roboto Mono",
-    ]),
+    headingFont: headingFontSchema,
+    bodyFont: bodyFontSchema,
     headingSize: z.number().int().min(22).max(54),
     bodySize: z.number().int().min(12).max(22),
     weight: z.union([
@@ -693,7 +684,7 @@ export const PROFILE_PRESETS = {
   terminal: {
     label: "Retro Terminal",
     description: "Monospace ve CRT karakteri",
-    tier: "pro",
+    tier: "free",
   },
   minimal: {
     label: "Minimal White",

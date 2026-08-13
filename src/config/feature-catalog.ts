@@ -1,3 +1,8 @@
+import {
+  PRO_BODY_FONT_IDS,
+  PRO_HEADING_FONT_IDS,
+} from "~/config/font-registry";
+
 export type ProductTier = "free" | "pro";
 
 export type AppearanceFeature = {
@@ -17,7 +22,7 @@ export const FEATURE_CATALOG = {
     label: "Tema paketi",
     tier: "free",
     fallback: "custom",
-    proValues: ["frost", "midnight", "cyber", "terminal"],
+    proValues: ["frost", "midnight", "cyber"],
   },
   "colors.primary": { label: "Ana renk", tier: "free", fallback: "#F06432" },
   "colors.secondary": {
@@ -33,13 +38,13 @@ export const FEATURE_CATALOG = {
   },
   "colors.backgroundSecondary": {
     label: "İkincil arka plan",
-    tier: "pro",
+    tier: "free",
     fallback: "#F8C95C",
   },
   "colors.surface": { label: "Yüzey", tier: "free", fallback: "#FDFCF7" },
   "colors.surfaceHover": {
     label: "Yüzey vurgusu",
-    tier: "pro",
+    tier: "free",
     fallback: "#FFFFFF",
   },
   "colors.card": { label: "Kart rengi", tier: "free", fallback: "#FDFCF7" },
@@ -60,29 +65,29 @@ export const FEATURE_CATALOG = {
   },
   "colors.textMuted": {
     label: "Soluk metin",
-    tier: "pro",
+    tier: "free",
     fallback: "#64726A",
   },
-  "colors.icon": { label: "İkon rengi", tier: "pro", fallback: "#17211B" },
-  "colors.link": { label: "Bağlantı rengi", tier: "pro", fallback: "#17211B" },
+  "colors.icon": { label: "İkon rengi", tier: "free", fallback: "#17211B" },
+  "colors.link": { label: "Bağlantı rengi", tier: "free", fallback: "#17211B" },
   "colors.linkHover": {
     label: "Bağlantı vurgusu",
-    tier: "pro",
+    tier: "free",
     fallback: "#F06432",
   },
-  "colors.glow": { label: "Parlama rengi", tier: "pro", fallback: "#F8C95C" },
-  "colors.shadow": { label: "Gölge rengi", tier: "pro", fallback: "#17211B" },
+  "colors.glow": { label: "Parlama rengi", tier: "free", fallback: "#F8C95C" },
+  "colors.shadow": { label: "Gölge rengi", tier: "free", fallback: "#17211B" },
   "colors.particle": {
     label: "Parçacık rengi",
-    tier: "pro",
+    tier: "free",
     fallback: "#FFFFFF",
   },
   "colors.username": {
     label: "Kullanıcı adı",
-    tier: "pro",
+    tier: "free",
     fallback: "#17211B",
   },
-  "colors.badge": { label: "Rozet rengi", tier: "pro", fallback: "#F8C95C" },
+  "colors.badge": { label: "Rozet rengi", tier: "free", fallback: "#F8C95C" },
   "colors.button": { label: "Düğme rengi", tier: "free", fallback: "#17211B" },
   "colors.buttonText": {
     label: "Düğme metni",
@@ -93,21 +98,22 @@ export const FEATURE_CATALOG = {
     label: "Arka plan türü",
     tier: "free",
     fallback: "gradient",
-    proValues: ["image", "video", "particles", "motion"],
+    proValues: ["video", "motion"],
   },
   "background.gradient.type": {
     label: "Geçiş türü",
-    tier: "pro",
+    tier: "free",
     fallback: "linear",
+    proValues: ["conic"],
   },
   "background.gradient.angle": {
     label: "Geçiş açısı",
-    tier: "pro",
+    tier: "free",
     fallback: 145,
   },
   "background.gradient.stops": {
     label: "Çok duraklı geçiş",
-    tier: "pro",
+    tier: "free",
     fallback: [
       { color: "#F5F0DE", position: 0 },
       { color: "#F8C95C", position: 100 },
@@ -115,47 +121,47 @@ export const FEATURE_CATALOG = {
   },
   "background.mediaUrl": {
     label: "Görsel veya video",
-    tier: "pro",
+    tier: "free",
     fallback: "",
   },
   "background.overlayColor": {
     label: "Medya kaplaması",
-    tier: "pro",
+    tier: "free",
     fallback: "#17211B",
   },
   "background.overlayOpacity": {
     label: "Kaplama yoğunluğu",
-    tier: "pro",
+    tier: "free",
     fallback: 18,
   },
   "background.fit": {
     label: "Medya boyutlandırma",
-    tier: "pro",
+    tier: "free",
     fallback: "cover",
   },
   "background.position": {
     label: "Medya konumu",
-    tier: "pro",
+    tier: "free",
     fallback: "center",
   },
   "background.blur": {
     label: "Arka plan bulanıklığı",
-    tier: "pro",
+    tier: "free",
     fallback: 0,
   },
   "background.brightness": {
     label: "Arka plan parlaklığı",
-    tier: "pro",
+    tier: "free",
     fallback: 100,
   },
   "background.contrast": {
     label: "Arka plan kontrastı",
-    tier: "pro",
+    tier: "free",
     fallback: 100,
   },
   "background.saturation": {
     label: "Arka plan doygunluğu",
-    tier: "pro",
+    tier: "free",
     fallback: 100,
   },
   "background.hueRotate": {
@@ -176,42 +182,49 @@ export const FEATURE_CATALOG = {
   },
   "card.enabled": { label: "Profil kartı", tier: "free", fallback: false },
   "card.opacity": { label: "Kart opaklığı", tier: "free", fallback: 72 },
-  "card.blur": { label: "Kart bulanıklığı", tier: "pro", fallback: 18 },
+  "card.blur": { label: "Kart bulanıklığı", tier: "free", fallback: 18 },
   "card.radius": { label: "Kart köşeleri", tier: "free", fallback: 32 },
-  "card.borderWidth": { label: "Kart kenarlığı", tier: "pro", fallback: 1 },
+  "card.borderWidth": { label: "Kart kenarlığı", tier: "free", fallback: 1 },
   "card.borderStyle": {
     label: "Kart kenarlık biçimi",
-    tier: "pro",
+    tier: "free",
     fallback: "solid",
   },
-  "card.shadow": { label: "Kart gölgesi", tier: "pro", fallback: "soft" },
+  "card.shadow": {
+    label: "Kart gölgesi",
+    tier: "free",
+    fallback: "soft",
+    proValues: ["glow"],
+  },
   "card.hover": {
     label: "Kart etkileşimi",
-    tier: "pro",
+    tier: "free",
     fallback: "none",
+    proValues: ["tilt", "glow"],
   },
-  "card.padding": { label: "Kart iç boşluğu", tier: "pro", fallback: 28 },
+  "card.padding": { label: "Kart iç boşluğu", tier: "free", fallback: 28 },
   "avatar.shape": {
     label: "Avatar şekli",
     tier: "free",
     fallback: "circle",
-    proValues: ["squircle", "hexagon"],
+    proValues: ["hexagon"],
   },
-  "avatar.size": { label: "Avatar boyutu", tier: "pro", fallback: 96 },
+  "avatar.size": { label: "Avatar boyutu", tier: "free", fallback: 96 },
   "avatar.borderWidth": {
     label: "Avatar kenarlığı",
-    tier: "pro",
+    tier: "free",
     fallback: 3,
   },
   "avatar.borderStyle": {
     label: "Avatar kenarlık biçimi",
-    tier: "pro",
+    tier: "free",
     fallback: "solid",
   },
   "avatar.shadow": {
     label: "Avatar gölgesi",
-    tier: "pro",
+    tier: "free",
     fallback: "hard",
+    proValues: ["glow"],
   },
   "avatar.animation": {
     label: "Avatar animasyonu",
@@ -220,8 +233,9 @@ export const FEATURE_CATALOG = {
   },
   "avatar.hover": {
     label: "Avatar etkileşimi",
-    tier: "pro",
+    tier: "free",
     fallback: "none",
+    proValues: ["tilt", "glow"],
   },
   "buttons.shape": {
     label: "Düğme şekli",
@@ -236,41 +250,37 @@ export const FEATURE_CATALOG = {
     fallback: "shadow",
     proValues: ["glass", "threeD"],
   },
-  "buttons.height": { label: "Düğme yüksekliği", tier: "pro", fallback: 58 },
+  "buttons.height": { label: "Düğme yüksekliği", tier: "free", fallback: 58 },
   "buttons.spacing": { label: "Düğme aralığı", tier: "free", fallback: 12 },
   "buttons.hover": {
     label: "Düğme üzerine gelme",
-    tier: "pro",
+    tier: "free",
     fallback: "lift",
+    proValues: ["tilt", "glow"],
   },
   "buttons.press": {
     label: "Düğme basma efekti",
-    tier: "pro",
+    tier: "free",
     fallback: "compress",
   },
   "typography.headingFont": {
     label: "Başlık yazı tipi",
     tier: "free",
     fallback: "Fraunces",
-    proValues: [
-      "Space Grotesk",
-      "Playfair Display",
-      "DM Serif Display",
-      "Bebas Neue",
-    ],
+    proValues: PRO_HEADING_FONT_IDS,
   },
   "typography.bodyFont": {
     label: "Gövde yazı tipi",
     tier: "free",
     fallback: "Manrope",
-    proValues: ["Inter", "Montserrat", "Lora", "Roboto Mono"],
+    proValues: PRO_BODY_FONT_IDS,
   },
   "typography.headingSize": {
     label: "Başlık boyutu",
-    tier: "pro",
+    tier: "free",
     fallback: 30,
   },
-  "typography.bodySize": { label: "Metin boyutu", tier: "pro", fallback: 15 },
+  "typography.bodySize": { label: "Metin boyutu", tier: "free", fallback: 15 },
   "typography.weight": {
     label: "Metin kalınlığı",
     tier: "free",
@@ -278,28 +288,28 @@ export const FEATURE_CATALOG = {
   },
   "typography.letterSpacing": {
     label: "Harf aralığı",
-    tier: "pro",
+    tier: "free",
     fallback: 0,
   },
   "typography.headingEffect": {
     label: "Başlık efekti",
-    tier: "pro",
+    tier: "free",
     fallback: "none",
+    proValues: ["shimmer"],
   },
   "layout.template": {
     label: "Profil düzeni",
     tier: "free",
     fallback: "stack",
-    proValues: ["bento", "terminal"],
   },
   "layout.cardPosition": {
     label: "Kart konumu",
-    tier: "pro",
+    tier: "free",
     fallback: "center",
   },
   "layout.bioPlacement": {
     label: "Biyografi konumu",
-    tier: "pro",
+    tier: "free",
     fallback: "belowName",
   },
   "layout.alignment": {
@@ -309,7 +319,7 @@ export const FEATURE_CATALOG = {
   },
   "layout.mobileAlignment": {
     label: "Mobil hizalama",
-    tier: "pro",
+    tier: "free",
     fallback: "center",
   },
   "layout.density": {
@@ -320,12 +330,12 @@ export const FEATURE_CATALOG = {
   },
   "layout.contentWidth": {
     label: "İçerik genişliği",
-    tier: "pro",
+    tier: "free",
     fallback: 620,
   },
   "layout.pagePadding": {
     label: "Masaüstü sayfa boşluğu",
-    tier: "pro",
+    tier: "free",
     fallback: 28,
   },
   "layout.mobilePagePadding": {
@@ -335,25 +345,31 @@ export const FEATURE_CATALOG = {
   },
   "layout.verticalAlign": {
     label: "Kart dikey konumu",
-    tier: "pro",
+    tier: "free",
     fallback: "top",
   },
   "layout.socialPlacement": {
     label: "Sosyal ikon konumu",
-    tier: "pro",
+    tier: "free",
     fallback: "belowBio",
   },
-  "effects.cursor": { label: "Özel imleç", tier: "pro", fallback: "default" },
+  "effects.cursor": {
+    label: "Özel imleç",
+    tier: "free",
+    fallback: "default",
+    proValues: ["heart", "star"],
+  },
   "effects.trail": { label: "İmleç izi", tier: "pro", fallback: "none" },
   "effects.clickRipple": {
     label: "Tıklama dalgası",
-    tier: "pro",
+    tier: "free",
     fallback: false,
   },
   "effects.entrance": {
     label: "Sayfa giriş animasyonu",
-    tier: "pro",
+    tier: "free",
     fallback: "fade",
+    proValues: ["stagger", "pop"],
   },
   "effects.staggerMs": {
     label: "Bağlantı gecikmesi",

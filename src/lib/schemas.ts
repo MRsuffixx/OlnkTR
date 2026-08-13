@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { linkFontSchema } from "~/config/font-registry";
 import { normalizeEmail } from "~/lib/email";
 
 import { appearanceSchema, hexColor } from "~/lib/appearance";
@@ -38,17 +39,7 @@ export const themeInput = z.object({
 export const linkCustomizationSchema = z.object({
   buttonColor: hexColor.nullable().default(null),
   textColor: hexColor.nullable().default(null),
-  fontFamily: z
-    .enum([
-      "inherit",
-      "Manrope",
-      "Fraunces",
-      "Inter",
-      "Montserrat",
-      "Lora",
-      "Roboto Mono",
-    ])
-    .default("inherit"),
+  fontFamily: linkFontSchema.default("inherit"),
   iconStyle: z.enum(["favicon", "mono", "hidden"]).default("favicon"),
 });
 
