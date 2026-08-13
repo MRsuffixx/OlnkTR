@@ -63,6 +63,9 @@
 ├── SECURITY(.tr).md              # Vulnerability reporting
 ├── package.json                  # Scripts + deps
 ├── pnpm-workspace.yaml           # pnpm peer overrides + allowBuilds
+├── Dockerfile                    # Multi-stage production/migration image
+├── compose.yaml                  # PostgreSQL + migration + app + Mailpit
+├── .dockerignore                 # Minimal, secret-free image context
 ├── tsconfig.json                 # strict + `~/*` alias
 ├── next.config.js                # CSP, serverExternalPackages, env side-effect
 ├── prisma.config.ts              # Prisma datasource URL
@@ -235,6 +238,13 @@ pnpm db:push                 # Dev-only schema sync (no migration)
 pnpm db:migrate              # Deploy migrations (CI / production)
 pnpm db:studio               # Prisma Studio
 pnpm admin:role <email> --role ADMIN|USER  # Trusted-shell role management
+```
+
+### Docker
+
+```bash
+docker compose up --build --wait  # App :3000, Mailpit :8025, migrations automatic
+docker compose down               # Preserve named database/mail volumes
 ```
 
 ### Development

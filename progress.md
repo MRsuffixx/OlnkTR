@@ -10,7 +10,9 @@
 ### 1.1 Shipped and Working (Free Tier)
 
 - Public profile at `olnk.tr/[username]` (RSC) with background, avatar, bio, links, and brand chip.
-- Google OAuth and Nodemailer magic-link sign-in.
+- Google OAuth and Nodemailer magic-link sign-in with Turkish, escaped text/HTML messages.
+- Production-style Docker Compose stack with PostgreSQL 17, automatic migrations,
+  standalone Next.js runtime, health checks, and a Mailpit development inbox.
 - Username claim with `pg_advisory_xact_lock` + DB unique constraint as authority.
 - Drag-and-drop link reorder via `@dnd-kit`.
 - Per-link icons, enable/disable, and drag-and-drop ordering.
@@ -58,6 +60,8 @@
 - `pnpm audit --prod --audit-level high`.
 - `pnpm build` (Next.js production build).
 - `pnpm test:e2e` (Playwright Chromium + mobile-chromium, port 3100, with `RUN_DATABASE_E2E=1`).
+- `docker compose up --build --wait` plus a real Auth.js → SMTP → callback/session
+  smoke test against Mailpit.
 
 ---
 
@@ -122,6 +126,23 @@
 ---
 
 ## 5. Change Log (recent)
+
+
+### 2026-08-09 — Docker runtime and magic-link delivery repair
+
+- Added a pinned Node/pnpm multi-stage Dockerfile, OpenSSL, non-root standalone
+  runtime, BuildKit dependency cache, PostgreSQL/Mailpit Compose services, automatic
+  migration ordering, and health checks.
+- Repaired Auth.js email pre-verification and verified-callback authorization without
+  reopening missing-id OAuth requests; existing suspended/banned/admin account checks
+  remain in force and email requests are address-rate-limited.
+- Added a Turkish escaped magic-link template, strict SMTP URL/pair validation, and
+  `AUTH_URL` so container bind addresses cannot leak into emailed links.
+- Pinned patched `fast-uri`, `ip-address`, and `nanoid` transitives after the current
+  registry audit exposed five advisories; the production audit now reports zero.
+- Verified clean install, Prisma generation/migrations, lint/typecheck, unit tests,
+  formatting, production build, all 12 Playwright cases (including DB-backed coverage),
+  container health, SMTP delivery, token consumption, user/session creation, and dashboard redirect.
 
 ### 2026-07-24 — Audio, ambient effects, profile gates, and honest counters
 

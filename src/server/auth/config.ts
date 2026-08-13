@@ -12,6 +12,11 @@ import {
   canAccessAccount,
   getAccountAccess,
 } from "~/server/auth/account-access";
+import {
+  isEmailAuthenticationCallback,
+  isEmailVerificationRequest,
+  sendVerificationRequest,
+} from "~/server/auth/email-verification";
 import { db } from "~/server/db";
 import {
   claimUsername,
@@ -30,8 +35,15 @@ declare module "next-auth" {
 }
 
 const googleEnabled = Boolean(env.AUTH_GOOGLE_ID && env.AUTH_GOOGLE_SECRET);
-const emailEnabled = Boolean(env.EMAIL_SERVER && env.EMAIL_FROM);
+const emailServerConfigured = Boolean(env.EMAIL_SERVER);
+const emailFromConfigured = Boolean(env.EMAIL_FROM);
 
+if (emailServerConfigured !== emailFromConfigured)
+  throw new Error(
+    "EMAIL_SERVER and EMAIL_FROM must either both be configured or both be omitted.",
+  );
+
+const emailEnabled = emailServerConfigured && emailFromConfigured;
 export const authMethods = { googleEnabled, emailEnabled };
 
 const providers: NextAuthConfig["providers"] = [];
@@ -51,6 +63,7 @@ if (emailEnabled) {
     Nodemailer({
       server: env.EMAIL_SERVER,
       from: env.EMAIL_FROM,
+      sendVerificationRequest,
       maxAge: 10 * 60,
     }),
   );
@@ -163,9 +176,39 @@ export const authConfig = {
   },
   session: { strategy: "database" },
   callbacks: {
-    signIn: async ({ user }) => {
+    signIn: async ({ user, email, account: providerAccount }) => {
+      const userEmail = user.email;
+      if (
+        userEmail &&
+        isEmailVerificationRequest({
+          userEmail,
+          verificationRequest: email?.verificationRequest,
+        })
+      ) {
+        const normalizedEmail = normalizeEmail(userEmail);
+        const rate = await consumeRateLimit({
+          key: `auth-email:${normalizedEmail}`,
+          limit: 5,
+          windowMs: 60 * 60 * 1000,
+          blockMs: 60 * 60 * 1000,
+        });
+        if (!rate.allowed) return false;
+        if (!user.id) return true;
+        const existingAccount = await getAccountAccess(user.id);
+        return existingAccount ? canAccessAccount(existingAccount) : true;
+      }
+
+      const emailAuthenticationCallback = isEmailAuthenticationCallback({
+        accountType: providerAccount?.type,
+        verificationRequest: email?.verificationRequest,
+      });
+      if (emailAuthenticationCallback && !userEmail) return false;
       if (!user.id) return false;
       const account = await getAccountAccess(user.id);
+      // Auth.js creates a random temporary id before persisting a brand-new
+      // user. At this point the one-time verification token was already
+      // validated and consumed by Auth.js.
+      if (emailAuthenticationCallback && !account) return true;
       if (account?.role === "ADMIN") {
         const actorUserId = account.id;
         const actorLabel = adminActorLabel(account);

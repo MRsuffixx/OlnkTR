@@ -1,13 +1,29 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
+const smtpServerSchema = z
+  .string()
+  .trim()
+  .refine((value) => {
+    try {
+      const url = new URL(value);
+      return (
+        (url.protocol === "smtp:" || url.protocol === "smtps:") &&
+        Boolean(url.hostname)
+      );
+    } catch {
+      return false;
+    }
+  }, "Geçerli bir smtp:// veya smtps:// adresi girin.");
+
 export const env = createEnv({
   server: {
     AUTH_SECRET: z.string().min(32),
+    AUTH_URL: z.string().url().optional(),
     AUTH_GOOGLE_ID: z.string().optional(),
     AUTH_GOOGLE_SECRET: z.string().optional(),
-    EMAIL_SERVER: z.string().optional(),
-    EMAIL_FROM: z.string().min(3).optional(),
+    EMAIL_SERVER: smtpServerSchema.optional(),
+    EMAIL_FROM: z.string().trim().min(3).optional(),
     DATABASE_URL: z.string().url(),
     STRIPE_SECRET_KEY: z.string().startsWith("sk_").optional(),
     STRIPE_WEBHOOK_SECRET: z.string().startsWith("whsec_").optional(),
@@ -62,6 +78,7 @@ export const env = createEnv({
   },
   runtimeEnv: {
     AUTH_SECRET: process.env.AUTH_SECRET,
+    AUTH_URL: process.env.AUTH_URL,
     AUTH_GOOGLE_ID: process.env.AUTH_GOOGLE_ID,
     AUTH_GOOGLE_SECRET: process.env.AUTH_GOOGLE_SECRET,
     EMAIL_SERVER: process.env.EMAIL_SERVER,

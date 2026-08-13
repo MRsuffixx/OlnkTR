@@ -50,6 +50,11 @@ Auxiliaries that connect from inside the server:
 - Stripe, iyzico, PayTR, Adyen via the adapter registry + universal webhook route.
 - Email via Nodemailer/SMTP for magic links.
 
+The local production-style container boundary is defined by `Dockerfile` and
+`compose.yaml`. Compose waits for PostgreSQL health, runs `prisma migrate deploy`
+to completion, then starts the non-root standalone Next.js runtime. Mailpit provides
+an internal SMTP endpoint and a loopback-only development inbox.
+
 ---
 
 ## 2. Request Lifecycle

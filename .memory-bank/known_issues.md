@@ -272,3 +272,23 @@ tRPC cache policy, and database URL parsing. Adyen Standard webhook verification
 regression fixture covering its per-notification-item HMAC protocol.
 **Verification:** See `AUDIT_REMEDIATION.md` for the baseline, classification matrix, exact
 commands, and remaining environment-dependent checks.
+
+---
+
+## 27. Magic-link sign-in returned `AccessDenied` before SMTP delivery
+
+**Severity:** Resolved (authentication outage)
+**Symptom:** Auth.js returned `/login?error=AccessDenied` and no message reached SMTP
+for a new e-mail address. After allowing the first call, consuming the link could still
+be denied before the new user was persisted.
+**Root cause:** Auth.js assigns a temporary random UUID both before sending an e-mail and
+before persisting a user from a verified callback. Treating any non-empty `user.id` as a
+persisted account caused `getAccountAccess()` to return null and deny both phases.
+**Resolution:** Authorization now distinguishes the documented
+`email.verificationRequest` phase and the already-token-verified `account.type = "email"`
+callback. New users may proceed only through those e-mail-specific states; existing
+accounts still pass live account-status/admin checks. Requests are rate-limited per
+normalized address.
+**Verification:** Docker smoke coverage performs CSRF setup, sends through Mailpit,
+checks the Turkish text/HTML body and public `AUTH_URL` origin, consumes the single-use
+token, verifies the session cookie, and observes the dashboard redirect.

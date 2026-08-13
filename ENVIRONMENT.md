@@ -12,6 +12,7 @@
 | Key           | Required in      | Type              | Notes                                                                                                        |
 | ------------- | ---------------- | ----------------- | ------------------------------------------------------------------------------------------------------------ |
 | `AUTH_SECRET` | all environments | string ≥ 32 chars | Used by Auth.js (NextAuth v5) to sign tokens, access cookies, and analytics HMAC keys. There is no fallback. |
+| `AUTH_URL`    | Docker/prod      | absolute URL      | Public server origin used for Auth.js callback and magic-link URLs; never use a container bind address.     |
 
 ### 1.2 Google OAuth
 
@@ -29,7 +30,10 @@ If both are present, `googleEnabled = true` (see `src/server/auth/config.ts:25`)
 | `EMAIL_SERVER` | when enabling email | SMTP URL, e.g. `smtp://user:pass@smtp.example.com:587` |
 | `EMAIL_FROM`   | when enabling email | e.g. `"olnk.tr <merhaba@olnk.tr>"`                     |
 
-If both are present, `emailEnabled = true` and the magic-link form is offered. Magic links expire after 10 minutes (`maxAge: 10 * 60`).
+Both values must be present or both omitted; a partial configuration fails at startup.
+`EMAIL_SERVER` accepts only `smtp://` or `smtps://` URLs. Percent-encode reserved
+characters in SMTP usernames/passwords. Magic links expire after 10 minutes, are
+single-use, and the message content is Turkish.
 
 ### 1.4 Database
 
@@ -42,6 +46,7 @@ If both are present, `emailEnabled = true` and the magic-link form is offered. M
 | Key                   | Required | Notes                                                                             |
 | --------------------- | -------- | --------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_APP_URL` | yes      | Canonical origin, used by `metadataBase`, sitemap, robots, webhooks, email links. |
+| `AUTH_URL`            | Docker/prod | Auth.js server origin for callbacks and e-mail links.                              |
 
 ### 1.6 Trusted IP / Geo
 
@@ -140,6 +145,7 @@ There are no reserved env vars beyond the above. The T3-env schema throws at bui
 | Database          | `DATABASE_URL`                                                                                                                                                                         |
 | Auth core         | `AUTH_SECRET`                                                                                                                                                                          |
 | Google OAuth      | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`                                                                                                                                                 |
+| Auth callback URL | `AUTH_URL`                                                                                                                                                                             |
 | Magic links       | `EMAIL_SERVER`, `EMAIL_FROM`                                                                                                                                                           |
 | Public origin     | `NEXT_PUBLIC_APP_URL`                                                                                                                                                                  |
 | Geo / rate limits | `TRUSTED_IP_HEADER`                                                                                                                                                                    |
@@ -163,7 +169,20 @@ There are no reserved env vars beyond the above. The T3-env schema throws at bui
 - Storage and payment provider keys are typically absent — the UI gracefully falls back.
 - Prisma logging: `["query", "error", "warn"]`.
 
-### 4.2 CI (`.github/workflows/ci.yml`)
+### 4.2 Docker Compose
+
+- `docker compose up --build --wait` starts PostgreSQL 17, runs all committed
+  migrations once, starts the standalone production app, and starts Mailpit.
+- `AUTH_URL` and `NEXT_PUBLIC_APP_URL` both default to `http://localhost:3000`.
+- Mailpit receives SMTP on the internal `mailpit:1025` address and exposes its UI
+  only at `http://127.0.0.1:8025`.
+- The app is exposed only at `http://127.0.0.1:3000`.
+- Default Compose secrets and database credentials are local-only. Override them
+  before exposing the stack to a network.
+- `docker compose down` preserves named volumes; `docker compose down --volumes`
+  intentionally deletes local database and captured-mail data.
+
+### 4.3 CI (`.github/workflows/ci.yml`)
 
 - `AUTH_SECRET`: ≥ 32 char secret set in the workflow env.
 - `NEXT_PUBLIC_APP_URL`: `http://localhost:3100`.
@@ -172,7 +191,7 @@ There are no reserved env vars beyond the above. The T3-env schema throws at bui
 - `RUN_DATABASE_E2E=1`: enables the Playwright DB-backed tests (`tests/e2e/public-accessibility.spec.ts`).
 - Postgres service: `postgres:17` on port 5432 with health check.
 
-### 4.3 Production
+### 4.4 Production
 
 - All required production keys present and rotated through a secret manager.
 - `AUTH_SECRET` ≥ 32 chars.
@@ -195,6 +214,8 @@ There are no reserved env vars beyond the above. The T3-env schema throws at bui
 - A malformed `DATABASE_URL` is rejected at startup, including in dev.
 - `SKIP_ENV_VALIDATION=1` disables validation (used by Docker).
 
+- `EMAIL_SERVER` rejects non-SMTP protocols, and partial `EMAIL_SERVER`/`EMAIL_FROM`
+  configuration fails while auth initializes.
 If you add a new env var:
 
 1. Add it to `.env.example` (dummy values only).
