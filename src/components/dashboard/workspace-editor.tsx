@@ -44,7 +44,10 @@ import {
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import { AppearanceEditor } from "~/components/dashboard/appearance-editor";
+import {
+  AppearanceEditor,
+  type AppearanceCategory,
+} from "~/components/dashboard/appearance-editor";
 import { AssetUpload } from "~/components/dashboard/asset-upload";
 import { ProfilePreview } from "~/components/dashboard/profile-preview";
 import { SocialAccountEditor } from "~/components/dashboard/social-account-editor";
@@ -57,7 +60,23 @@ type Workspace = RouterOutputs["workspace"]["get"];
 type Draft = Omit<WorkspaceInput, "revision">;
 type DraftLink = Draft["links"][number];
 type SaveStatus = "saved" | "waiting" | "saving" | "error" | "conflict";
-type BuilderPanel = "profile" | "links" | "socials" | "design" | "music";
+type BuilderPanel =
+  | "profile"
+  | "links"
+  | "socials"
+  | "themes"
+  | "colors"
+  | "background"
+  | "card"
+  | "avatar"
+  | "buttons"
+  | "typography"
+  | "layout"
+  | "effects"
+  | "music"
+  | "counter"
+  | "publish"
+  | "advanced";
 
 const builderPanels: Array<{
   id: BuilderPanel;
@@ -84,10 +103,58 @@ const builderPanels: Array<{
     icon: Share2,
   },
   {
-    id: "design",
-    label: "Tasarım",
-    description: "Tema ve görünüm motoru",
+    id: "themes",
+    label: "Temalar",
+    description: "17 hazır tema ve stil paketi",
     icon: Palette,
+  },
+  {
+    id: "colors",
+    label: "Renkler",
+    description: "22 semantik renk değişkeni",
+    icon: Palette,
+  },
+  {
+    id: "background",
+    label: "Arka plan",
+    description: "Renk, gradient, görsel ve video",
+    icon: Sparkles,
+  },
+  {
+    id: "card",
+    label: "Kart",
+    description: "Yüzey, blur, kenarlık ve gölge",
+    icon: PanelsTopLeft,
+  },
+  {
+    id: "avatar",
+    label: "Avatar",
+    description: "Şekil, boyut ve etkileşim",
+    icon: UserRound,
+  },
+  {
+    id: "buttons",
+    label: "Düğmeler",
+    description: "Şekil, renk ve animasyon",
+    icon: Link2,
+  },
+  {
+    id: "typography",
+    label: "Yazı",
+    description: "Font, boyut ve başlık efekti",
+    icon: UserRound,
+  },
+  {
+    id: "layout",
+    label: "Düzen",
+    description: "Yerleşim ve responsive hizalama",
+    icon: PanelsTopLeft,
+  },
+  {
+    id: "effects",
+    label: "Efektler",
+    description: "İmleç, parçacık ve ekran efektleri",
+    icon: Sparkles,
   },
   {
     id: "music",
@@ -95,7 +162,43 @@ const builderPanels: Array<{
     description: "Spotify, SoundCloud ve ses",
     icon: Music2,
   },
+  {
+    id: "counter",
+    label: "Sayaç",
+    description: "Ziyaretçi kanıtı ve görünümü",
+    icon: Eye,
+  },
+  {
+    id: "publish",
+    label: "Yayın",
+    description: "SEO, paylaşım ve gizlilik",
+    icon: Eye,
+  },
+  {
+    id: "advanced",
+    label: "Gelişmiş",
+    description: "Gelişmiş profil seçenekleri",
+    icon: Crown,
+  },
 ];
+
+const APPEARANCE_PANEL_CATEGORIES: Partial<
+  Record<BuilderPanel, AppearanceCategory>
+> = {
+  themes: "presets",
+  colors: "colors",
+  background: "background",
+  card: "card",
+  avatar: "avatar",
+  buttons: "buttons",
+  typography: "typography",
+  layout: "layout",
+  effects: "effects",
+  music: "audio",
+  counter: "socialProof",
+  publish: "publish",
+  advanced: "advanced",
+};
 
 const NEW_LINK: Omit<DraftLink, "id"> = {
   title: "Yeni bağlantı",
@@ -609,6 +712,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
   const activeBuilderPanel =
     builderPanels.find((panel) => panel.id === builderPanel) ??
     builderPanels[0]!;
+  const appearanceCategory = APPEARANCE_PANEL_CATEGORIES[builderPanel];
 
   return (
     <main className="mx-auto max-w-[1600px]">
@@ -634,7 +738,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
             <PanelsTopLeft className="size-5" />
           </div>
           <nav
-            className="mt-7 flex w-full flex-col gap-2 px-2"
+            className="dashboard-scrollbar mt-7 flex w-full flex-1 flex-col gap-2 overflow-y-auto px-2"
             aria-label="Sayfa oluşturucu"
           >
             {builderPanels.map((panel) => (
@@ -654,7 +758,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
               </button>
             ))}
           </nav>
-          <span className="text-ink/35 mt-auto text-[9px] font-black tracking-[.2em] uppercase [writing-mode:vertical-rl]">
+          <span className="text-ink/35 mt-3 text-[9px] font-black tracking-[.2em] uppercase [writing-mode:vertical-rl]">
             olnk studio
           </span>
         </aside>
@@ -864,7 +968,7 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                 }
               />
             )}
-            {builderPanel === "design" && (
+            {appearanceCategory && (
               <AppearanceEditor
                 appearance={draft.appearance}
                 customCss={draft.customCss}
@@ -890,36 +994,8 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                 onUpgrade={() => setUpgrade(true)}
                 profilePasswordProtected={profilePasswordProtected}
                 onProfilePasswordChange={setProfilePasswordProtected}
-              />
-            )}
-            {builderPanel === "music" && (
-              <AppearanceEditor
-                appearance={draft.appearance}
-                customCss={draft.customCss}
-                hasPro={initial.hasPro}
-                onChange={(appearance) =>
-                  setDraft((current) => ({ ...current, appearance }))
-                }
-                onMediaUploaded={(mediaUrl) =>
-                  setDraft((current) => ({
-                    ...current,
-                    appearance: {
-                      ...current.appearance,
-                      background: {
-                        ...current.appearance.background,
-                        mediaUrl,
-                      },
-                    },
-                  }))
-                }
-                onCssChange={(customCss) =>
-                  setDraft((current) => ({ ...current, customCss }))
-                }
-                onUpgrade={() => setUpgrade(true)}
-                profilePasswordProtected={profilePasswordProtected}
-                onProfilePasswordChange={setProfilePasswordProtected}
-                focusedCategory="audio"
-                heading="Müzik ve ses stüdyosu"
+                focusedCategory={appearanceCategory}
+                heading={activeBuilderPanel.label}
               />
             )}
           </div>

@@ -27,7 +27,7 @@ import {
 } from "~/lib/appearance";
 import { api } from "~/trpc/react";
 
-type Category =
+export type AppearanceCategory =
   | "presets"
   | "colors"
   | "background"
@@ -41,7 +41,7 @@ type Category =
   | "socialProof"
   | "publish"
   | "advanced";
-const categories: Array<{ id: Category; label: string }> = [
+const categories: Array<{ id: AppearanceCategory; label: string }> = [
   { id: "presets", label: "Temalar" },
   { id: "colors", label: "Renkler" },
   { id: "background", label: "Arka plan" },
@@ -139,10 +139,10 @@ export function AppearanceEditor({
   onUpgrade: () => void;
   profilePasswordProtected: boolean;
   onProfilePasswordChange: (protectedProfile: boolean) => void;
-  focusedCategory?: Category;
+  focusedCategory?: AppearanceCategory;
   heading?: string;
 }) {
-  const [category, setCategory] = useState<Category>("presets");
+  const [category, setCategory] = useState<AppearanceCategory>("presets");
   const activeCategory = focusedCategory ?? category;
   const [profilePassword, setProfilePassword] = useState("");
   const [profilePasswordError, setProfilePasswordError] = useState<
