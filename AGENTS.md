@@ -10,8 +10,8 @@
 - **Name:** `olnk-tr` (package) / **olnk.tr** (product)
 - **Version:** `0.2.0` (`private: true`)
 - **Type:** ESM (`"type": "module"`)
-- **Description:** Mobile-first link-in-bio platform for Turkish-speaking creators, professionals, and small businesses. Public profile at `olnk.tr/[username]`. Editable links, QR, analytics, custom domains, Pro billing.
-- **Branch in development:** `codex/stabilize-upgrades-fixes` (HEAD `433f4fb`).
+- **Description:** Mobile-first identity page, profile builder, and mini-site platform for Turkish-speaking creators, professionals, and small businesses. Public profile at `olnk.tr/[username]`. Editable links, structured appearance, QR, analytics, custom domains, and Pro billing.
+- **Protected branch:** `main`. Feature work follows §7.6; documentation must not treat a recorded commit hash as the current checkout.
 - **License:** Custom **olnk.tr Monetized Attribution License 1.0 (OMAL 1.0)** — source-available but **not** OSI-approved. Monetized deployments must include attribution linking back to `https://github.com/MRsuffixx/OlnkTR`. No revenue sharing, no source disclosure requirement. English (`LICENSE`) controls over Turkish (`LICENSE.tr`) on conflict.
 
 ---
@@ -50,6 +50,9 @@
 ├── PROJECT_CONTEXT.md            # Executive summary + tech stack + folder map
 ├── ARCHITECTURE.md               # System design + data flow + integrations
 ├── SCHEMA.md                     # Prisma models + relations + Zod schemas
+├── PROJECT_AUDIT.md              # Existing-system audit + migration decisions
+├── docs/PROFILE_BUILDER.md       # Profile-builder extension contract
+├── CHANGELOG.md                  # Meaningful product/architecture changes
 ├── ENVIRONMENT.md                # Env variables + modes
 ├── progress.md                   # Status, in-progress, backlog, change log
 ├── .memory-bank/                 # Specialized memory (ADRs, known issues, tests)
@@ -70,7 +73,7 @@
 ├── next.config.js                # CSP, serverExternalPackages, env side-effect
 ├── prisma.config.ts              # Prisma datasource URL
 ├── prisma/schema.prisma          # 22 models, 21 enums
-├── prisma/migrations/            # 5 migrations — DO NOT edit applied ones
+├── prisma/migrations/            # Append-only migrations — DO NOT edit applied ones
 ├── eslint.config.js              # flat config; `--max-warnings=0`
 ├── prettier.config.js            # `prettier-plugin-tailwindcss` only
 ├── vitest.config.ts              # aliases ~ and server-only, node env
@@ -196,6 +199,30 @@
 - `CRON_SECRET` ≥ 24 chars; guards `/api/billing/renew` and `/api/maintenance`.
 - Production secrets live in platform secret managers, never in code.
 
+### 4.13 Profile Builder Architecture
+
+- Appearance-heavy preferences belong in the versioned `AppearanceSettings` document;
+  do not add one Prisma column per color, radius, animation, or spacing control.
+- Links, social accounts, sections, widgets, badges, integrations, themes, assets, domains,
+  and analytics remain relational/queryable content.
+- Every appearance leaf needs a schema/default/migration decision and one
+  `FEATURE_CATALOG` entry. Numeric/content/storage limits belong in `PLAN_LIMITS`.
+- Never scatter `isPro` checks. Use `resolveAppearanceForPlan()`, `canUseFeature()`, and
+  central limit helpers; enforce capabilities again on the server.
+- Fonts use `src/config/font-registry.ts`. Effects use the profile effect registry. Future
+  widgets use a versioned widget registry with per-type Zod configuration.
+- Public and preview rendering share profile primitives. A layout or preset configures the
+  renderer; it does not duplicate the profile page.
+- Privacy, security, account protection, deletion, and accessibility controls are never
+  Pro entitlements.
+- Do not add user JavaScript, raw HTML, unbounded CSS, arbitrary font uploads, or opaque
+  whole-profile JSON. Existing sanitized custom CSS is a bounded compatibility feature,
+  not the extension mechanism.
+- Preserve `/{username}`, legacy appearance parsing, and existing uploaded asset URLs.
+  Configuration changes require explicit backward-compatibility tests.
+- Public-profile performance is a product boundary: lazy-load enabled effects/integrations,
+  keep dashboard code out of the public bundle, and respect reduced motion/hidden tabs.
+
 ---
 
 ## 5. Forbidden Patterns
@@ -209,7 +236,7 @@
 5. **Use `process.env.X` directly** in app code — go through `src/env.js`.
 6. **Use `JSON.parse` / `JSON.stringify` on `Date` / `Map` / `Set` / `BigInt`** without superjson.
 7. **Skip Zod validation** for any input that crosses a trust boundary (HTTP body, headers, cookies, query params).
-8. **Use `dangerouslySetInnerHTML` without server-side sanitization** (only `sanitizeCustomCss` output is allowed).
+8. **Use `dangerouslySetInnerHTML` for user content.** The current escaped JSON-LD emission is the only permitted use.
 9. **Use portal-based modal libraries** — the project uses `<dialog>` via `ui/modal-dialog.tsx`.
 10. **Import from `@prisma/client` directly** — import from `generated/prisma` (or use `db` from `src/server/db.ts`).
 11. **Create a new `PrismaClient`** — use the singleton.
@@ -220,6 +247,8 @@
 16. **Skip the lint/typecheck step** before pushing. CI runs `pnpm check` and fails on any warning.
 17. **Bypass the existing CSP** without updating `next.config.js`.
 18. **Add a TODO/FIXME/HACK comment without an associated issue** — these are tracked via `.memory-bank/known_issues.md`.
+19. **Add a widget or effect with page-level conditionals** instead of its registry.
+20. **Put social accounts, sections, widgets, badges, or themes inside `Theme.settings`.**
 
 ---
 
@@ -339,7 +368,7 @@ pnpm audit --prod --audit-level high   # CI gate
 ### 7.6 Branching
 
 - `main` — production-ready.
-- `codex/<topic>` — stabilization / large changes (current: `codex/stabilize-upgrades-fixes`).
+- `codex/<topic>` — stabilization / large changes.
 - `feat/<short-topic>` — feature work.
 - `fix/<short-topic>` — bug fixes.
 
@@ -396,6 +425,10 @@ pnpm audit --prod --audit-level high   # CI gate
 | Add an env var                | `.env.example` + `src/env.js` + `ENVIRONMENT.md`                                      |
 | Add a payment provider        | `src/server/payments/types.ts` + `adapters/<name>.ts` + `registry.ts`                 |
 | Add a feature flag / Pro gate | `src/server/entitlements.ts` + `src/config/feature-catalog.ts`                        |
+| Add a product/storage limit   | `src/config/plan-limits.ts` + server enforcement + tests                              |
+| Add an approved font          | `src/config/font-registry.ts` + `src/app/layout.tsx` + schema tests                   |
+| Add a profile effect          | `src/lib/appearance.ts` + feature catalog + `components/profile/effects/` registry    |
+| Extend the builder platform   | `docs/PROFILE_BUILDER.md` + `PROJECT_AUDIT.md`                                        |
 | Add an admin operation        | `src/lib/schemas.ts` + `src/server/api/routers/admin/*` + `src/server/admin/audit.ts` |
 | Add a cron job                | `src/app/api/maintenance/route.ts`                                                    |
 | Modify the public profile     | `src/app/[username]/page.tsx` (RSC) + `src/components/profile/*`                      |
@@ -438,7 +471,8 @@ pnpm audit --prod --audit-level high   # CI gate
 
 ### "Public profile doesn't reflect editor changes"
 
-- There is **no explicit cache invalidation** after edits (see `ARCHITECTURE.md` §5.4 and `.memory-bank/known_issues.md`). Wait for the default revalidation window or restart `next start`.
+- The route reads current Prisma state on each request. First confirm the save succeeded and no
+  `editorRevision` conflict is visible; then bypass browser/CDN cache and inspect the stored theme/link.
 
 ### "Hydration mismatch warnings in dev"
 

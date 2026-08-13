@@ -1,6 +1,6 @@
 # progress.md — Dynamic Project Tracker
 
-> Branch: `codex/stabilize-upgrades-fixes`.
+> Protected branch: `main`; feature branches follow `AGENTS.md` §7.6.
 > This file is the canonical status board; update whenever features ship, the stack changes, or in-progress work starts/stops.
 
 ---
@@ -22,8 +22,6 @@
 - Gesture-first Spotify and SoundCloud profile audio with accessible stop/mute controls.
 - 30-day analytics dashboard with bar chart and per-link clicks.
 - QR code generation at `/api/qr/[username]` (PNG, 1h cache + 24h SWR).
-- Custom domain add/verify via DNS TXT (`_olnk.<domain>`).
-- Reclaim flow for previously owned domains.
 - Account deletion pipeline (`AccountDeletionJob` + cron + manual trigger).
 - Maintenance cron (`/api/maintenance`) covering rate buckets, events, intents, challenges, assets, deletions, domain revalidations.
 - Email normalisation single source of truth (`src/lib/email.ts`).
@@ -32,9 +30,11 @@
 - Admin control room under `/admin`: live database RBAC, user/workspace/account operations,
   unified subscriptions, revenue/platform charts, provider visibility, immutable audit, and
   trusted-shell role management.
-- Mini-site builder dashboard with dedicated Profile, Content, and Design workspaces plus a shared live preview on desktop and mobile.
+- Mini-site builder dashboard with dedicated Profile, Content, and Design workspaces plus shared mobile, tablet, and desktop live previews.
 - Appearance document v3 with explicit v1/v2 migration, semantic colour tokens, dedicated avatar settings, profile cards, layout templates, SEO/privacy settings, and a Free minimal preset.
-- Dashboard mobile/desktop viewport switching backed by the same profile-rendering helpers as the public page.
+- Reusable two-to-five-stop linear/radial gradient editor, approved font registry, image backgrounds, core card/avatar controls, and basic Bento/terminal layouts.
+- Free avatar/background-image uploads with centralized 100 MB profile storage limits and binary container-signature verification.
+- Public/preview background and identity parity through shared primitives; ambient effects activate through a lazy plugin registry.
 
 ### 1.2 Shipped and Working (Pro Tier)
 
@@ -42,7 +42,7 @@
 - Custom CSS via postcss-based `sanitizeCustomCss` scoped to `[data-olnk-profile]`.
 - YouTube and Spotify embeds (`profileEmbedUrl`).
 - Custom domains (up to 3 per user, 24h claim window, reclaim challenges).
-- File uploads to S3-compatible storage (`createUpload` + `finalizeUpload`, 10 MB free / 250 MB Pro quota).
+- Larger S3-compatible media limits (up to 1 GB total, 200 MB background video, and 50 MB direct audio/image classes as configured in `PLAN_LIMITS`).
 - Stripe subscriptions (automatic renewal).
 - iyzico subscriptions (automatic, hosted HTML, identity required at checkout).
 - PayTR (manual, iFrame, no card storage).
@@ -74,13 +74,11 @@
 
 > Items currently being worked on; promote to §1.1/1.2 once merged.
 
-| Task                                              | Owner context  | Notes                                                                                                                                                                                                            |
-| ------------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Profile builder foundation audit**              | transformation | Trace the production data/render/security paths, document reusable boundaries, align the Free customization baseline, and extract reusable gradient/font/render primitives without changing public profile URLs. |
-| **Public profile cache invalidation** (known gap) | stabilisation  | Add `revalidateTag` after `workspace.save` + `account.updateProfile` so the editor's preview matches the live page without re-deploying.                                                                         |
-| **Live checkout result overlay**                  | stabilisation  | The `/dashboard/billing?checkout=…&intent=…` states already pass to `<BillingSettings/>`; refine the success / failure copy and link to the updated settings panel.                                              |
-| **PayTR local-mode pricing display**              | stabilisation  | `LOCAL_PRO_*_TRY` defaults to `12900` / `94900`; verify against the production PayTR dashboard before launch.                                                                                                    |
-| **Mobile profile editor**                         | planning       | Editor is currently desktop-first; long-term goal is a feature-parity mobile experience.                                                                                                                         |
+| Task                                 | Owner context | Notes                                                                                                                                                               |
+| ------------------------------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Live checkout result overlay**     | stabilisation | The `/dashboard/billing?checkout=…&intent=…` states already pass to `<BillingSettings/>`; refine the success / failure copy and link to the updated settings panel. |
+| **PayTR local-mode pricing display** | stabilisation | `LOCAL_PRO_*_TRY` defaults to `12900` / `94900`; verify against the production PayTR dashboard before launch.                                                       |
+| **Mobile profile editor**            | planning      | Editor is currently desktop-first; long-term goal is a feature-parity mobile experience.                                                                            |
 
 ---
 
@@ -88,7 +86,7 @@
 
 ### 3.1 Reliability & Operations
 
-- [ ] **Cache invalidation on edit** — `revalidateTag('profile:<username>')` in `workspace.save` and after `account.updateProfile` (which changes `image` / `name` / `bio`).
+- [ ] **Measured profile caching** — when traffic data justifies it, introduce a tagged profile read cache and mutation invalidation together; the current dynamic route reads Prisma state on each request.
 - [ ] **Web vitals on the public profile** — track LCP/CLS as design-time telemetry (no SDK; manual sampling).
 - [ ] **Background-job queue** — out-of-process worker (e.g. Inngest, BullMQ, or `pg-boss`) for high-volume recurring billing. Today, billing events are reconciled inside the HTTP request thread.
 - [ ] **Replay endpoint for failed webhooks** — a UI button on `/dashboard/billing` that retries the most recent `WebhookEvent.status = FAILED` events.
@@ -111,8 +109,8 @@
 
 ### 3.4 Refactors (Technical Debt)
 
-- [ ] **Reduce `workspace-editor.tsx` size** — 829 lines; candidate splits: `SortableLink`, `drainLoop`, `revokeHelpers`.
-- [ ] **Reduce `appearance-editor.tsx` size** — 897 lines; candidate splits: per-tab files under `appearance-editor/<tab>.tsx`.
+- [ ] **Reduce `workspace-editor.tsx` size** — about 1,000 lines; candidate splits: builder panels, `SortableLink`, save drain, and preview frame.
+- [ ] **Reduce `appearance-editor.tsx` size** — about 1,700 lines; split category modules while retaining shared controls/registries.
 - [ ] **`processBillingEvent` complexity** — 390 lines; consider extracting the per-event-type handlers into separate functions/tables.
 - [ ] **Replace `console.*` logging with a tiny structured logger** — JSON output to stdout, available in Vercel logs.
 
@@ -124,14 +122,26 @@
 
 | #   | Symptom                                                                                                                                                                                                 | Severity            | Status                                                       |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------ |
-| 1   | Editor preview may diverge from public page (no explicit cache invalidation)                                                                                                                            | Medium              | Open — see Backlog §3.1                                      |
-| 2   | PayTR `cancelSubscription` is intentionally a no-op; users must complete the term manually                                                                                                              | Behavioural         | Documented (see `src/server/payments/adapters/paytr.ts:186`) |
-| 3   | Dark Reader extension causes hydration warnings on `<html>` and `<svg>`                                                                                                                                 | Cosmetic (dev only) | Documented (see `AGENTS.md §11`)                             |
-| 4   | `next dev` shows `scroll-behavior: smooth` warning until we apply `data-scroll-behavior="smooth"` (the current `globals.css` `scroll-behavior: smooth` rule still triggers Next's router-level scanner) | Cosmetic            | Open — small fix in `globals.css` + `layout.tsx`             |
+| 1   | PayTR `cancelSubscription` is intentionally a no-op; users must complete the term manually                                                                                                              | Behavioural         | Documented (see `src/server/payments/adapters/paytr.ts:186`) |
+| 2   | Dark Reader extension causes hydration warnings on `<html>` and `<svg>`                                                                                                                                 | Cosmetic (dev only) | Documented (see `AGENTS.md §11`)                             |
+| 3   | `next dev` shows `scroll-behavior: smooth` warning until we apply `data-scroll-behavior="smooth"` (the current `globals.css` `scroll-behavior: smooth` rule still triggers Next's router-level scanner) | Cosmetic            | Open — small fix in `globals.css` + `layout.tsx`             |
+| 4   | Repository-wide `pnpm format:check` reports six pre-existing config/auth/policy files                                                                                                                   | CI hygiene          | Open — isolate as a mechanical formatting change             |
 
 ---
 
 ## 5. Change Log (recent)
+
+### 2026-08-13 — Existing-product audit and builder registries
+
+- Audited the real registration, username, dashboard save, public render, redirect, upload,
+  analytics, domain, admin, and entitlement paths; recorded decisions in `PROJECT_AUDIT.md` and
+  `docs/PROFILE_BUILDER.md`.
+- Aligned the Free appearance baseline with the product direction and centralized all media/content
+  limits.
+- Added gradient/font/effect registries, shared profile background/identity primitives, and tablet
+  preview.
+- Hardened uploads with binary media signature verification; no database migration was required.
+- Verification: `pnpm check`, 50 Vitest tests, production build, dependency audit, and 10 desktop/mobile Playwright checks pass; two DB-only E2E cases remain opt-in.
 
 ### 2026-08-13 — Advanced profile renderer parity
 

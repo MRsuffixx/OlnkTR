@@ -1,4 +1,5 @@
 # olnk.tr
+
 <div align="center">
   <a href="https://olnk.tr" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding:12px 24px; background-color:#0969da; color:#ffffff !important; text-decoration:none; border-radius:6px; font-weight:bold; font-size:16px;">🔴LIVE APP</a>
 </div>
@@ -25,13 +26,16 @@ A mobile-first mini-site builder for creators, professionals, and small business
 - **Authentication and onboarding:** Google OAuth and passwordless email sign-in with Auth.js, plus normalized and database-enforced unique usernames.
 - **Username safety:** Reserved-route checks, Turkish-aware normalization, obfuscation-resistant moderation, and a database-managed blocklist.
 - **Public profiles:** Fast server-rendered pages with canonical URLs, Open Graph metadata, structured data, responsive layouts, and downloadable QR codes.
-- **Mini-site builder:** A profile/content/design workspace with a live phone preview, click-to-edit controls, drag-and-drop ordering, and revision-aware autosave.
+- **Mini-site builder:** A profile/content/design workspace with live phone, tablet, and desktop previews, click-to-edit controls, drag-and-drop ordering, and revision-aware autosave.
 - **Versioned design engine:** Semantic colour tokens, profile cards, layout templates, full-theme presets, custom backgrounds, typography, button styles, lazy canvas/retro effects, audio, SEO, privacy controls, and optional custom CSS.
 - **Link controls:** Scheduled links, password protection, YouTube and Spotify embeds, visibility toggles, and safe redirect handling.
 - **Profile gates and audio:** Server-enforced whole-profile passwords plus gesture-first Spotify, SoundCloud, and uploaded audio with visible stop/mute controls.
 - **Analytics:** Non-blocking click and profile-view collection with referrer, country, device, and time-based insights.
 - **Billing and storage:** Optional payment integrations for Pro features and optional S3-compatible media storage.
 - **Account management:** Profile settings, username changes, subscription management, and permanent account deletion.
+
+Architecture contributors should begin with [the existing-product audit](PROJECT_AUDIT.md) and
+[the profile-builder extension contract](docs/PROFILE_BUILDER.md).
 
 ## Technology stack
 

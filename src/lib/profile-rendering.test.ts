@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { PROFILE_FONT_IDS } from "~/config/font-registry";
 import { DEFAULT_APPEARANCE } from "~/lib/appearance";
 import {
   profileAvatarStyle,
@@ -41,18 +42,7 @@ describe("shared profile rendering", () => {
   });
 
   it("maps every offered font to a loaded CSS variable", () => {
-    for (const font of [
-      "Fraunces",
-      "Manrope",
-      "Space Grotesk",
-      "Playfair Display",
-      "DM Serif Display",
-      "Bebas Neue",
-      "Inter",
-      "Montserrat",
-      "Lora",
-      "Roboto Mono",
-    ] as const) {
+    for (const font of PROFILE_FONT_IDS) {
       expect(profileFontFamily(font)).toContain("var(--font-");
     }
   });

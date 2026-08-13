@@ -4,16 +4,13 @@
 
 ---
 
-## 1. Public profile cache is not explicitly invalidated after edits
+## 1. Persistent public-profile caching is intentionally absent
 
-**Severity:** Medium (correctness, not security)
-**Symptom:** Edits made in the editor (avatar, name, link order, appearance) may not be visible on the live profile for the duration of the default revalidation window.
-**Root cause:** `src/app/[username]/page.tsx` has no `export const revalidate` or `export const dynamic`. The handler does not call `revalidateTag` or `revalidatePath`. RSC thus relies on Next's default stale-while-revalidate cadence.
-**Workaround:**
-- Force a re-build (`pnpm build && pnpm start`) for immediate visibility in production.
-- For dev, restart `next dev` after major edits.
-**Canonical fix:** Add `unstable_cache(getProfile, ['profile'], { tags: [`profile:<username>`] })` on the server and `revalidateTag('profile:<username>')` in `workspace.save` and `account.updateProfile`. See `decision_log.md` ADR-013.
-**Tracked in:** `progress.md` §2 "Public profile cache invalidation".
+**Severity:** Low (future scalability)
+**Current behaviour:** `/{username}` is a dynamic route and reads the current profile through Prisma on each request. React `cache()` only deduplicates `generateMetadata()` and page reads inside the same render request; it does not create a cross-request stale profile cache.
+**Consequence:** Edits are visible on the next profile request, but high traffic profiles do not yet receive a tagged application cache.
+**Canonical follow-up:** If measurement justifies persistent caching, introduce the tagged read cache and its `workspace.save` / `account.updateProfile` invalidation in the same change. Adding `revalidateTag()` before a tagged cache exists has no correctness benefit.
+**Audit note:** The earlier claim that this route used a default stale-while-revalidate profile cache was stale and was corrected during the 2026-08-13 builder audit.
 
 ---
 
@@ -31,10 +28,9 @@
 ## 3. `scroll-behavior: smooth` warning from `globals.css`
 
 **Severity:** Cosmetic (dev only)
-**Symptom:** Next.js logs `Detected \`scroll-behavior: smooth\` on the \`<html>\` element. To disable smooth scrolling during route transitions, add \`data-scroll-behavior="smooth"\` to your \`<html>\` element.`
-**Root cause:** `src/styles/globals.css:30` sets `scroll-behavior: smooth` on `html`. Next's router wants a `data-` attribute so it can suppress the smooth scroll during instant client-side navigations.
+**Symptom:** Next.js logs `Detected \`scroll-behavior: smooth\` on the \`<html>\` element. To disable smooth scrolling during route transitions, add \`data-scroll-behavior="smooth"\` to your \`<html>\` element.`**Root cause:**`src/styles/globals.css:30`sets`scroll-behavior: smooth`on`html`. Next's router wants a `data-`attribute so it can suppress the smooth scroll during instant client-side navigations.
 **Workaround:** None required; the warning is dev-only.
-**Canonical fix:** Remove the CSS rule and add `data-scroll-behavior="smooth"` to `<html>` in `src/app/layout.tsx:81`.
+**Canonical fix:** Remove the CSS rule and add`data-scroll-behavior="smooth"`to`<html>`in`src/app/layout.tsx:81`.
 **Tracked in:** `progress.md` §4.
 
 ---
@@ -292,3 +288,18 @@ normalized address.
 **Verification:** Docker smoke coverage performs CSRF setup, sends through Mailpit,
 checks the Turkish text/HTML body and public `AUTH_URL` origin, consumes the single-use
 token, verifies the session cookie, and observes the dashboard redirect.
+
+---
+
+## 28. Repository-wide Prettier baseline has six pre-existing files
+
+**Severity:** CI hygiene
+**Symptom:** `pnpm format:check` reports `next.config.js`, `src/config/username-policy.ts`,
+`src/env.js`, `src/server/auth/config.ts`, `src/server/auth/email-verification.test.ts`, and
+`src/server/auth/email-verification.ts`.
+**Root cause:** These files predate the current builder pass and are not formatted according to the
+current Prettier configuration/cache baseline.
+**Workaround:** Format-check every file changed by a feature explicitly; lint and type checking are
+still enforced repository-wide by `pnpm check`.
+**Canonical fix:** Apply one dedicated mechanical formatting change so feature diffs do not absorb
+the large username-policy/auth formatting churn.

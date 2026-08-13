@@ -107,7 +107,11 @@ describe("subscription entitlements", () => {
     const resolved = resolveAppearanceForPlan(stored, false);
     expect(resolved.raw.background.mode).toBe("video");
     expect(resolved.effective.background.mode).toBe("gradient");
-    expect(resolved.effective.background.mediaUrl).toBe("");
+    // The same media URL may back a Free image background, while the Pro video
+    // mode itself is downgraded deterministically.
+    expect(resolved.effective.background.mediaUrl).toBe(
+      "https://cdn.example.test/background.mp4",
+    );
     expect(resolved.effective.effects.cursor).toBe("default");
     expect(resolved.effective.effects.matrixRain).toBe("off");
     expect(resolved.effective.audio.source).toBe("none");
@@ -120,5 +124,28 @@ describe("subscription entitlements", () => {
     expect(resolved.effective.socialProof.style).toBe("plain");
     expect(resolved.effective.advanced.removeBranding).toBe(false);
     expect(resolved.lockedPaths).toContain("background.mode");
+  });
+
+  it("keeps the core creative controls useful on Free", () => {
+    const stored = structuredClone(DEFAULT_APPEARANCE);
+    stored.background.gradient.type = "radial";
+    stored.background.gradient.angle = 42;
+    stored.background.gradient.stops = [
+      { color: "#112233", position: 0 },
+      { color: "#445566", position: 45 },
+      { color: "#778899", position: 100 },
+    ];
+    stored.background.preset = "custom";
+    stored.layout.template = "bento";
+    stored.layout.mobileAlignment = "left";
+    stored.avatar.size = 132;
+
+    const resolved = resolveAppearanceForPlan(stored, false);
+    expect(resolved.effective.background.gradient.type).toBe("radial");
+    expect(resolved.effective.background.gradient.stops).toHaveLength(3);
+    expect(resolved.effective.background.preset).toBe("custom");
+    expect(resolved.effective.layout.template).toBe("bento");
+    expect(resolved.effective.layout.mobileAlignment).toBe("left");
+    expect(resolved.effective.avatar.size).toBe(132);
   });
 });

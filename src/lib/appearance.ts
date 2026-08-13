@@ -881,20 +881,20 @@ export function applyAppearancePreset(
       radius: 8,
       borderWidth: 1,
       borderStyle: "solid",
-      shadow: "glow",
-      hover: "glow",
+      shadow: "hard",
+      hover: "lift",
       padding: 24,
     };
     next.buttons = {
       ...next.buttons,
       fill: "outline",
       shape: "square",
-      hover: "glow",
+      hover: "lift",
     };
     next.avatar = {
       ...next.avatar,
       shape: "square",
-      shadow: "glow",
+      shadow: "hard",
       borderStyle: "double",
     };
     next.typography = {
@@ -904,7 +904,6 @@ export function applyAppearancePreset(
       headingEffect: "glow",
     };
     next.layout.template = "terminal";
-    next.effects = { ...next.effects, scanlines: true, crtFilter: true };
     return next;
   }
   next.colors = {

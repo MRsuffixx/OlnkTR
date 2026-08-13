@@ -413,7 +413,10 @@ model UploadedAsset {
 ```
 
 - Status lifecycle: `PENDING → READY → DELETE_PENDING → DELETED` (or `FAILED`).
-- Quota: 10 MB free / 250 MB Pro. Per-upload 25 MB max, per-avatar 8 MB cap.
+- Limits are centralized in `src/config/plan-limits.ts`: 100 MB total Free and 1 GB total Pro,
+  with purpose/media-specific single-file caps. Free supports avatar/background images; direct
+  background video and audio are Pro. Finalization verifies exact size, metadata MIME, and binary
+  container signature before `READY`.
 
 ### 2.9 AuthIntent, RateLimitBucket, AccountDeletionJob, UsernameBlocklist
 
@@ -682,9 +685,11 @@ export const setLinkPasswordInput = z.object({
 
 ### `AppearanceSettings` summary (`src/lib/appearance.ts`)
 
-A deeply-typed, versioned Zod document. Version `3` separates semantic `colors`, `background`, `card`, `avatar`, `buttons`, `typography`, `layout`, `effects`, `audio`, `socialProof`, `seo`, `privacy`, and `advanced` groups. `parseAppearance()` explicitly migrates both the legacy version-1 colour fields and version-2 layout-owned avatar fields, then supplies bounded defaults for newly introduced controls.
+A deeply-typed, versioned Zod document. Version `3` separates semantic `colors`, `background`, `card`, `avatar`, `buttons`, `typography`, `layout`, `effects`, `audio`, `socialProof`, `seo`, `privacy`, and `advanced` groups. `parseAppearance()` explicitly migrates both the legacy version-1 colour fields and version-2 layout-owned avatar fields, then supplies bounded defaults for newly introduced controls. Gradient stops are bounded to two through five and normalized by position before CSS generation.
 
-Every editable leaf is represented in `FEATURE_CATALOG` (`src/config/feature-catalog.ts`). Pro-only paths are gated by `tier: "pro"` plus optional `proValues` lists. Full-profile presets call the same typed settings model; they do not bypass leaf-level entitlement resolution.
+Every editable leaf is represented in `FEATURE_CATALOG` (`src/config/feature-catalog.ts`). Pro-only paths are gated by `tier: "pro"` plus optional `proValues` lists. Full-profile presets call the same typed settings model; they do not bypass leaf-level entitlement resolution. Approved typography IDs and Zod enums come from `src/config/font-registry.ts`; quotas and numeric product limits come from `src/config/plan-limits.ts`.
+
+This builder-foundation pass changes validation, policy, and rendering only. It adds no Prisma field and therefore requires no database migration.
 
 ---
 

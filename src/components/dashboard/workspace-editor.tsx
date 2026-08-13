@@ -34,6 +34,7 @@ import {
   RotateCcw,
   Sparkles,
   Smartphone,
+  Tablet,
   Trash2,
   UserRound,
   X,
@@ -407,9 +408,9 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [builderPanel, setBuilderPanel] = useState<BuilderPanel>("profile");
   const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
-  const [previewDevice, setPreviewDevice] = useState<"mobile" | "desktop">(
-    "mobile",
-  );
+  const [previewDevice, setPreviewDevice] = useState<
+    "mobile" | "tablet" | "desktop"
+  >("mobile");
   const [status, setStatus] = useState<SaveStatus>("saved");
   const [saveError, setSaveError] = useState<string | null>(null);
   const [upgrade, setUpgrade] = useState(false);
@@ -887,6 +888,15 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
             </button>
             <button
               type="button"
+              onClick={() => setPreviewDevice("tablet")}
+              aria-pressed={previewDevice === "tablet"}
+              className={`grid size-9 place-items-center rounded-full ${previewDevice === "tablet" ? "bg-ink text-paper" : "text-ink/45"}`}
+              aria-label="Tablet önizleme"
+            >
+              <Tablet className="size-4" />
+            </button>
+            <button
+              type="button"
               onClick={() => setPreviewDevice("desktop")}
               aria-pressed={previewDevice === "desktop"}
               className={`grid size-9 place-items-center rounded-full ${previewDevice === "desktop" ? "bg-ink text-paper" : "text-ink/45"}`}
@@ -905,6 +915,19 @@ export function WorkspaceEditor({ initial }: { initial: Workspace }) {
                   selectedId={selectedId}
                   onSelect={focusLink}
                   viewport="mobile"
+                />
+              </div>
+            </div>
+          ) : previewDevice === "tablet" ? (
+            <div className="border-ink bg-ink w-full max-w-[540px] rounded-[2.4rem] border-[9px] p-2 shadow-[0_30px_70px_rgba(23,33,27,.22)]">
+              <div className="bg-cream h-[640px] overflow-hidden rounded-[1.7rem]">
+                <ProfilePreview
+                  draft={draft}
+                  username={initial.username ?? "profilin"}
+                  customCss={previewCss}
+                  selectedId={selectedId}
+                  onSelect={focusLink}
+                  viewport="tablet"
                 />
               </div>
             </div>

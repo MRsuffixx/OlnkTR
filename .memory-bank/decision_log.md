@@ -400,3 +400,31 @@ preview viewports using the same helpers as the public profile.
 - Background blur and colour filters cannot reduce foreground text clarity by filtering the content tree.
 - Avatar animation and hover effects are mutually exclusive in the editor to avoid transform conflicts.
 - Device-specific alignment and spacing can be verified before publishing.
+
+---
+
+## ADR-024 — Builder primitives, registries, and Free baseline share one policy
+
+**Date:** 2026-08-13
+**Status:** Accepted
+**Context:** Appearance version 3 provided safe structured settings, but the public page and
+preview still duplicated background/identity markup, fonts were repeated across schemas and
+render helpers, effect activation was conditional code, Free could not use the requested core
+gradient/image/card/avatar/Bento controls, and upload finalization trusted object MIME metadata.
+
+**Decision:** Keep the v3 document and relational database unchanged. Extract shared
+`ProfileBackground` and `ProfileIdentity` primitives, register approved fonts and lazy ambient
+effects centrally, and keep product/storage limits in `PLAN_LIMITS`. Align the Free policy with the
+product principle: semantic colors, linear/radial multi-stop gradients, image backgrounds, core
+card/avatar controls, and basic Bento/terminal layouts are Free; conic/video/motion and advanced
+effects remain Pro. Finalized storage objects must also match a recognized binary container
+signature.
+
+**Consequences:**
+
+- Existing profile URLs, Theme rows, and v1/v2/v3 appearance documents need no DB migration.
+- Preview and public background/identity behavior evolve through the same components.
+- A new font/effect/limit has one registration point instead of duplicated string lists or magic
+  numbers.
+- Free users can build a credible profile while Pro continues to unlock depth and expensive media.
+- Renamed executable text cannot become a ready image solely by spoofing `Content-Type`.

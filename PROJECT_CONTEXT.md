@@ -1,7 +1,7 @@
 # PROJECT_CONTEXT.md — olnk.tr Project Blueprint
 
 > Project: **olnk.tr** · Package: `olnk-tr` v0.2.0 · Private.
-> Branch: `codex/stabilize-upgrades-fixes`.
+> Protected branch: `main`; feature work follows `AGENTS.md` branching rules.
 > License: **olnk.tr Monetized Attribution License 1.0 (OMAL 1.0)** — source-available, not OSI-approved.
 
 ---
@@ -13,12 +13,12 @@
 ### Feature pillars
 
 - **Authentication:** Google OAuth and passwordless email via Nodemailer (Auth.js v5 / NextAuth `database` session strategy).
-- **Public mini-sites:** mobile-optimised, server-rendered profiles with a real-time builder preview.
+- **Public mini-sites:** responsive, server-rendered profiles with mobile/tablet/desktop builder previews.
 - **Editable links:** drag-and-drop reorder, per-link icon, scheduling, password protection, YouTube and Spotify embeds, click recording.
 - **Design engine:** versioned `AppearanceSettings` JSON with semantic colour tokens, cards, layout templates, presets, backgrounds, buttons, typography, effects, audio, SEO, privacy, and custom CSS for Pro.
 - **Analytics:** click + view tracking, dedupe keys, daily buckets, 7/30/90-day dashboards. Advanced block (countries, devices, sources) is Pro-gated.
 - **Pro billing:** USD $3/mo and $22/yr via Stripe and Adyen; ₺129/₺949 via iyzico and PayTR. PayTR is manual renewal.
-- **Storage:** S3-compatible object storage (R2 / MinIO / Backblaze supported) for avatars and backgrounds.
+- **Storage:** S3-compatible object storage (R2 / MinIO / Backblaze supported) for validated avatars, backgrounds, and Pro audio.
 - **Custom domains:** Pro-gated. DNS TXT verification via `_olnk.<domain>`. Reclaim-challenge flow for previously owned domains.
 - **Account deletion:** async pipeline (`AccountDeletionJob`) with exponential backoff; cascades through all User-related tables.
 - **Admin operations:** database-authoritative RBAC, user and billing operations, platform
@@ -32,7 +32,7 @@
 
 ### Business goals
 
-- Free tier with sensible defaults; Pro tier unlocks appearance customisation, scheduling, password protection, embeds, custom domains, advanced analytics.
+- Free tier can create a genuinely polished profile; Pro unlocks deeper effects, larger/advanced media, professional rules, custom domains, and advanced analytics.
 - License keeps the source open while requiring attribution for monetised deployments (no revenue share, no source-disclosure requirement).
 - Native Turkish copy throughout the product; no i18n abstraction.
 
@@ -58,7 +58,7 @@
 | Email             | Nodemailer                                 | `9.0.3`                                           | pinned via peer rules                                          |
 | Validation        | Zod                                        | `4.4.3`                                           | All untrusted input                                            |
 | Env validation    | `@t3-oss/env-nextjs`                       | `0.13.11`                                         | `src/env.js`                                                   |
-| Storage           | AWS SDK v3 (S3-compatible)                 | `3.1095.0`                                        | Presigned PUTs, head + delete                                  |
+| Storage           | AWS SDK v3 (S3-compatible)                 | `3.1095.0`                                        | Presigned PUTs, metadata/signature verify + delete             |
 | Payments — Stripe | `stripe`                                   | `22.3.2`                                          | Subscriptions + webhooks                                       |
 | Payments — iyzico | `iyzipay`                                  | `2.0.69`                                          | serverExternalPackages; ambient `.d.ts`                        |
 | Payments — PayTR  | (HTTP)                                     | —                                                 | Manual iframe + HMAC                                           |

@@ -178,7 +178,7 @@ export const FEATURE_CATALOG = {
     label: "Arka plan paketi",
     tier: "free",
     fallback: "sunrise",
-    proValues: ["aurora", "midnight", "mesh", "confetti", "custom"],
+    proValues: ["aurora", "midnight", "mesh"],
   },
   "card.enabled": { label: "Profil kartı", tier: "free", fallback: false },
   "card.opacity": { label: "Kart opaklığı", tier: "free", fallback: 72 },

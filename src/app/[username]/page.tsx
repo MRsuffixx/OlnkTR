@@ -9,30 +9,26 @@ import { cache } from "react";
 import { Brand } from "~/components/brand";
 import { ProfileEffects } from "~/components/profile/profile-effects";
 import { ProfileAmbientEffects } from "~/components/profile/profile-ambient-effects";
-import { ProfileBackgroundVideo } from "~/components/profile/profile-background-video";
+import { ProfileBackground } from "~/components/profile/profile-background";
 import { ProfileAudioPlayer } from "~/components/profile/profile-audio-player";
 import { ProfileGate } from "~/components/profile/profile-gate";
+import { ProfileIdentity } from "~/components/profile/profile-identity";
 import { ShareButton } from "~/components/profile/share-button";
 import { VisitorCounter } from "~/components/profile/visitor-counter";
 import {
-  appearanceBackground,
-  appearanceBackgroundEffects,
   appearanceCardStyle,
   appearanceCssVariables,
   appearanceLayoutVariables,
-  appearanceVideoOverlay,
 } from "~/lib/appearance";
 import { linkCustomizationSchema } from "~/lib/schemas";
 import { getAppOrigin, isCustomProfileHost } from "~/lib/app-url";
 import { normalizeUsername } from "~/lib/username";
 import {
-  profileAvatarStyle,
   profileButtonStyle,
   profileCardMargin,
   profileDensity,
   profileEmbedUrl,
   profileFontFamily,
-  profileHeadingStyle,
   profileVerticalMargin,
 } from "~/lib/profile-rendering";
 import { db } from "~/server/db";
@@ -149,9 +145,6 @@ export default async function PublicProfilePage({
       (!link.scheduledStart || link.scheduledStart <= now) &&
       (!link.scheduledEnd || link.scheduledEnd > now),
   );
-  const initial = (profile.name ?? profile.username)
-    .slice(0, 1)
-    .toLocaleUpperCase("tr-TR");
   const profileUrl = `${getAppOrigin()}/${profile.username}`;
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
@@ -177,7 +170,6 @@ export default async function PublicProfilePage({
       : appearance.layout.mobileAlignment === "right"
         ? "text-right items-end"
         : "text-center items-center";
-  const background = appearanceBackground(appearance);
   const density = profileDensity(
     appearance.layout.template === "compact"
       ? "compact"
@@ -215,36 +207,7 @@ export default async function PublicProfilePage({
       {pro &&
         appearance.advanced.customCssEnabled &&
         profile.theme?.customCss && <style>{profile.theme.customCss}</style>}
-      {appearance.background.mode === "video" &&
-      appearance.background.mediaUrl ? (
-        <div className="pointer-events-none absolute -inset-8" aria-hidden>
-          <ProfileBackgroundVideo
-            src={appearance.background.mediaUrl}
-            fit={appearance.background.fit}
-            position={appearance.background.position}
-            style={appearanceBackgroundEffects(appearance)}
-          />
-          <div
-            className="absolute inset-0"
-            style={appearanceVideoOverlay(appearance)}
-          />
-        </div>
-      ) : (
-        <div
-          className="pointer-events-none absolute -inset-8"
-          style={{
-            ...background,
-            ...appearanceBackgroundEffects(appearance),
-          }}
-          aria-hidden
-        />
-      )}
-      {appearance.background.mode === "particles" && (
-        <div className="olnk-particles absolute inset-0" />
-      )}
-      {appearance.background.mode === "motion" && (
-        <div className="olnk-gradient-motion absolute inset-0" />
-      )}
+      <ProfileBackground appearance={appearance} />
       <ProfileEffects
         effects={appearance.effects}
         color={appearance.colors.accent}
@@ -307,80 +270,23 @@ export default async function PublicProfilePage({
             <ShareButton title={profile.name ?? profile.username} />
           </div>
         )}
-        <section
-          className={`mt-4 flex flex-col ${mobileAlignment} ${desktopAlignment}`}
-          data-olnk-tilt="profile"
-          style={{ order: 2 }}
-        >
-          <div
-            className="olnk-avatar bg-orange grid place-items-center overflow-hidden text-4xl font-black text-white"
-            data-avatar-animation={appearance.avatar.animation}
-            data-avatar-hover={appearance.avatar.hover}
-            style={{
-              ...profileAvatarStyle(appearance),
-            }}
-          >
-            {profile.image ? (
-              <img
-                src={profile.image}
-                alt={`${profile.name ?? profile.username} profil fotoğrafı`}
-                className="size-full object-cover"
+        <ProfileIdentity
+          appearance={appearance}
+          name={profile.name}
+          username={profile.username}
+          bio={profile.bio}
+          image={profile.image}
+          alignmentClass={`${mobileAlignment} ${desktopAlignment}`}
+          visitor={
+            visitorCount !== null ? (
+              <VisitorCounter
+                username={profile.username}
+                initialCount={visitorCount}
+                settings={appearance.socialProof}
               />
-            ) : (
-              initial
-            )}
-          </div>
-          {appearance.layout.bioPlacement === "aboveName" && profile.bio && (
-            <p
-              className="max-w-md leading-7"
-              style={{
-                marginTop: density.profileGap,
-                color: appearance.colors.textSecondary,
-              }}
-            >
-              {profile.bio}
-            </p>
-          )}
-          <h1
-            className="font-black"
-            data-olnk-heading-effect={appearance.typography.headingEffect}
-            style={{
-              marginTop: density.profileGap,
-              fontFamily: profileFontFamily(appearance.typography.headingFont),
-              fontSize: appearance.typography.headingSize,
-              letterSpacing: appearance.typography.letterSpacing,
-              ...profileHeadingStyle(appearance),
-            }}
-          >
-            {profile.name ?? `@${profile.username}`}
-          </h1>
-          {profile.name && (
-            <p
-              className="mt-1 text-sm font-semibold"
-              style={{ color: appearance.colors.textMuted }}
-            >
-              @{profile.username}
-            </p>
-          )}
-          {appearance.layout.bioPlacement === "belowName" && profile.bio && (
-            <p
-              className="max-w-md leading-7"
-              style={{
-                marginTop: Math.max(8, density.profileGap / 2),
-                color: appearance.colors.textSecondary,
-              }}
-            >
-              {profile.bio}
-            </p>
-          )}
-          {visitorCount !== null && (
-            <VisitorCounter
-              username={profile.username}
-              initialCount={visitorCount}
-              settings={appearance.socialProof}
-            />
-          )}
-        </section>
+            ) : null
+          }
+        />
         <nav
           className={`grid ${appearance.layout.template === "bento" ? "grid-cols-2" : "grid-cols-1"}`}
           style={{

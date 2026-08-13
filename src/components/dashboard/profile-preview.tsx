@@ -12,22 +12,15 @@ import {
   Share2,
 } from "lucide-react";
 
+import { ProfileBackground } from "~/components/profile/profile-background";
+import { ProfileIdentity } from "~/components/profile/profile-identity";
+import { appearanceCardStyle, appearanceCssVariables } from "~/lib/appearance";
 import {
-  appearanceBackground,
-  appearanceBackgroundEffects,
-  appearanceCardStyle,
-  appearanceCssVariables,
-  appearanceVideoOverlay,
-} from "~/lib/appearance";
-import { ProfileBackgroundVideo } from "~/components/profile/profile-background-video";
-import {
-  profileAvatarStyle,
   profileButtonStyle,
   profileCardMargin,
   profileDensity,
   profileEmbedUrl,
   profileFontFamily,
-  profileHeadingStyle,
   profileVerticalMargin,
 } from "~/lib/profile-rendering";
 import type { WorkspaceInput } from "~/lib/schemas";
@@ -47,10 +40,8 @@ export function ProfilePreview({
   customCss: string;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
-  viewport?: "mobile" | "desktop";
+  viewport?: "mobile" | "tablet" | "desktop";
 }) {
-  const initial =
-    draft.name.trim().slice(0, 1).toLocaleUpperCase("tr-TR") || "O";
   const appearance = draft.appearance;
   const density = profileDensity(
     appearance.layout.template === "compact"
@@ -98,36 +89,7 @@ export function ProfilePreview({
       {appearance.advanced.customCssEnabled && customCss && (
         <style>{customCss}</style>
       )}
-      {appearance.background.mode === "video" &&
-      appearance.background.mediaUrl ? (
-        <div className="pointer-events-none absolute -inset-8" aria-hidden>
-          <ProfileBackgroundVideo
-            src={appearance.background.mediaUrl}
-            fit={appearance.background.fit}
-            position={appearance.background.position}
-            style={appearanceBackgroundEffects(appearance)}
-          />
-          <div
-            className="absolute inset-0"
-            style={appearanceVideoOverlay(appearance)}
-          />
-        </div>
-      ) : (
-        <div
-          className="pointer-events-none absolute -inset-8"
-          style={{
-            ...appearanceBackground(appearance),
-            ...appearanceBackgroundEffects(appearance),
-          }}
-          aria-hidden
-        />
-      )}
-      {appearance.background.mode === "particles" && (
-        <div className="olnk-particles absolute inset-0" />
-      )}
-      {appearance.background.mode === "motion" && (
-        <div className="olnk-gradient-motion absolute inset-0" />
-      )}
+      <ProfileBackground appearance={appearance} />
       {appearance.effects.matrixRain !== "off" && (
         <div
           className="pointer-events-none absolute inset-0 overflow-hidden bg-black/35 font-mono text-[10px] leading-4 text-green-400 opacity-65"
@@ -161,7 +123,9 @@ export function ProfilePreview({
       {appearance.effects.scanlines && (
         <div className="pointer-events-none absolute inset-0 z-20 bg-[repeating-linear-gradient(to_bottom,transparent_0_3px,rgb(0_0_0/.18)_3px_4px)]" />
       )}
-      <div className="bg-ink absolute top-3 left-1/2 h-5 w-24 -translate-x-1/2 rounded-full" />
+      {viewport === "mobile" && (
+        <div className="bg-ink absolute top-3 left-1/2 h-5 w-24 -translate-x-1/2 rounded-full" />
+      )}
       <div
         className={`relative flex w-full flex-col ${appearance.card.enabled ? "" : "flex-1"} ${align}`}
         data-olnk-template={appearance.layout.template}
@@ -199,87 +163,38 @@ export function ProfilePreview({
             ))}
           </div>
         )}
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            onSelect(null);
-          }}
-          className="olnk-avatar bg-orange relative mt-2 grid shrink-0 place-items-center overflow-hidden text-3xl font-black text-white"
-          data-avatar-animation={appearance.avatar.animation}
-          data-avatar-hover={appearance.avatar.hover}
-          style={{
-            ...profileAvatarStyle(appearance),
-            order: 2,
-          }}
-          aria-label="Profil bilgilerini düzenle"
-        >
-          {draft.image ? (
-            <img src={draft.image} alt="" className="size-full object-cover" />
-          ) : (
-            initial
-          )}
-        </button>
-        {appearance.layout.bioPlacement === "aboveName" && (
-          <p
-            className="relative max-w-[280px] leading-6"
-            style={{
-              marginTop: density.profileGap,
-              order: 2,
-              color: appearance.colors.textSecondary,
-            }}
-          >
-            {draft.bio || "Kendini birkaç kelimeyle anlat."}
-          </p>
-        )}
-        <h2
-          className="relative font-black"
-          data-olnk-heading-effect={appearance.typography.headingEffect}
-          style={{
-            marginTop: density.profileGap,
-            fontFamily: profileFontFamily(appearance.typography.headingFont),
-            fontSize: appearance.typography.headingSize,
-            letterSpacing: appearance.typography.letterSpacing,
-            ...profileHeadingStyle(appearance),
-            order: 2,
-          }}
-        >
-          {draft.name || "Görünen adın"}
-        </h2>
-        <p
-          className="relative mt-1 text-[11px] font-semibold"
-          style={{ order: 2, color: appearance.colors.textMuted }}
-        >
-          @{username}
-        </p>
-        {appearance.layout.bioPlacement === "belowName" && (
-          <p
-            className="relative mt-2 max-w-[280px] leading-6"
-            style={{ order: 2, color: appearance.colors.textSecondary }}
-          >
-            {draft.bio || "Kendini birkaç kelimeyle anlat."}
-          </p>
-        )}
-        {appearance.socialProof.enabled && (
-          <p
-            className={
-              appearance.socialProof.style === "retro"
-                ? "relative mt-3 rounded border border-green-400 bg-black/80 px-2 py-1 font-mono text-[9px] font-black tracking-widest text-green-300"
-                : appearance.socialProof.style === "pill"
-                  ? "relative mt-3 rounded-full border border-current/15 bg-white/35 px-2 py-1 text-[9px] font-black"
-                  : "relative mt-3 text-[9px] font-black opacity-60"
-            }
-            style={{ order: 2 }}
-          >
-            1.284{" "}
-            {appearance.socialProof.label ||
-              (appearance.socialProof.metric === "today"
-                ? "bugün ziyaret"
-                : appearance.socialProof.metric === "live"
-                  ? "son 30 dakikada"
-                  : "toplam ziyaret")}
-          </p>
-        )}
+        <ProfileIdentity
+          appearance={appearance}
+          name={draft.name || "Görünen adın"}
+          username={username}
+          bio={draft.bio || "Kendini birkaç kelimeyle anlat."}
+          image={draft.image}
+          alignmentClass={align}
+          headingLevel="h2"
+          compact
+          onEdit={() => onSelect(null)}
+          visitor={
+            appearance.socialProof.enabled ? (
+              <p
+                className={
+                  appearance.socialProof.style === "retro"
+                    ? "relative mt-3 rounded border border-green-400 bg-black/80 px-2 py-1 font-mono text-[9px] font-black tracking-widest text-green-300"
+                    : appearance.socialProof.style === "pill"
+                      ? "relative mt-3 rounded-full border border-current/15 bg-white/35 px-2 py-1 text-[9px] font-black"
+                      : "relative mt-3 text-[9px] font-black opacity-60"
+                }
+              >
+                1.284{" "}
+                {appearance.socialProof.label ||
+                  (appearance.socialProof.metric === "today"
+                    ? "bugün ziyaret"
+                    : appearance.socialProof.metric === "live"
+                      ? "son 30 dakikada"
+                      : "toplam ziyaret")}
+              </p>
+            ) : null
+          }
+        />
         <div
           className={`relative w-full ${appearance.layout.template === "bento" ? "grid-cols-2" : "grid-cols-1"}`}
           style={{

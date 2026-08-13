@@ -1,12 +1,12 @@
 "use client";
 
-import { Component, lazy, Suspense, type ReactNode } from "react";
+import { Component, Suspense, type ReactNode } from "react";
 
+import {
+  PROFILE_EFFECT_REGISTRY,
+  type ProfileEffectContext,
+} from "~/components/profile/effects/effect-registry";
 import type { AppearanceSettings } from "~/lib/appearance";
-
-const MouseParticles = lazy(() => import("./effects/mouse-particles"));
-const MatrixRain = lazy(() => import("./effects/matrix-rain"));
-const TiltAndFilters = lazy(() => import("./effects/tilt-and-filters"));
 
 class AmbientEffectBoundary extends Component<
   { children: ReactNode },
@@ -30,32 +30,19 @@ export function ProfileAmbientEffects({
   effects: AppearanceSettings["effects"];
   particleColor: string;
 }) {
-  const filtersEnabled =
-    effects.cardTilt !== "off" ||
-    effects.crtFilter ||
-    effects.glitch ||
-    effects.scanlines;
-  if (
-    effects.mouseParticles === "off" &&
-    effects.matrixRain === "off" &&
-    !filtersEnabled
-  )
-    return null;
+  const context: ProfileEffectContext = { effects, particleColor };
+  const active = PROFILE_EFFECT_REGISTRY.filter((plugin) =>
+    plugin.enabled(context),
+  );
+  if (!active.length) return null;
 
   return (
-    <AmbientEffectBoundary>
-      <Suspense fallback={null}>
-        {effects.mouseParticles !== "off" && (
-          <MouseParticles
-            intensity={effects.mouseParticles}
-            color={particleColor}
-          />
-        )}
-        {effects.matrixRain !== "off" && (
-          <MatrixRain intensity={effects.matrixRain} />
-        )}
-        {filtersEnabled && <TiltAndFilters effects={effects} />}
-      </Suspense>
-    </AmbientEffectBoundary>
+    <Suspense fallback={null}>
+      {active.map(({ id, Renderer }) => (
+        <AmbientEffectBoundary key={id}>
+          <Renderer {...context} />
+        </AmbientEffectBoundary>
+      ))}
+    </Suspense>
   );
 }

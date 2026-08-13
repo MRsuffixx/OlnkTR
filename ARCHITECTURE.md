@@ -1,6 +1,6 @@
 # ARCHITECTURE.md — olnk.tr System Design
 
-> Maintained on `codex/stabilize-upgrades-fixes`.
+> Maintained against the protected `main` architecture; feature branches must update this file when boundaries change.
 > This document maps modules, data flow, integrations, and the cross-cutting concerns that every contributor must understand before changing the system.
 
 ---
@@ -70,7 +70,7 @@ an internal SMTP endpoint and a loopback-only development inbox.
 7. `recordProfileView()` is scheduled via `next/server`'s `after()` — non-blocking; the response returns immediately.
 8. Optional public counters read honest daily buckets or a rolling 30-minute distinct pseudonymous count aligned with view deduplication.
 9. Spotify/SoundCloud APIs and canvas effect chunks load only when the resolved appearance enables them. Audio always starts from an explicit visitor gesture.
-10. **Caching note:** no `revalidate` is exported. Updates do not explicitly invalidate. See `.memory-bank/known_issues.md`.
+10. The Prisma lookup is dynamic; React `cache()` only deduplicates metadata/page reads within the same render request.
 
 ### 2.2 Dashboard (`/dashboard/*`)
 
@@ -79,7 +79,7 @@ an internal SMTP endpoint and a loopback-only development inbox.
    - `/onboarding` if no `username`.
 2. RSC pages (`page.tsx`) call server-side tRPC procedures (`api.workspace.get`, `api.analytics.overview`, `api.billing.overview`, `api.customization.domainOverview`) via the cached caller in `src/trpc/server.ts`.
 3. The page hydrates with the resulting state; subsequent mutations use the client `httpBatchStreamLink`.
-4. `WorkspaceEditor` is a three-area mini-site builder: a profile/content/design tool rail, the active inspector, and a shared live profile preview. Mobile keeps the same tools and switches between editor and preview.
+4. `WorkspaceEditor` is a three-area mini-site builder: a profile/content/design tool rail, the active inspector, and a shared live profile preview. Mobile keeps the same tools and switches between editor and preview; preview frames cover phone, tablet, and desktop.
 5. Identity and real content stay relational (`User`, `ProfileLink`). Presentation, layout, effects, typography, audio, SEO, and privacy preferences are validated as one versioned `Theme.settings` document.
 6. The dashboard layout sets `metadata.robots = { index: false, follow: false }`.
 
@@ -90,6 +90,8 @@ an internal SMTP endpoint and a loopback-only development inbox.
 - Avatar geometry and interaction live in a dedicated `avatar` group; `layout` only controls placement, density, responsive padding, and alignment.
 - Background media renders in an isolated layer so blur, brightness, contrast, saturation, hue, scale, fit, and position never filter profile content.
 - `FEATURE_CATALOG` tiers every editable leaf. Free downgrades keep stored Pro choices while `resolveAppearanceForPlan()` produces deterministic public fallbacks.
+- The Free baseline includes semantic colors, linear/radial multi-stop gradients, image backgrounds, core card/avatar controls, and basic Bento/terminal layouts. Conic gradients, video/motion backgrounds, and advanced effects remain centrally gated.
+- `font-registry.ts` owns approved font IDs and CSS families. `effect-registry.tsx` owns lazy ambient-effect plugins. `ProfileBackground` and `ProfileIdentity` are shared by public and preview renderers.
 - Security-sensitive gates remain relational. `privacy` controls indexing, analytics ingestion, and share controls but cannot replace `User.profilePasswordHash` enforcement.
 - Links, future social accounts, badges, sections, and widgets are content and must use separate models rather than being embedded in `Theme.settings`.
 
@@ -239,7 +241,7 @@ Pricing: `CANONICAL_USD_PRICES = { MONTHLY: 300, YEARLY: 2200 }`. STRIPE/ADYEN q
 
 ### 3.7 Storage (`src/server/storage.ts`)
 
-S3-compatible via `@aws-sdk/client-s3` with `forcePathStyle: true` (R2/MinIO/Backblaze friendly). `region: env.STORAGE_REGION ?? "auto"`. If any of `STORAGE_ENDPOINT / BUCKET / ACCESS_KEY_ID / SECRET_ACCESS_KEY / PUBLIC_URL` is missing, `getStorageConfig()` returns `null` and the client displays the "https adres kullanın" fallback. Allowed mime types: `jpeg|png|webp|gif|mp4|webm|mpeg audio|mp4 audio|ogg|wav`. Audio is Pro-only; entry sounds are capped at 2 MB and profile audio at 25 MB.
+S3-compatible via `@aws-sdk/client-s3` with `forcePathStyle: true` (R2/MinIO/Backblaze friendly). `region: env.STORAGE_REGION ?? "auto"`. If any of `STORAGE_ENDPOINT / BUCKET / ACCESS_KEY_ID / SECRET_ACCESS_KEY / PUBLIC_URL` is missing, `getStorageConfig()` returns `null` and the client displays the "https adres kullanın" fallback. Allowed mime types: `jpeg|png|webp|gif|mp4|webm|mpeg audio|mp4 audio|ogg|wav`. Finalization reads object metadata and the first binary bytes: exact size, declared MIME, and a recognized container signature must all match before `READY`. Quotas and per-purpose limits live in `src/config/plan-limits.ts`; Free supports avatar/background images, while direct video/audio remain Pro.
 
 ---
 
@@ -283,8 +285,8 @@ The 404 and 410 responses are `Cache-Control: public, max-age=60` HTML pages.
 
 ### 5.2 Cross-request memo
 
-- `auth()` is `cache()`-wrapped in `src/server/auth/index.ts`.
-- `getProfile()` on the public page is `cache()`-wrapped inline.
+- `auth()` and the inline public `getProfile()` use React `cache()` for request-render deduplication.
+- These wrappers are not a persistent cross-request profile cache.
 - The server-side tRPC caller is shared via `createHydrationHelpers` so SSR + RSC see one instance per request.
 
 ### 5.3 Local UI state
@@ -294,8 +296,8 @@ The 404 and 410 responses are `Cache-Control: public, max-age=60` HTML pages.
 
 ### 5.4 Caching & invalidation
 
-- **No explicit `revalidateTag` / `revalidatePath` calls.** This is a known gap (see `.memory-bank/known_issues.md`).
-- The public profile renders static at build time and uses default stale-while-revalidate after edits.
+- The public dynamic route reads profile state from Prisma on each request; the production build marks `/{username}` dynamic.
+- There is no tagged persistent profile cache to invalidate today. Add tag invalidation together with such a cache, not before it.
 - `/api/qr/[username]` sets 1h max-age + 24h SWR.
 - Webhook routes return non-cacheable responses.
 
@@ -343,7 +345,8 @@ On `401` from any provider: `WebhookVerificationError`. On `500`: a generic erro
 | Concern                         | Mitigation                                                                   | Where                                        |
 | ------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------- |
 | SQL injection                   | Parameterised queries only (Prisma)                                          | `src/server/db.ts`                           |
-| XSS in user HTML                | No `dangerouslySetInnerHTML` except for sanitized CSS output                 | `src/server/security/custom-css.ts`          |
+| XSS in user content             | No user HTML; escaped JSON-LD only; bounded scoped CSS compatibility path    | `[username]/page.tsx`, `custom-css.ts`       |
+| Upload content spoofing         | Exact size/MIME plus binary container signature before asset readiness       | `src/server/storage.ts`                      |
 | Cross-site request forgery      | Auth.js + Next server actions + origin checks (CSP `frame-ancestors 'none'`) | `next.config.js`, `src/auth`                 |
 | Click fraud                     | Minute-bucketed dedupe keys, rate limits, bot filter                         | `src/server/analytics/ingest.ts`             |
 | Password leak                   | scrypt (not bcrypt), rate-limited unlock endpoint                            | `src/server/security/link-password.ts`       |
@@ -379,6 +382,10 @@ On `401` from any provider: `WebhookVerificationError`. On `500`: a generic erro
 | A new env var              | `.env.example`, `src/env.js`, `ENVIRONMENT.md`                                                                                   |
 | A new payment provider     | `src/server/payments/types.ts`, `adapters/<provider>.ts`, `registry.ts`, `pricing.ts`, `service.ts` (only if behaviour diverges) |
 | A new appearance field     | `src/lib/appearance.ts`, `src/config/feature-catalog.ts`, `src/components/dashboard/appearance-editor.tsx`                       |
+| A new font                 | `src/config/font-registry.ts`, `src/app/layout.tsx`, appearance tests                                                            |
+| A new effect               | Appearance schema/catalog plus `src/components/profile/effects/effect-registry.tsx`                                              |
+| A product/storage limit    | `src/config/plan-limits.ts`, server enforcement, unit tests                                                                      |
+| A section/widget/theme     | New relational model + migration + registry; follow `docs/PROFILE_BUILDER.md`                                                    |
 | A new middleware behaviour | `src/proxy.ts`, `next.config.js` (for headers)                                                                                   |
 | A new cron job             | `src/app/api/maintenance/route.ts`                                                                                               |
 | A new admin operation      | `src/lib/schemas.ts`, `src/server/api/routers/admin/*`, `src/server/admin/audit.ts`                                              |
