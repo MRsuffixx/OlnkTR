@@ -91,15 +91,15 @@ export default function Home() {
                 </p>
                 <div className="mt-4 flex justify-center gap-2">
                   {[
-                    ["D", "#5865F2"],
-                    ["IG", "#E4405F"],
-                    ["GH", "#181717"],
-                    ["SP", "#1DB954"],
-                  ].map(([label, color]) => (
+                    ["D", "#5865F2", "#FFFFFF"],
+                    ["IG", "#C13555", "#FFFFFF"],
+                    ["GH", "#181717", "#FFFFFF"],
+                    ["SP", "#1DB954", "#000000"],
+                  ].map(([label, color, textColor]) => (
                     <span
                       key={label}
-                      className="grid size-8 place-items-center rounded-full text-[9px] font-black text-white"
-                      style={{ backgroundColor: color }}
+                      className="grid size-8 place-items-center rounded-full text-[9px] font-black"
+                      style={{ backgroundColor: color, color: textColor }}
                     >
                       {label}
                     </span>
