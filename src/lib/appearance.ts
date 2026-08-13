@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { z } from "zod";
 
-export const APPEARANCE_SETTINGS_VERSION = 2;
+export const APPEARANCE_SETTINGS_VERSION = 3;
 export const hexColor = z.string().regex(/^#[\dA-Fa-f]{6}$/);
 
 const mediaUrl = z.union([
@@ -96,6 +96,16 @@ export const appearanceSchema = z.object({
     mediaUrl,
     overlayColor: hexColor,
     overlayOpacity: z.number().int().min(0).max(90),
+    fit: z.enum(["cover", "contain"]).default("cover"),
+    position: z
+      .enum(["center", "top", "bottom", "left", "right"])
+      .default("center"),
+    blur: z.number().int().min(0).max(24).default(0),
+    brightness: z.number().int().min(50).max(150).default(100),
+    contrast: z.number().int().min(50).max(150).default(100),
+    saturation: z.number().int().min(0).max(200).default(100),
+    hueRotate: z.number().int().min(0).max(360).default(0),
+    scale: z.number().int().min(100).max(130).default(100),
     preset: z.enum([
       "sunrise",
       "mint",
@@ -114,7 +124,9 @@ export const appearanceSchema = z.object({
       blur: z.number().int().min(0).max(40),
       radius: z.number().int().min(0).max(48),
       borderWidth: z.number().int().min(0).max(6),
+      borderStyle: z.enum(["solid", "dashed", "double"]).default("solid"),
       shadow: z.enum(["none", "soft", "hard", "glow"]),
+      hover: z.enum(["none", "lift", "tilt", "glow"]).default("none"),
       padding: z.number().int().min(16).max(64),
     })
     .default({
@@ -123,8 +135,29 @@ export const appearanceSchema = z.object({
       blur: 18,
       radius: 32,
       borderWidth: 1,
+      borderStyle: "solid",
       shadow: "soft",
+      hover: "none",
       padding: 28,
+    }),
+  avatar: z
+    .object({
+      shape: z.enum(["circle", "rounded", "square", "squircle", "hexagon"]),
+      size: z.number().int().min(64).max(180),
+      borderWidth: z.number().int().min(0).max(10),
+      borderStyle: z.enum(["solid", "dashed", "double"]),
+      shadow: z.enum(["none", "soft", "hard", "glow"]),
+      animation: z.enum(["none", "pulse", "float", "spin"]),
+      hover: z.enum(["none", "zoom", "tilt", "glow"]),
+    })
+    .default({
+      shape: "circle",
+      size: 96,
+      borderWidth: 3,
+      borderStyle: "solid",
+      shadow: "hard",
+      animation: "none",
+      hover: "none",
     }),
   buttons: z.object({
     shape: z.enum(["square", "rounded", "pill", "custom"]),
@@ -171,14 +204,14 @@ export const appearanceSchema = z.object({
       .enum(["stack", "compact", "bento", "terminal"])
       .default("stack"),
     cardPosition: z.enum(["left", "center", "right"]).default("center"),
-    avatarShape: z.enum(["circle", "rounded", "square", "squircle", "hexagon"]),
-    avatarSize: z.number().int().min(64).max(160),
-    avatarBorderWidth: z.number().int().min(0).max(10),
     bioPlacement: z.enum(["belowName", "aboveName", "hidden"]),
     alignment: z.enum(["left", "center", "right"]),
     mobileAlignment: z.enum(["left", "center", "right"]).default("center"),
     density: z.enum(["compact", "comfortable", "airy"]),
     contentWidth: z.number().int().min(320).max(860),
+    pagePadding: z.number().int().min(16).max(80).default(28),
+    mobilePagePadding: z.number().int().min(12).max(36).default(20),
+    verticalAlign: z.enum(["top", "center", "bottom"]).default("top"),
     socialPlacement: z.enum(["aboveBio", "belowBio", "belowLinks"]),
   }),
   effects: z.object({
@@ -273,6 +306,14 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
     mediaUrl: "",
     overlayColor: "#17211B",
     overlayOpacity: 18,
+    fit: "cover",
+    position: "center",
+    blur: 0,
+    brightness: 100,
+    contrast: 100,
+    saturation: 100,
+    hueRotate: 0,
+    scale: 100,
     preset: "sunrise",
   },
   card: {
@@ -281,8 +322,19 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
     blur: 18,
     radius: 32,
     borderWidth: 1,
+    borderStyle: "solid",
     shadow: "soft",
+    hover: "none",
     padding: 28,
+  },
+  avatar: {
+    shape: "circle",
+    size: 96,
+    borderWidth: 3,
+    borderStyle: "solid",
+    shadow: "hard",
+    animation: "none",
+    hover: "none",
   },
   buttons: {
     shape: "rounded",
@@ -305,14 +357,14 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
   layout: {
     template: "stack",
     cardPosition: "center",
-    avatarShape: "circle",
-    avatarSize: 96,
-    avatarBorderWidth: 3,
     bioPlacement: "belowName",
     alignment: "center",
     mobileAlignment: "center",
     density: "comfortable",
     contentWidth: 620,
+    pagePadding: 28,
+    mobilePagePadding: 20,
+    verticalAlign: "top",
     socialPlacement: "belowBio",
   },
   effects: {
@@ -354,6 +406,23 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
     detailedAnalytics: false,
   },
 };
+
+const legacyV2AppearanceSchema = appearanceSchema
+  .omit({ avatar: true })
+  .extend({
+    version: z.literal(2),
+    layout: appearanceSchema.shape.layout.extend({
+      avatarShape: z.enum([
+        "circle",
+        "rounded",
+        "square",
+        "squircle",
+        "hexagon",
+      ]),
+      avatarSize: z.number().int().min(64).max(160),
+      avatarBorderWidth: z.number().int().min(0).max(10),
+    }),
+  });
 
 const legacyAppearanceSchema = z.object({
   background: z.object({
@@ -408,7 +477,13 @@ const legacyAppearanceSchema = z.object({
     color: hexColor,
   }),
   layout: z.object({
-    avatarShape: appearanceSchema.shape.layout.shape.avatarShape,
+    avatarShape: z.enum([
+      "circle",
+      "rounded",
+      "square",
+      "squircle",
+      "hexagon",
+    ]),
     avatarSize: z.number().int().min(64).max(160),
     avatarBorderWidth: z.number().int().min(0).max(10),
     avatarBorderColor: hexColor,
@@ -473,6 +548,12 @@ function migrateLegacyAppearance(
       letterSpacing: value.typography.letterSpacing,
       headingEffect: "none",
     },
+    avatar: {
+      ...DEFAULT_APPEARANCE.avatar,
+      shape: value.layout.avatarShape,
+      size: value.layout.avatarSize,
+      borderWidth: value.layout.avatarBorderWidth,
+    },
     layout: value.layout,
     effects: {
       cursor: value.effects.cursor,
@@ -493,6 +574,22 @@ function migrateLegacyAppearance(
   });
 }
 
+function migrateV2Appearance(
+  value: z.infer<typeof legacyV2AppearanceSchema>,
+) {
+  return appearanceSchema.parse({
+    ...value,
+    version: APPEARANCE_SETTINGS_VERSION,
+    avatar: {
+      ...DEFAULT_APPEARANCE.avatar,
+      shape: value.layout.avatarShape,
+      size: value.layout.avatarSize,
+      borderWidth: value.layout.avatarBorderWidth,
+    },
+    layout: value.layout,
+  });
+}
+
 export function parseAppearance(value: unknown): AppearanceSettings {
   const declaredVersion =
     value && typeof value === "object"
@@ -501,6 +598,12 @@ export function parseAppearance(value: unknown): AppearanceSettings {
   if (declaredVersion === APPEARANCE_SETTINGS_VERSION) {
     const current = appearanceSchema.safeParse(value);
     return current.success ? current.data : structuredClone(DEFAULT_APPEARANCE);
+  }
+  if (declaredVersion === 2) {
+    const legacyV2 = legacyV2AppearanceSchema.safeParse(value);
+    return legacyV2.success
+      ? migrateV2Appearance(legacyV2.data)
+      : structuredClone(DEFAULT_APPEARANCE);
   }
   const legacy = legacyAppearanceSchema.safeParse(value);
   if (legacy.success) return migrateLegacyAppearance(legacy.data);
@@ -637,7 +740,9 @@ export function applyAppearancePreset(
       blur: 24,
       radius: 32,
       borderWidth: 1,
+      borderStyle: "solid",
       shadow: "soft",
+      hover: "lift",
       padding: 28,
     };
     next.buttons = { ...next.buttons, fill: "glass", shape: "rounded" };
@@ -725,7 +830,9 @@ export function applyAppearancePreset(
       blur: 14,
       radius: 18,
       borderWidth: 1,
+      borderStyle: "solid",
       shadow: "glow",
+      hover: "glow",
       padding: 28,
     };
     next.buttons = {
@@ -775,7 +882,9 @@ export function applyAppearancePreset(
       blur: 0,
       radius: 8,
       borderWidth: 1,
+      borderStyle: "solid",
       shadow: "glow",
+      hover: "glow",
       padding: 24,
     };
     next.buttons = {
@@ -809,7 +918,9 @@ export function applyAppearancePreset(
     blur: 0,
     radius: 0,
     borderWidth: 0,
+    borderStyle: "solid",
     shadow: "none",
+    hover: "none",
     padding: 24,
   };
   next.buttons = {

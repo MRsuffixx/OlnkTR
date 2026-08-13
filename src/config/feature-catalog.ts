@@ -11,7 +11,7 @@ export const FEATURE_CATALOG = {
   version: {
     label: "Ayar belgesi sürümü",
     tier: "free",
-    fallback: 2,
+    fallback: 3,
   },
   preset: {
     label: "Tema paketi",
@@ -128,6 +128,46 @@ export const FEATURE_CATALOG = {
     tier: "pro",
     fallback: 18,
   },
+  "background.fit": {
+    label: "Medya boyutlandırma",
+    tier: "pro",
+    fallback: "cover",
+  },
+  "background.position": {
+    label: "Medya konumu",
+    tier: "pro",
+    fallback: "center",
+  },
+  "background.blur": {
+    label: "Arka plan bulanıklığı",
+    tier: "pro",
+    fallback: 0,
+  },
+  "background.brightness": {
+    label: "Arka plan parlaklığı",
+    tier: "pro",
+    fallback: 100,
+  },
+  "background.contrast": {
+    label: "Arka plan kontrastı",
+    tier: "pro",
+    fallback: 100,
+  },
+  "background.saturation": {
+    label: "Arka plan doygunluğu",
+    tier: "pro",
+    fallback: 100,
+  },
+  "background.hueRotate": {
+    label: "Arka plan renk dönüşü",
+    tier: "pro",
+    fallback: 0,
+  },
+  "background.scale": {
+    label: "Arka plan yakınlaştırma",
+    tier: "pro",
+    fallback: 100,
+  },
   "background.preset": {
     label: "Arka plan paketi",
     tier: "free",
@@ -139,8 +179,50 @@ export const FEATURE_CATALOG = {
   "card.blur": { label: "Kart bulanıklığı", tier: "pro", fallback: 18 },
   "card.radius": { label: "Kart köşeleri", tier: "free", fallback: 32 },
   "card.borderWidth": { label: "Kart kenarlığı", tier: "pro", fallback: 1 },
+  "card.borderStyle": {
+    label: "Kart kenarlık biçimi",
+    tier: "pro",
+    fallback: "solid",
+  },
   "card.shadow": { label: "Kart gölgesi", tier: "pro", fallback: "soft" },
+  "card.hover": {
+    label: "Kart etkileşimi",
+    tier: "pro",
+    fallback: "none",
+  },
   "card.padding": { label: "Kart iç boşluğu", tier: "pro", fallback: 28 },
+  "avatar.shape": {
+    label: "Avatar şekli",
+    tier: "free",
+    fallback: "circle",
+    proValues: ["squircle", "hexagon"],
+  },
+  "avatar.size": { label: "Avatar boyutu", tier: "pro", fallback: 96 },
+  "avatar.borderWidth": {
+    label: "Avatar kenarlığı",
+    tier: "pro",
+    fallback: 3,
+  },
+  "avatar.borderStyle": {
+    label: "Avatar kenarlık biçimi",
+    tier: "pro",
+    fallback: "solid",
+  },
+  "avatar.shadow": {
+    label: "Avatar gölgesi",
+    tier: "pro",
+    fallback: "hard",
+  },
+  "avatar.animation": {
+    label: "Avatar animasyonu",
+    tier: "pro",
+    fallback: "none",
+  },
+  "avatar.hover": {
+    label: "Avatar etkileşimi",
+    tier: "pro",
+    fallback: "none",
+  },
   "buttons.shape": {
     label: "Düğme şekli",
     tier: "free",
@@ -215,18 +297,6 @@ export const FEATURE_CATALOG = {
     tier: "pro",
     fallback: "center",
   },
-  "layout.avatarShape": {
-    label: "Avatar şekli",
-    tier: "free",
-    fallback: "circle",
-    proValues: ["squircle", "hexagon"],
-  },
-  "layout.avatarSize": { label: "Avatar boyutu", tier: "pro", fallback: 96 },
-  "layout.avatarBorderWidth": {
-    label: "Avatar kenarlığı",
-    tier: "pro",
-    fallback: 3,
-  },
   "layout.bioPlacement": {
     label: "Biyografi konumu",
     tier: "pro",
@@ -252,6 +322,21 @@ export const FEATURE_CATALOG = {
     label: "İçerik genişliği",
     tier: "pro",
     fallback: 620,
+  },
+  "layout.pagePadding": {
+    label: "Masaüstü sayfa boşluğu",
+    tier: "pro",
+    fallback: 28,
+  },
+  "layout.mobilePagePadding": {
+    label: "Mobil sayfa boşluğu",
+    tier: "free",
+    fallback: 20,
+  },
+  "layout.verticalAlign": {
+    label: "Dikey konum",
+    tier: "pro",
+    fallback: "top",
   },
   "layout.socialPlacement": {
     label: "Sosyal ikon konumu",
@@ -441,6 +526,13 @@ export const FEATURE_GROUPS = [
     label: "Profil kartı",
     paths: Object.keys(FEATURE_CATALOG).filter((key) =>
       key.startsWith("card."),
+    ),
+  },
+  {
+    id: "avatar",
+    label: "Avatar",
+    paths: Object.keys(FEATURE_CATALOG).filter((key) =>
+      key.startsWith("avatar."),
     ),
   },
   {

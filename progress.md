@@ -32,6 +32,8 @@
 - Admin control room under `/admin`: live database RBAC, user/workspace/account operations,
   unified subscriptions, revenue/platform charts, provider visibility, immutable audit, and
   trusted-shell role management.
+- Mini-site builder dashboard with dedicated Profile, Content, and Design workspaces plus a shared live preview on desktop and mobile.
+- Appearance document v2 with explicit v1 migration, semantic colour tokens, profile cards, layout templates, SEO/privacy settings, and a Free minimal preset.
 
 ### 1.2 Shipped and Working (Pro Tier)
 
@@ -52,6 +54,7 @@
 - Independently toggleable lazy canvas/CRT effects with reduced-motion and hidden-tab safeguards.
 - Whole-profile password protection with server-side content withholding, throttled scrypt verification, and versioned HttpOnly access cookies.
 - Near-live distinct visitor counter and retro digital style.
+- Full-profile Frost Glass, Midnight, Cyber Grid, and Retro Terminal presets with centrally enforced leaf-level entitlements.
 
 ### 1.3 Quality Gates (Green)
 
@@ -75,7 +78,7 @@
 | **Live checkout result overlay**                  | stabilisation | The `/dashboard/billing?checkout=…&intent=…` states already pass to `<BillingSettings/>`; refine the success / failure copy and link to the updated settings panel. |
 | **PayTR local-mode pricing display**              | stabilisation | `LOCAL_PRO_*_TRY` defaults to `12900` / `94900`; verify against the production PayTR dashboard before launch.                                                       |
 | **Mobile profile editor**                         | planning      | Editor is currently desktop-first; long-term goal is a feature-parity mobile experience.                                                                            |
-| **Mini-site builder foundation**                  | codex         | Evolve the versioned appearance document with layout templates, profile-card surfaces, semantic colour tokens, reusable presets, and a sectioned builder dashboard. |
+| **Advanced profile renderer parity**              | codex         | Move avatar styling out of layout, add media filters/card interactions/responsive spacing, and make dashboard desktop/mobile previews match the public renderer.     |
 
 ---
 
@@ -127,6 +130,15 @@
 ---
 
 ## 5. Change Log (recent)
+
+### 2026-08-13 — Mini-site builder foundation
+
+- Repositioned olnk.tr from a link-in-bio product to a Turkish-first mini-site builder; links remain the first relational content type rather than defining the product boundary.
+- Rebuilt the workspace as Profile, Content, and Design workspaces around one live preview, including mobile editor/preview switching.
+- Introduced appearance document version 2 with semantic CSS colour tokens, profile-card surfaces, stack/compact/bento/terminal layouts, heading effects, full-theme presets, and explicit version-1 migration.
+- Added SEO title/description/share-image controls and privacy switches for indexing, analytics ingestion, and share actions; server-enforced profile passwords remain relational.
+- Persisted `Theme.settingsVersion = 2` on user and admin workspace saves without a destructive database migration.
+- Verification: `pnpm check`, all 38 Vitest tests, and `pnpm build` pass. The repository-wide format gate still reports six pre-existing unrelated files.
 
 ### 2026-08-09 — Docker runtime and magic-link delivery repair
 
