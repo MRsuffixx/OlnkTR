@@ -5,6 +5,11 @@ import { z } from "zod";
 
 import { Prisma } from "../../../../generated/prisma/client";
 import type { CapabilityKey } from "~/config/feature-catalog";
+import {
+  assetUploadLimitBytes,
+  limitsForPlan,
+  MAX_SINGLE_UPLOAD_BYTES,
+} from "~/config/plan-limits";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
 import { domainProofMatches } from "~/server/domains";
@@ -30,16 +35,13 @@ async function requireFeature(userId: string, feature: CapabilityKey) {
     where: { id: userId },
     select: { subscription: true, manualEntitlement: true },
   });
-  if (
-    !canUseFeature(
-      hasProAccess(user?.subscription, user?.manualEntitlement),
-      feature,
-    )
-  )
+  const pro = hasProAccess(user?.subscription, user?.manualEntitlement);
+  if (!canUseFeature(pro, feature))
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Bu özellik Pro planında kullanılabilir.",
     });
+  return pro;
 }
 
 export const customizationRouter = createTRPCRouter({
@@ -279,11 +281,7 @@ export const customizationRouter = createTRPCRouter({
           "audio/ogg",
           "audio/wav",
         ]),
-        sizeBytes: z
-          .number()
-          .int()
-          .positive()
-          .max(25 * 1024 * 1024),
+        sizeBytes: z.number().int().positive().max(MAX_SINGLE_UPLOAD_BYTES),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -292,25 +290,31 @@ export const customizationRouter = createTRPCRouter({
           code: "PRECONDITION_FAILED",
           message: "Dosya yükleme şu anda yapılandırılmamış.",
         });
-      const capability =
+      const capability: CapabilityKey =
         input.purpose === "audio"
           ? "assets.audioUpload"
           : input.purpose === "entrySound"
             ? "assets.entrySoundUpload"
-            : input.purpose === "background" ||
+            : input.purpose === "background" &&
                 input.mimeType.startsWith("video/")
-              ? "assets.backgroundUpload"
-              : "assets.avatarUpload";
-      await requireFeature(ctx.session.user.id, capability);
-      if (input.purpose === "avatar" && input.mimeType.startsWith("video/"))
+              ? "assets.backgroundVideoUpload"
+              : input.purpose === "background"
+                ? "assets.backgroundImageUpload"
+                : "assets.avatarUpload";
+      const pro = await requireFeature(ctx.session.user.id, capability);
+      if (input.purpose === "avatar" && !input.mimeType.startsWith("image/"))
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Avatar için görsel dosyası seçin.",
         });
-      if (input.purpose === "avatar" && input.sizeBytes > 8 * 1024 * 1024)
+      if (
+        input.purpose === "background" &&
+        !input.mimeType.startsWith("image/") &&
+        !input.mimeType.startsWith("video/")
+      )
         throw new TRPCError({
-          code: "PAYLOAD_TOO_LARGE",
-          message: "Avatar en fazla 8 MB olabilir.",
+          code: "BAD_REQUEST",
+          message: "Arka plan için görsel veya video seçin.",
         });
       const isAudio = input.mimeType.startsWith("audio/");
       if (
@@ -321,15 +325,15 @@ export const customizationRouter = createTRPCRouter({
           code: "BAD_REQUEST",
           message: "Bu alan için geçerli bir ses dosyası seçin.",
         });
-      if (input.purpose === "entrySound" && input.sizeBytes > 2 * 1024 * 1024)
+      const uploadLimit = assetUploadLimitBytes({
+        pro,
+        purpose: input.purpose,
+        mimeType: input.mimeType,
+      });
+      if (!uploadLimit || input.sizeBytes > uploadLimit)
         throw new TRPCError({
           code: "PAYLOAD_TOO_LARGE",
-          message: "Giriş sesi en fazla 2 MB olabilir.",
-        });
-      if (input.purpose === "audio" && input.sizeBytes > 25 * 1024 * 1024)
-        throw new TRPCError({
-          code: "PAYLOAD_TOO_LARGE",
-          message: "Ses dosyası en fazla 25 MB olabilir.",
+          message: `Bu dosya planınızdaki ${Math.floor(uploadLimit / (1024 * 1024))} MB sınırını aşıyor.`,
         });
       const rate = await consumeRateLimit({
         key: `upload:${ctx.session.user.id}:${getTrustedClientAddress(ctx.headers)}`,
@@ -352,22 +356,14 @@ export const customizationRouter = createTRPCRouter({
         await tx.$executeRaw(
           Prisma.sql`SELECT pg_advisory_xact_lock(hashtextextended(${`asset:${ctx.session.user.id}`}, 0))`,
         );
-        const [user, used] = await Promise.all([
-          tx.user.findUnique({
-            where: { id: ctx.session.user.id },
-            select: { subscription: true, manualEntitlement: true },
-          }),
-          tx.uploadedAsset.aggregate({
-            where: {
-              userId: ctx.session.user.id,
-              status: { in: ["PENDING", "READY"] },
-            },
-            _sum: { sizeBytes: true },
-          }),
-        ]);
-        const quota = hasProAccess(user?.subscription, user?.manualEntitlement)
-          ? 250 * 1024 * 1024
-          : 10 * 1024 * 1024;
+        const used = await tx.uploadedAsset.aggregate({
+          where: {
+            userId: ctx.session.user.id,
+            status: { in: ["PENDING", "READY"] },
+          },
+          _sum: { sizeBytes: true },
+        });
+        const quota = limitsForPlan(pro).storageBytes;
         if ((used._sum.sizeBytes ?? 0) + input.sizeBytes > quota)
           throw new TRPCError({
             code: "PAYLOAD_TOO_LARGE",
@@ -406,10 +402,11 @@ export const customizationRouter = createTRPCRouter({
       });
       if (!asset) throw new TRPCError({ code: "NOT_FOUND" });
       try {
-        const actual = await inspectAsset(asset.objectKey);
+        const actual = await inspectAsset(asset.objectKey, asset.mimeType);
         if (
           actual.sizeBytes !== asset.sizeBytes ||
-          actual.mimeType !== asset.mimeType
+          actual.mimeType !== asset.mimeType ||
+          !actual.signatureValid
         )
           throw new Error("Uploaded object metadata mismatch.");
         const ready = await ctx.db.uploadedAsset.update({

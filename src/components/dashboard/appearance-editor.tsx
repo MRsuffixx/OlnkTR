@@ -10,11 +10,13 @@ import {
 import { useState } from "react";
 
 import { AssetUpload } from "~/components/dashboard/asset-upload";
+import { GradientEditor } from "~/components/dashboard/gradient-editor";
 import {
   FEATURE_CATALOG,
   type AppearanceFeature,
   type AppearanceFeaturePath,
 } from "~/config/feature-catalog";
+import { BODY_FONT_IDS, HEADING_FONT_IDS } from "~/config/font-registry";
 import {
   applyAppearancePreset,
   BACKGROUND_PRESETS,
@@ -330,58 +332,26 @@ export function AppearanceEditor({
               />
             )}
             {value("background.mode") === "gradient" && (
-              <>
-                <Choice
-                  label="Geçiş geometrisi"
-                  path="background.gradient.type"
-                  current={value("background.gradient.type")}
-                  hasPro={hasPro}
-                  onChoose={update}
-                  options={[
-                    ["linear", "Doğrusal"],
-                    ["radial", "Dairesel"],
-                    ["conic", "Konik"],
-                  ]}
-                />
-                <Range
-                  label="Açı"
-                  path="background.gradient.angle"
-                  value={value("background.gradient.angle")}
-                  min={0}
-                  max={360}
-                  suffix="°"
-                  hasPro={hasPro}
-                  onChange={update}
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  {appearance.background.gradient.stops
-                    .slice(0, 2)
-                    .map((stop, index) => (
-                      <label
-                        key={index}
-                        className="text-ink/55 text-xs font-bold"
-                      >
-                        <span className="mb-1.5 block">Renk {index + 1}</span>
-                        <input
-                          type="color"
-                          value={stop.color}
-                          onChange={(event) => {
-                            if (!hasPro) return onUpgrade();
-                            const stops = [
-                              ...appearance.background.gradient.stops,
-                            ];
-                            stops[index] = {
-                              ...stop,
-                              color: event.target.value,
-                            };
-                            update("background.gradient.stops", stops);
-                          }}
-                          className="border-ink/15 h-11 w-full rounded-xl border bg-white p-1"
-                        />
-                      </label>
-                    ))}
-                </div>
-              </>
+              <GradientEditor
+                value={appearance.background.gradient}
+                hasPro={hasPro}
+                onUpgrade={onUpgrade}
+                onChange={(gradient) => {
+                  if (!hasPro && gradient.type === "conic") {
+                    onUpgrade();
+                    return;
+                  }
+                  onChange({
+                    ...appearance,
+                    preset: "custom",
+                    background: {
+                      ...appearance.background,
+                      preset: "custom",
+                      gradient,
+                    },
+                  });
+                }}
+              />
             )}
             {["image", "video"].includes(value("background.mode")) && (
               <>
@@ -400,7 +370,7 @@ export function AppearanceEditor({
                       ? "video/mp4,video/webm"
                       : "image/jpeg,image/png,image/webp,image/gif"
                   }
-                  disabled={!hasPro}
+                  disabled={value("background.mode") === "video" && !hasPro}
                   onUploaded={onMediaUploaded}
                 />
                 <Choice
@@ -867,14 +837,7 @@ export function AppearanceEditor({
               value={value("typography.headingFont")}
               hasPro={hasPro}
               onChange={update}
-              options={[
-                "Fraunces",
-                "Manrope",
-                "Space Grotesk",
-                "Playfair Display",
-                "DM Serif Display",
-                "Bebas Neue",
-              ]}
+              options={HEADING_FONT_IDS}
             />
             <SelectField
               label="Gövde yazı tipi"
@@ -882,14 +845,7 @@ export function AppearanceEditor({
               value={value("typography.bodyFont")}
               hasPro={hasPro}
               onChange={update}
-              options={[
-                "Manrope",
-                "Fraunces",
-                "Inter",
-                "Montserrat",
-                "Lora",
-                "Roboto Mono",
-              ]}
+              options={BODY_FONT_IDS}
             />
             <div className="grid grid-cols-2 gap-3">
               <Range
@@ -1712,7 +1668,7 @@ function SelectField({
   label: string;
   path: AppearanceFeaturePath;
   value: string;
-  options: string[];
+  options: readonly string[];
   hasPro: boolean;
   onChange: (path: AppearanceFeaturePath, value: unknown) => void;
 }) {

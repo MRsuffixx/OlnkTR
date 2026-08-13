@@ -629,8 +629,12 @@ export const CAPABILITY_CATALOG = {
   "analytics.devices": { label: "Cihaz analizi", tier: "pro" },
   "domains.custom": { label: "Özel alan adı", tier: "pro" },
   "assets.avatarUpload": { label: "Avatar yükleme", tier: "free" },
-  "assets.backgroundUpload": {
-    label: "Arka plan görseli veya videosu",
+  "assets.backgroundImageUpload": {
+    label: "Arka plan görseli",
+    tier: "free",
+  },
+  "assets.backgroundVideoUpload": {
+    label: "Arka plan videosu",
     tier: "pro",
   },
   "assets.audioUpload": {

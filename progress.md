@@ -74,13 +74,13 @@
 
 > Items currently being worked on; promote to §1.1/1.2 once merged.
 
-| Task                                              | Owner context | Notes                                                                                                                                                               |
-| ------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Task                                              | Owner context  | Notes                                                                                                                                                                                                            |
+| ------------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Profile builder foundation audit**              | transformation | Trace the production data/render/security paths, document reusable boundaries, align the Free customization baseline, and extract reusable gradient/font/render primitives without changing public profile URLs. |
-| **Public profile cache invalidation** (known gap) | stabilisation | Add `revalidateTag` after `workspace.save` + `account.updateProfile` so the editor's preview matches the live page without re-deploying.                            |
-| **Live checkout result overlay**                  | stabilisation | The `/dashboard/billing?checkout=…&intent=…` states already pass to `<BillingSettings/>`; refine the success / failure copy and link to the updated settings panel. |
-| **PayTR local-mode pricing display**              | stabilisation | `LOCAL_PRO_*_TRY` defaults to `12900` / `94900`; verify against the production PayTR dashboard before launch.                                                       |
-| **Mobile profile editor**                         | planning      | Editor is currently desktop-first; long-term goal is a feature-parity mobile experience.                                                                            |
+| **Public profile cache invalidation** (known gap) | stabilisation  | Add `revalidateTag` after `workspace.save` + `account.updateProfile` so the editor's preview matches the live page without re-deploying.                                                                         |
+| **Live checkout result overlay**                  | stabilisation  | The `/dashboard/billing?checkout=…&intent=…` states already pass to `<BillingSettings/>`; refine the success / failure copy and link to the updated settings panel.                                              |
+| **PayTR local-mode pricing display**              | stabilisation  | `LOCAL_PRO_*_TRY` defaults to `12900` / `94900`; verify against the production PayTR dashboard before launch.                                                                                                    |
+| **Mobile profile editor**                         | planning       | Editor is currently desktop-first; long-term goal is a feature-parity mobile experience.                                                                                                                         |
 
 ---
 

@@ -48,30 +48,44 @@ const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   variable: "--font-space-grotesk",
+  preload: false,
 });
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
+  preload: false,
 });
 const dmSerif = DM_Serif_Display({
   subsets: ["latin"],
   weight: "400",
   variable: "--font-dm-serif",
+  preload: false,
 });
 const bebas = Bebas_Neue({
   subsets: ["latin"],
   weight: "400",
   variable: "--font-bebas",
+  preload: false,
 });
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  preload: false,
+});
 const montserrat = Montserrat({
   subsets: ["latin"],
   variable: "--font-montserrat",
+  preload: false,
 });
-const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
+const lora = Lora({
+  subsets: ["latin"],
+  variable: "--font-lora",
+  preload: false,
+});
 const robotoMono = Roboto_Mono({
   subsets: ["latin"],
   variable: "--font-roboto-mono",
+  preload: false,
 });
 
 export default function RootLayout({
