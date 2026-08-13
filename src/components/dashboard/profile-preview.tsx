@@ -243,16 +243,16 @@ export function ProfilePreview({
             ...profileHeadingStyle(appearance),
             order: 2,
           }}
-      >
-        {draft.name || "Görünen adın"}
-      </h2>
-      <p
-        className="relative mt-1 text-[11px] font-semibold"
-        style={{ order: 2, color: appearance.colors.textMuted }}
-      >
-        @{username}
-      </p>
-      {appearance.layout.bioPlacement === "belowName" && (
+        >
+          {draft.name || "Görünen adın"}
+        </h2>
+        <p
+          className="relative mt-1 text-[11px] font-semibold"
+          style={{ order: 2, color: appearance.colors.textMuted }}
+        >
+          @{username}
+        </p>
+        {appearance.layout.bioPlacement === "belowName" && (
           <p
             className="relative mt-2 max-w-[280px] leading-6"
             style={{ order: 2, color: appearance.colors.textSecondary }}

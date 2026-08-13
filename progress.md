@@ -33,7 +33,8 @@
   unified subscriptions, revenue/platform charts, provider visibility, immutable audit, and
   trusted-shell role management.
 - Mini-site builder dashboard with dedicated Profile, Content, and Design workspaces plus a shared live preview on desktop and mobile.
-- Appearance document v2 with explicit v1 migration, semantic colour tokens, profile cards, layout templates, SEO/privacy settings, and a Free minimal preset.
+- Appearance document v3 with explicit v1/v2 migration, semantic colour tokens, dedicated avatar settings, profile cards, layout templates, SEO/privacy settings, and a Free minimal preset.
+- Dashboard mobile/desktop viewport switching backed by the same profile-rendering helpers as the public page.
 
 ### 1.2 Shipped and Working (Pro Tier)
 
@@ -55,6 +56,7 @@
 - Whole-profile password protection with server-side content withholding, throttled scrypt verification, and versioned HttpOnly access cookies.
 - Near-live distinct visitor counter and retro digital style.
 - Full-profile Frost Glass, Midnight, Cyber Grid, and Retro Terminal presets with centrally enforced leaf-level entitlements.
+- Bounded background media filters, card/avatar borders and shadows, responsive page spacing, and conflict-free avatar motion/hover controls.
 
 ### 1.3 Quality Gates (Green)
 
@@ -78,7 +80,6 @@
 | **Live checkout result overlay**                  | stabilisation | The `/dashboard/billing?checkout=…&intent=…` states already pass to `<BillingSettings/>`; refine the success / failure copy and link to the updated settings panel. |
 | **PayTR local-mode pricing display**              | stabilisation | `LOCAL_PRO_*_TRY` defaults to `12900` / `94900`; verify against the production PayTR dashboard before launch.                                                       |
 | **Mobile profile editor**                         | planning      | Editor is currently desktop-first; long-term goal is a feature-parity mobile experience.                                                                            |
-| **Advanced profile renderer parity**              | codex         | Move avatar styling out of layout, add media filters/card interactions/responsive spacing, and make dashboard desktop/mobile previews match the public renderer.    |
 
 ---
 
@@ -130,6 +131,15 @@
 ---
 
 ## 5. Change Log (recent)
+
+### 2026-08-13 — Advanced profile renderer parity
+
+- Evolved `AppearanceSettings` to version 3 and added explicit version-2 migration; avatar geometry and interaction no longer leak into layout configuration.
+- Added bounded background fit, position, blur, brightness, contrast, saturation, hue rotation, scale, and overlay controls rendered on an isolated layer.
+- Added card border styles/hover effects, avatar border/shadow/animation/hover controls, responsive page padding, and vertical card placement.
+- Added dashboard mobile/desktop preview switching and rendered display name plus `@username` consistently in preview and public profiles.
+- Made full-profile presets deterministic so stale filters, layouts, and avatar animations cannot leak between themes.
+- Verification: `pnpm check`, all 41 Vitest tests, and `pnpm build` pass.
 
 ### 2026-08-13 — Mini-site builder foundation
 

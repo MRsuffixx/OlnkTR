@@ -377,3 +377,26 @@ Profile passwords remain relational because they are enforcement state, not pres
 - The dashboard preview and public profile share the same presets, tokens, cards, and layouts.
 - Adding a cosmetic field does not add a Prisma column.
 - Content querying and ordering remain relational and indexable.
+
+---
+
+## ADR-023 — Renderer controls are isolated by visual responsibility
+
+**Date:** 2026-08-13
+**Status:** Accepted
+**Context:** Version 2 still placed avatar geometry inside `layout`, applied backgrounds directly
+to the page root, and only previewed the mobile viewport. That made future avatar effects harder to
+extend and risked background filters affecting readable content.
+
+**Decision:** Evolve the appearance document to version 3. Move avatar geometry, borders, shadows,
+animation, and hover behavior into a dedicated `avatar` group. Keep layout responsible only for
+placement and responsive spacing. Render image, video, and gradient backgrounds in an isolated,
+non-interactive layer with bounded filter controls. The dashboard offers explicit mobile and desktop
+preview viewports using the same helpers as the public profile.
+
+**Consequences:**
+
+- Version-1 and version-2 profiles migrate in memory and persist as version 3 on their next save.
+- Background blur and colour filters cannot reduce foreground text clarity by filtering the content tree.
+- Avatar animation and hover effects are mutually exclusive in the editor to avoid transform conflicts.
+- Device-specific alignment and spacing can be verified before publishing.
