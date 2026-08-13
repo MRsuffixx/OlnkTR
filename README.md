@@ -1,4 +1,8 @@
 # olnk.tr
+<div align="center">
+  <a href="https://olnk.tr" target="_blank" rel="noopener noreferrer" style="display:inline-block; padding:12px 24px; background-color:#0969da; color:#ffffff !important; text-decoration:none; border-radius:6px; font-weight:bold; font-size:16px;">🔴LIVE APP</a>
+</div>
+<br>
 
 ![olnk.tr](./public/og.png)
 
