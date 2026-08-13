@@ -281,4 +281,4 @@ documented.
 6. Add advanced Pro rules/effects after public performance budgets are measured.
 
 This order preserves existing users and public URLs while creating the platform needed
-for a mini-site builder rather than a second, incompatible application.
+for a full website builder rather than a second, incompatible application.

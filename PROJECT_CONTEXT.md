@@ -8,12 +8,12 @@
 
 ## 1. Executive Summary
 
-`olnk.tr` is a **mobile-first mini-site builder** built primarily for **Turkish-speaking creators, professionals, and small businesses**. Each user receives a public site at `olnk.tr/[username]`; links are the first content type, while the product architecture expands toward sections, widgets, reusable themes, media, and richer identity. The project is a private `0.2.0` release in active development.
+`olnk.tr` is a **mobile-first, full-scale profile and website builder** built primarily for **Turkish-speaking creators, professionals, communities, and businesses**. Each user receives a public site at `olnk.tr/[username]`; links are only one content type in a platform designed for sections, widgets, themes, integrations, media, and rich identity experiences. The project is a private `0.2.0` release in active development.
 
 ### Feature pillars
 
 - **Authentication:** Google OAuth and passwordless email via Nodemailer (Auth.js v5 / NextAuth `database` session strategy).
-- **Public mini-sites:** responsive, server-rendered profiles with mobile/tablet/desktop builder previews.
+- **Public websites:** responsive, server-rendered sites with mobile/tablet/desktop builder previews.
 - **Editable links:** drag-and-drop reorder, per-link icon, scheduling, password protection, YouTube and Spotify embeds, click recording.
 - **Design engine:** versioned `AppearanceSettings` JSON with semantic colour tokens, cards, layout templates, presets, backgrounds, buttons, typography, effects, audio, SEO, privacy, and custom CSS for Pro.
 - **Analytics:** click + view tracking, dedupe keys, daily buckets, 7/30/90-day dashboards. Advanced block (countries, devices, sources) is Pro-gated.
@@ -28,7 +28,7 @@
 
 - Turkish-speaking creators (influencers, podcasters, YouTubers).
 - Freelancers and small business owners.
-- Anyone who wants a fast, branded personal mini-site in Turkish without writing code.
+- Anyone who wants to build a complete, branded personal or professional site in Turkish without writing code.
 
 ### Business goals
 

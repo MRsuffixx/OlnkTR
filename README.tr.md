@@ -7,7 +7,7 @@
 [![Lisans](https://img.shields.io/badge/lisans-OMAL--1.0-5C4EE5)](LICENSE.tr)
 ![Katkılara açık](https://img.shields.io/badge/katkılara-açık-brightgreen.svg)
 
-Öncelikle Türkçe konuşan içerik üreticileri, profesyoneller ve küçük işletmeler için geliştirilen mobil öncelikli bir mini site oluşturucudur. Her kullanıcı `olnk.tr/[kullanici-adi]` adresinde kendi sitesine sahip olur. Bağlantılar ilk içerik türüdür; ürün mimarisi bölümler, widget'lar, paylaşılabilir temalar, medya ve daha zengin kimlik bileşenleri için tasarlanmıştır.
+Öncelikle Türkçe konuşan içerik üreticileri, profesyoneller, topluluklar ve işletmeler için geliştirilen mobil öncelikli, tam kapsamlı bir profil ve site oluşturucudur. Her kullanıcı `olnk.tr/[kullanici-adi]` adresinde kendi sitesine sahip olur. Bağlantılar yalnızca içerik türlerinden biridir; ürün mimarisi bölümler, widget'lar, paylaşılabilir temalar, entegrasyonlar, medya ve zengin kimlik deneyimleri için tasarlanmıştır.
 
 [İngilizce belgeleri okuyun](README.md)
 

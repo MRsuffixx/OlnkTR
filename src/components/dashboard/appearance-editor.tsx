@@ -844,6 +844,18 @@ export function AppearanceEditor({
                 ["tilt", "Eğil"],
               ]}
             />
+            <Choice
+              label="Tıklama"
+              path="buttons.press"
+              current={value("buttons.press")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["none", "Yok"],
+                ["compress", "Sıkıştır"],
+                ["sink", "İçe bas"],
+              ]}
+            />
           </>
         )}
         {activeCategory === "typography" && (
@@ -961,6 +973,18 @@ export function AppearanceEditor({
               ]}
             />
             <Choice
+              label="Biyografi konumu"
+              path="layout.bioPlacement"
+              current={value("layout.bioPlacement")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["belowName", "İsmin altında"],
+                ["aboveName", "İsmin üstünde"],
+                ["hidden", "Gizli"],
+              ]}
+            />
+            <Choice
               label="Hizalama"
               path="layout.alignment"
               current={value("layout.alignment")}
@@ -1038,6 +1062,18 @@ export function AppearanceEditor({
                 ["bottom", "Alt"],
               ]}
             />
+            <Choice
+              label="Sosyal hesap konumu"
+              path="layout.socialPlacement"
+              current={value("layout.socialPlacement")}
+              hasPro={hasPro}
+              onChoose={update}
+              options={[
+                ["aboveBio", "Profilin üstü"],
+                ["belowBio", "Biyografinin altı"],
+                ["belowLinks", "Bağlantıların altı"],
+              ]}
+            />
           </>
         )}
         {activeCategory === "effects" && (
@@ -1088,6 +1124,17 @@ export function AppearanceEditor({
                 ["stagger", "Sıralı"],
                 ["pop", "Zıpla"],
               ]}
+            />
+            <Range
+              label="Öğe animasyon aralığı"
+              path="effects.staggerMs"
+              value={value("effects.staggerMs")}
+              min={0}
+              max={300}
+              step={10}
+              suffix="ms"
+              hasPro={hasPro}
+              onChange={update}
             />
             <Toggle
               label="Tıklama dalgası"

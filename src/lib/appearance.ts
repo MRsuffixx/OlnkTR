@@ -958,7 +958,7 @@ const COLOR_THEME_PRESETS = {
     card: { enabled: true, opacity: 96, blur: 0, radius: 12 },
     buttons: { fill: "solid", shape: "rounded", radius: 8 },
     avatar: { shape: "circle", shadow: "soft" },
-    typography: { headingFont: "Inter", bodyFont: "Inter" },
+    typography: { headingFont: "Manrope", bodyFont: "Inter" },
   },
   y2k: {
     colors: {

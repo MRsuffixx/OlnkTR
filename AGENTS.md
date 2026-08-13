@@ -10,7 +10,7 @@
 - **Name:** `olnk-tr` (package) / **olnk.tr** (product)
 - **Version:** `0.2.0` (`private: true`)
 - **Type:** ESM (`"type": "module"`)
-- **Description:** Mobile-first identity page, profile builder, and mini-site platform for Turkish-speaking creators, professionals, and small businesses. Public profile at `olnk.tr/[username]`. Editable links, structured appearance, QR, analytics, custom domains, and Pro billing.
+- **Description:** Mobile-first full profile, website builder, and widget platform for Turkish-speaking creators, professionals, and businesses. Public site at `olnk.tr/[username]`. Editable content, structured appearance, QR, analytics, custom domains, and Pro billing.
 - **Protected branch:** `main`. Feature work follows §7.6; documentation must not treat a recorded commit hash as the current checkout.
 - **License:** Custom **olnk.tr Monetized Attribution License 1.0 (OMAL 1.0)** — source-available but **not** OSI-approved. Monetized deployments must include attribution linking back to `https://github.com/MRsuffixx/OlnkTR`. No revenue sharing, no source disclosure requirement. English (`LICENSE`) controls over Turkish (`LICENSE.tr`) on conflict.
 

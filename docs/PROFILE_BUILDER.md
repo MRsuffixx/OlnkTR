@@ -1,6 +1,6 @@
 # Profile Builder Architecture Guide
 
-This guide is the extension contract for OLNK.TR's identity page, mini-site, and future
+This guide is the extension contract for OLNK.TR's full identity website builder and
 widget platform. It complements `ARCHITECTURE.md`, `SCHEMA.md`, and `AGENTS.md`.
 
 ## 1. Boundary rule

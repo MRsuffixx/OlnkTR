@@ -14,7 +14,7 @@
 [![License](https://img.shields.io/badge/license-OMAL--1.0-5C4EE5)](LICENSE)
 ![Pull requests welcome](https://img.shields.io/badge/pull%20requests-welcome-brightgreen.svg)
 
-A mobile-first mini-site builder for creators, professionals, and small businesses, built primarily for Turkish-speaking users. Each user receives a public site at `olnk.tr/[username]` where links are only the beginning: the product is designed to grow into structured sections, widgets, reusable themes, media, and richer identity without turning appearance settings into database columns.
+A mobile-first, full-scale profile and website builder for creators, professionals, communities, and businesses, built primarily for Turkish-speaking users. Each user receives a public site at `olnk.tr/[username]`; links are one content type in a platform built for structured sections, widgets, reusable themes, integrations, media, and rich identity without turning appearance settings into database columns.
 
 [Read the Turkish documentation](README.tr.md)
 

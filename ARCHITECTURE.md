@@ -79,7 +79,7 @@ an internal SMTP endpoint and a loopback-only development inbox.
    - `/onboarding` if no `username`.
 2. RSC pages (`page.tsx`) call server-side tRPC procedures (`api.workspace.get`, `api.analytics.overview`, `api.billing.overview`, `api.customization.domainOverview`) via the cached caller in `src/trpc/server.ts`.
 3. The page hydrates with the resulting state; subsequent mutations use the client `httpBatchStreamLink`.
-4. `WorkspaceEditor` is a three-area mini-site builder: a profile/content/design tool rail, the active inspector, and a shared live profile preview. Mobile keeps the same tools and switches between editor and preview; preview frames cover phone, tablet, and desktop.
+4. `WorkspaceEditor` is a full website builder: profile, link, social, design, and music tools feed the active inspector and a shared live preview. Mobile keeps the same tools and switches between editor and preview; preview frames cover phone, tablet, and desktop.
 5. Identity and real content stay relational (`User`, `ProfileLink`). Presentation, layout, effects, typography, audio, SEO, and privacy preferences are validated as one versioned `Theme.settings` document.
 6. The dashboard layout sets `metadata.robots = { index: false, follow: false }`.
 
