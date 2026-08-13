@@ -267,8 +267,7 @@ export const workspaceRouter = createTRPCRouter({
               );
               const hasDestination = Boolean(
                 account.url ||
-                  (account.platform === "DISCORD" &&
-                    settings.discord.userId),
+                (account.platform === "DISCORD" && settings.discord.userId),
               );
               const data = {
                 platform: account.platform,

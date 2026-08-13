@@ -211,7 +211,7 @@ export default async function PublicProfilePage({
     const discord = account.settings.discord;
     return Boolean(
       discord.userId &&
-        (discord.showPresence || discord.showActivity || discord.showSpotify),
+      (discord.showPresence || discord.showActivity || discord.showSpotify),
     );
   });
   const [visitorCount, discordPresence] = await Promise.all([

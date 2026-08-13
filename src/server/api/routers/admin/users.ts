@@ -541,7 +541,7 @@ export const adminUsersRouter = createTRPCRouter({
             );
             const hasDestination = Boolean(
               account.url ||
-                (account.platform === "DISCORD" && settings.discord.userId),
+              (account.platform === "DISCORD" && settings.discord.userId),
             );
             return tx.socialAccount.upsert({
               where: { id_userId: { id: account.id, userId: target.id } },
@@ -584,9 +584,7 @@ export const adminUsersRouter = createTRPCRouter({
             ...(input.workspace.socials.length
               ? {
                   id: {
-                    notIn: input.workspace.socials.map(
-                      (account) => account.id,
-                    ),
+                    notIn: input.workspace.socials.map((account) => account.id),
                   },
                 }
               : {}),
