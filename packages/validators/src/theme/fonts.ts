@@ -8,7 +8,11 @@ export const THEME_FONTS = {
   system: { label: "System", category: "sans", fallback: "ui-sans-serif, system-ui, sans-serif" },
   inter: { label: "Inter", category: "sans", fallback: "ui-sans-serif, system-ui, sans-serif" },
   manrope: { label: "Manrope", category: "sans", fallback: "ui-sans-serif, system-ui, sans-serif" },
-  "dm-sans": { label: "DM Sans", category: "sans", fallback: "ui-sans-serif, system-ui, sans-serif" },
+  "dm-sans": {
+    label: "DM Sans",
+    category: "sans",
+    fallback: "ui-sans-serif, system-ui, sans-serif",
+  },
   "space-grotesk": {
     label: "Space Grotesk",
     category: "sans",

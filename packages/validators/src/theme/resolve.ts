@@ -56,7 +56,7 @@ export function resetThemeOverride(
     delete next[section][key];
     if (Object.keys(next[section]).length === 0) delete next[section];
   }
-  return next as ThemeOverrides;
+  return next;
 }
 
 /** Sets one override value, returning a new object. */
@@ -68,11 +68,14 @@ export function setThemeOverride<S extends Exclude<ThemeSection, "background">>(
 ): ThemeOverrides {
   const next = structuredClone(overrides) as Record<string, Record<string, unknown> | undefined>;
   next[section] = { ...(next[section] ?? {}), [key as string]: value };
-  return next as ThemeOverrides;
+  return next;
 }
 
 /** Effective button/card treatment of one block after its appearance overrides. */
-export function resolveBlockAppearance(theme: ThemeConfig, appearance: BlockAppearance | undefined) {
+export function resolveBlockAppearance(
+  theme: ThemeConfig,
+  appearance: BlockAppearance | undefined,
+) {
   return {
     variant: appearance?.variant ?? theme.buttons.variant,
     background: appearance?.background ?? theme.colors.button,

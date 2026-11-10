@@ -10,5 +10,6 @@ export * from "./primitives";
 export * from "./profiles";
 export * from "./username";
 export { createBlockInputSchema, reorderInputSchema, updateBlockInputSchema } from "./blocks/index";
+export * from "./editor";
 export * from "./entitlements";
 export * from "./theme";

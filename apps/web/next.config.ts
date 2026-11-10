@@ -30,6 +30,8 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // The repository root AGENTS.md is the contract for agents; do not generate another one here.
+  agentRules: false,
   outputFileTracingRoot: root,
   poweredByHeader: false,
   reactStrictMode: true,

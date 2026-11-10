@@ -130,7 +130,7 @@ export const themeLayoutSchema = z
     contentWidth: z.enum(["narrow", "regular", "wide"]),
     alignment: z.enum(["center", "start"]),
     /** Gap between blocks in px. */
-    blockGap: z.number().int().min(4).max(40),
+    blockGap: z.number().int().min(0).max(40),
     /** Space between the header and the first block in px. */
     sectionGap: z.number().int().min(8).max(96),
     avatarSize: z.number().int().min(48).max(168),

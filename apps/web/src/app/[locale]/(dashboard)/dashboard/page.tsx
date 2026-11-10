@@ -32,7 +32,9 @@ export default async function DashboardPage({ params }: { params: Promise<{ loca
                     {t(profile.status)}
                   </Badge>
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/dashboard/profiles/${profile.id}`}>{t("manage")}</Link>
+                    <Link href={`/studio/${profile.id}`} data-testid="open-studio">
+                      {t("manage")}
+                    </Link>
                   </Button>
                 </div>
               </CardContent>

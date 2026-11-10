@@ -27,11 +27,13 @@ TypeScript 7 (native compiler) is intentionally not used yet: typescript-eslint 
 ## 3. Repository map
 
 ```
-apps/web            Next.js app: pages (/[locale]/...), route handlers (/api/*, /go, /media), proxy.ts
+apps/web            Next.js app: pages (/[locale]/...), Creator Studio (modules/studio), shared profile
+                    renderer (modules/profile-renderer), route handlers (/api/*, /go, /media), proxy.ts
 apps/worker         BullMQ worker runtime, processors, health server; bundles migrate.js
 packages/config     env schema (Zod), constants, shared tsconfig/eslint/vitest presets
 packages/types      shared kernel: AppError taxonomy, Actor model, OwnerRef, Clock
-packages/validators isomorphic Zod contracts, block registry, theme schema, entitlement catalogue
+packages/validators isomorphic Zod contracts, block registry, theme engine (schema, migrations,
+                    presets, inheritance), editor document, entitlement catalogue
 packages/db         Drizzle schema (per module), client, migrations, seed, test helpers
 packages/observability  logger (pino, redaction), request context, tracing, error reporting
 packages/jobs       queue names, job payload schemas, BullMQ producer, Redis connections
@@ -40,7 +42,8 @@ packages/email      SMTP transport + bilingual templates
 packages/billing    plans, subscription state machine, entitlement engine, payment providers, webhooks
 packages/analytics  privacy-preserving ingestion, aggregation, rollups, retention, queries
 packages/core       domain modules (access, audit, users, organizations, profiles, links, blocks,
-                    themes, media, api-keys, platform, admin, public-profiles, billing/analytics facades)
+                    themes, editor (drafts/publish), media, api-keys, platform, admin, public-profiles,
+                    billing/analytics facades)
 packages/auth       Better Auth server config, session resolution, browser client
 packages/api        composition container, tRPC routers/procedures, REST v1, HTTP handlers
 packages/ui         shadcn-style UI primitives (Radix + Tailwind)
@@ -161,5 +164,10 @@ pnpm db:generate             # create a migration after schema changes
 7. Update docs in the same change when behaviour, env vars, schema or commands change.
 8. Never run destructive commands against non-test databases; integration tests refuse
    databases not ending in `_test`.
-9. Custom domains are deliberately **not implemented**; extend `PublicProfileLookup`
-   (`core/modules/public-profiles`) when that phase starts.
+9. Profile content changes from the UI go through the **studio draft** (`core.editor`):
+   save drafts with `expectedRevision`, publish through `editor.publish`. Never write live
+   blocks/links from the studio directly. New block types need a definition, a renderer and an
+   editor descriptor (see `docs/modules/blocks.md`); new theme tokens need a schema change, a
+   migration and renderer CSS (see `docs/modules/themes.md`).
+10. Custom domains are deliberately **not implemented**; extend `PublicProfileLookup`
+    (`core/modules/public-profiles`) when that phase starts.

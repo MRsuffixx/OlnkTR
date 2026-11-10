@@ -4,6 +4,7 @@ import {
   check,
   index,
   integer,
+  primaryKey,
   jsonb,
   pgTable,
   text,
@@ -36,6 +37,9 @@ export const themes = pgTable(
     /** active | archived */
     status: text().notNull().default("active"),
     latestVersion: integer().notNull().default(1),
+    /** Catalogue category (minimal, editorial, bold, dark, business, custom). */
+    category: text().notNull().default("custom"),
+    author: text(),
     ...timestamps,
   },
   (table) => [
@@ -61,4 +65,19 @@ export const themeVersions = pgTable(
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [uniqueIndex().on(table.themeId, table.version)],
+);
+
+/** Per-user favourite themes (studio theme picker). */
+export const themeFavorites = pgTable(
+  "theme_favorites",
+  {
+    userId: uuid()
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    themeId: uuid()
+      .notNull()
+      .references(() => themes.id, { onDelete: "cascade" }),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.themeId] }), index().on(table.themeId)],
 );

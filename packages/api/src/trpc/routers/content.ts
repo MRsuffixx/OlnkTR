@@ -10,6 +10,7 @@ import {
   updateLinkInputSchema,
 } from "@olnktr/validators";
 import { createTRPCRouter, protectedProcedure, rateLimitedProcedure } from "../init";
+import { studioThemesRouter } from "./editor";
 
 export const linksRouter = createTRPCRouter({
   list: protectedProcedure
@@ -71,4 +72,5 @@ export const themesRouter = createTRPCRouter({
     .query(({ ctx, input }) =>
       ctx.container.core.themes.listAvailable(ctx.actor, input.organizationId),
     ),
+  ...studioThemesRouter,
 });

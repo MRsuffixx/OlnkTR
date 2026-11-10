@@ -242,15 +242,15 @@ describe("premium entitlement enforcement", () => {
   it("blocks premium themes and block types on the free plan", async () => {
     const free = await h.user();
     const profile = await h.profileFor(free);
-    const [aurora] = await h.db.select().from(schema.themes).where(eq(schema.themes.key, "aurora"));
+    const [neon] = await h.db.select().from(schema.themes).where(eq(schema.themes.key, "neon"));
     await expect(
-      h.core.themes.assignToProfile(free, { profileId: profile.id, themeId: aurora!.id }),
+      h.core.themes.assignToProfile(free, { profileId: profile.id, themeId: neon!.id }),
     ).rejects.toMatchObject({ code: "ENTITLEMENT_REQUIRED" });
     await expect(
       h.core.blocks.create(free, {
         profileId: profile.id,
-        type: "spotify",
-        config: { resourceType: "track", resourceId: "4uLU6hMCjMI75M1A2tKUQC" },
+        type: "product",
+        config: { title: "Print", url: "https://shop.example/print" },
       }),
     ).rejects.toMatchObject({ code: "ENTITLEMENT_REQUIRED" });
 
@@ -259,15 +259,15 @@ describe("premium entitlement enforcement", () => {
       { "themes.premium": true, "blocks.available_types": ["*"] },
     );
     await expect(
-      h.core.themes.assignToProfile(free, { profileId: profile.id, themeId: aurora!.id }),
+      h.core.themes.assignToProfile(free, { profileId: profile.id, themeId: neon!.id }),
     ).resolves.toBeDefined();
     await expect(
       h.core.blocks.create(free, {
         profileId: profile.id,
-        type: "spotify",
-        config: { resourceType: "track", resourceId: "4uLU6hMCjMI75M1A2tKUQC" },
+        type: "product",
+        config: { title: "Print", url: "https://shop.example/print" },
       }),
-    ).resolves.toMatchObject({ type: "spotify" });
+    ).resolves.toMatchObject({ type: "product" });
   });
 
   it("applies the profile owner's entitlements, not the acting member's", async () => {
@@ -284,9 +284,9 @@ describe("premium entitlement enforcement", () => {
       .insert(schema.organizationMembers)
       .values({ organizationId: org.id, userId: editor.userId, role: "editor" });
     const profile = await h.profileFor(owner, org.id);
-    const [aurora] = await h.db.select().from(schema.themes).where(eq(schema.themes.key, "aurora"));
+    const [neon] = await h.db.select().from(schema.themes).where(eq(schema.themes.key, "neon"));
     await expect(
-      h.core.themes.assignToProfile(editor, { profileId: profile.id, themeId: aurora!.id }),
+      h.core.themes.assignToProfile(editor, { profileId: profile.id, themeId: neon!.id }),
     ).rejects.toMatchObject({
       code: "ENTITLEMENT_REQUIRED",
     });

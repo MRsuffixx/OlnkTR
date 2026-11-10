@@ -1,5 +1,5 @@
 import type { PartialEntitlementSet } from "@olnktr/validators/entitlements";
-import { DEFAULT_THEME_CONFIG, type ThemeConfig } from "@olnktr/validators/theme";
+import { THEME_PRESETS, type ThemePreset } from "@olnktr/validators/theme";
 
 /**
  * Initial catalogue. The seed only *creates* missing rows: once a plan exists,
@@ -98,61 +98,14 @@ export const SEED_PLANS: SeedPlan[] = [
   },
 ];
 
-export interface SeedTheme {
-  key: string;
-  name: string;
-  description: string;
-  isPremium: boolean;
-  config: ThemeConfig;
-}
+/** System themes come from the preset catalogue in @olnktr/validators/theme. */
+export const SEED_THEMES: readonly ThemePreset[] = THEME_PRESETS;
 
-export const SEED_THEMES: SeedTheme[] = [
-  {
-    key: "default",
-    name: "Default",
-    description: "Clean light theme.",
-    isPremium: false,
-    config: DEFAULT_THEME_CONFIG,
-  },
-  {
-    key: "midnight",
-    name: "Midnight",
-    description: "High-contrast dark theme.",
-    isPremium: false,
-    config: {
-      ...DEFAULT_THEME_CONFIG,
-      colors: {
-        background: "#09090b",
-        surface: "#18181b",
-        text: "#fafafa",
-        mutedText: "#a1a1aa",
-        accent: "#fafafa",
-        accentText: "#09090b",
-        border: "#27272a",
-      },
-    },
-  },
-  {
-    key: "aurora",
-    name: "Aurora",
-    description: "Gradient theme with soft pill buttons.",
-    isPremium: true,
-    config: {
-      ...DEFAULT_THEME_CONFIG,
-      colors: {
-        background: "#0f172a",
-        surface: "#1e293b",
-        text: "#f8fafc",
-        mutedText: "#cbd5e1",
-        accent: "#a78bfa",
-        accentText: "#0f172a",
-        border: "#334155",
-      },
-      background: { type: "gradient", from: "#0f172a", to: "#4c1d95", angle: 160 },
-      buttons: { shape: "pill", variant: "soft", shadow: true },
-    },
-  },
-];
+/**
+ * Foundation-phase system themes replaced by the preset catalogue. They are
+ * archived (hidden from pickers) but keep resolving for profiles using them.
+ */
+export const LEGACY_THEME_KEYS = ["default", "midnight", "aurora"] as const;
 
 export const SEED_SETTINGS: Record<string, unknown> = {
   "registration.enabled": true,

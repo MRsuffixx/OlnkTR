@@ -1,17 +1,6 @@
 import { z } from "zod";
 import { uuidSchema } from "../primitives";
-import {
-  dividerBlock,
-  headingBlock,
-  imageBlock,
-  linkBlock,
-  socialLinksBlock,
-  spacerBlock,
-  spotifyBlock,
-  textBlock,
-  videoBlock,
-  youtubeBlock,
-} from "./definitions";
+import { BUILTIN_BLOCK_DEFINITIONS } from "./definitions";
 import { BlockRegistry } from "./registry";
 
 export * from "./definitions";
@@ -20,17 +9,9 @@ export * from "./registry";
 
 /** Creates a registry pre-loaded with every built-in block type. */
 export function createDefaultBlockRegistry(): BlockRegistry {
-  return new BlockRegistry()
-    .register(linkBlock)
-    .register(headingBlock)
-    .register(textBlock)
-    .register(imageBlock)
-    .register(videoBlock)
-    .register(socialLinksBlock)
-    .register(dividerBlock)
-    .register(spacerBlock)
-    .register(youtubeBlock)
-    .register(spotifyBlock);
+  const registry = new BlockRegistry();
+  for (const definition of BUILTIN_BLOCK_DEFINITIONS) registry.register(definition);
+  return registry;
 }
 
 export const blockRegistry = createDefaultBlockRegistry();

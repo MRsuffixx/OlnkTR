@@ -3,6 +3,7 @@ import {
   check,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -13,6 +14,7 @@ import { exactlyOneOwner, primaryId, timestamps } from "./_helpers";
 import { users } from "./auth";
 import { mediaFiles } from "./media";
 import { organizations } from "./organizations";
+import type { ThemeOverrides } from "@olnktr/validators/theme";
 import { themes } from "./themes";
 
 export const profileVisibility = pgEnum("profile_visibility", ["public", "unlisted", "private"]);
@@ -44,6 +46,8 @@ export const profiles = pgTable(
     themeId: uuid().references(() => themes.id, { onDelete: "set null" }),
     /** Pinned theme version; null = follow the theme's latest version. */
     themeVersion: integer(),
+    /** Profile-level theme overrides (layer 2 of the theme inheritance model). */
+    themeOverrides: jsonb().$type<ThemeOverrides>().notNull().default({}),
     ...timestamps,
   },
   (table) => [

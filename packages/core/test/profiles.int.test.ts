@@ -84,7 +84,7 @@ describe("profiles", () => {
       username: profile.username.toUpperCase(),
     });
     expect(view).toMatchObject({ id: profile.id, showBranding: true, seo: { noIndex: false } });
-    expect(view?.theme.schemaVersion).toBe(1);
+    expect(view?.theme.schemaVersion).toBe(2);
 
     await h.core.profiles.update(user, { profileId: profile.id, visibility: "unlisted" });
     expect((await h.core.publicProfiles.resolve(lookup))?.seo.noIndex).toBe(true);

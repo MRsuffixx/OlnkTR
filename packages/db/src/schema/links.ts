@@ -17,6 +17,8 @@ export interface LinkMetadata {
   icon?: string;
   thumbnailMediaId?: string;
   openInNewTab?: boolean;
+  /** false = the public page links directly instead of through /go. */
+  trackClicks?: boolean;
 }
 
 export const linkCategories = pgTable(

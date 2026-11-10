@@ -1,3 +1,4 @@
+import { BASIC_BLOCK_TYPES } from "./blocks/definitions";
 import { z } from "zod";
 
 /**
@@ -9,16 +10,6 @@ import { z } from "zod";
  *  - `enum`    : ordered levels (later = more capable)
  *  - `list`    : allow-list of string values, `["*"]` allows everything
  */
-const BASIC_BLOCK_TYPES = [
-  "link",
-  "heading",
-  "text",
-  "image",
-  "social_links",
-  "divider",
-  "spacer",
-  "youtube",
-];
 
 export const ENTITLEMENT_DEFINITIONS = {
   "profiles.limit": { kind: "limit", default: 1, description: "Maximum number of profiles owned" },

@@ -17,6 +17,14 @@
   --destructive: #dc2626;
   --border: #e4e4e7;
   --ring: #a1a1aa;
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --input: #e4e4e7;
+  --radius: 0.5rem;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -32,7 +40,85 @@
     --destructive: #ef4444;
     --border: #27272a;
     --ring: #52525b;
+    --popover: #18181b;
+    --popover-foreground: #fafafa;
+    --accent: #27272a;
+    --accent-foreground: #fafafa;
+    --secondary: #27272a;
+    --secondary-foreground: #fafafa;
+    --input: #27272a;
   }
+}
+
+/*
+ * Creator Studio tokens. The studio root carries data-studio-theme; applying the
+ * tokens on <html> via :has() lets portalled overlays (dialogs, menus, toasts)
+ * inherit them. Dark graphite is the primary editing surface; the signal
+ * accent is a Bosphorus teal used for selection, focus and the publish action.
+ */
+html:has([data-studio-theme="dark"]) {
+  color-scheme: dark;
+  --st-canvas: #141519;
+  --st-dot: #2b2d34;
+  --st-rail: #18191d;
+  --st-panel: #1c1d22;
+  --st-raised: #25272d;
+  --st-line: #2e3037;
+  --st-line-strong: #3d4048;
+  --st-text-3: #737782;
+  --st-ok: #5bd68a;
+  --st-warn: #e8b04b;
+  --st-danger: #f26464;
+  --background: #1c1d22;
+  --foreground: #ecedef;
+  --card: #1c1d22;
+  --card-foreground: #ecedef;
+  --muted: #25272d;
+  --muted-foreground: #a3a6af;
+  --primary: #2ec4b6;
+  --primary-foreground: #04201d;
+  --destructive: #e5484d;
+  --border: #2e3037;
+  --input: #34363e;
+  --ring: #2ec4b6;
+  --popover: #222429;
+  --popover-foreground: #ecedef;
+  --accent: #2a2c33;
+  --accent-foreground: #ecedef;
+  --secondary: #25272d;
+  --secondary-foreground: #ecedef;
+}
+html:has([data-studio-theme="light"]) {
+  color-scheme: light;
+  --st-canvas: #e8eaed;
+  --st-dot: #cfd3d9;
+  --st-rail: #f5f6f7;
+  --st-panel: #ffffff;
+  --st-raised: #eff1f3;
+  --st-line: #e2e5e9;
+  --st-line-strong: #cdd1d7;
+  --st-text-3: #80858f;
+  --st-ok: #1f9d55;
+  --st-warn: #b7791f;
+  --st-danger: #d93f3f;
+  --background: #ffffff;
+  --foreground: #15171b;
+  --card: #ffffff;
+  --card-foreground: #15171b;
+  --muted: #eff1f3;
+  --muted-foreground: #5a5f69;
+  --primary: #0b8379;
+  --primary-foreground: #ffffff;
+  --destructive: #d93f3f;
+  --border: #e2e5e9;
+  --input: #d6dae0;
+  --ring: #0b8379;
+  --popover: #ffffff;
+  --popover-foreground: #15171b;
+  --accent: #eff1f3;
+  --accent-foreground: #15171b;
+  --secondary: #eff1f3;
+  --secondary-foreground: #15171b;
 }
 
 @theme inline {
@@ -47,9 +133,52 @@
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-ring: var(--ring);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-input: var(--input);
+  --color-canvas: var(--st-canvas);
+  --color-rail: var(--st-rail);
+  --color-panel: var(--st-panel);
+  --color-raised: var(--st-raised);
+  --color-line: var(--st-line);
+  --color-line-strong: var(--st-line-strong);
+  --color-subtle: var(--st-text-3);
+  --color-ok: var(--st-ok);
+  --color-warn: var(--st-warn);
+  --color-danger: var(--st-danger);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-studio: var(--font-studio);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+.studio-root {
+  font-family: var(--font-studio), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Dotted canvas: the grid is functional (it is the editing surface), not decoration. */
+.studio-canvas {
+  background-color: var(--st-canvas);
+  background-image: radial-gradient(var(--st-dot) 1px, transparent 1.2px);
+  background-size: 18px 18px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-root *,
+  .studio-root *::before,
+  .studio-root *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
 }

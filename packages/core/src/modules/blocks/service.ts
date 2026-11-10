@@ -1,6 +1,7 @@
 import { and, eq, schema } from "@olnktr/db";
 import { errors, type Actor, type OwnerRef } from "@olnktr/types";
 import { blockRegistry, type BlockRegistry } from "@olnktr/validators/blocks";
+import type { BlockAppearance } from "@olnktr/validators/theme";
 import { profileOwner, type AccessService } from "../access/index";
 import type { AuditService } from "../audit/index";
 import type { CoreDeps } from "../../shared/deps";
@@ -17,6 +18,7 @@ export interface BlockView {
   isVisible: boolean;
   linkId: string | null;
   valid: boolean;
+  appearance: BlockAppearance | null;
 }
 
 /** Upgrades and validates a stored block. Invalid rows are flagged rather than crashing reads. */
@@ -32,6 +34,7 @@ export function toBlockView(row: BlockRow, registry: BlockRegistry = blockRegist
       isVisible: row.isVisible,
       linkId: row.linkId,
       valid: true,
+      appearance: row.appearance ?? null,
     };
   } catch {
     return {
@@ -43,6 +46,7 @@ export function toBlockView(row: BlockRow, registry: BlockRegistry = blockRegist
       isVisible: row.isVisible,
       linkId: row.linkId,
       valid: false,
+      appearance: row.appearance ?? null,
     };
   }
 }
@@ -93,7 +97,8 @@ export function createBlockService(
       return registry.list().map((definition) => ({
         type: definition.type,
         version: definition.version,
-        category: definition.category,
+        group: definition.group,
+        tier: definition.tier,
         managedBy: definition.managedBy ?? null,
         locked: !(allowed.includes("*") || allowed.includes(definition.type)),
       }));

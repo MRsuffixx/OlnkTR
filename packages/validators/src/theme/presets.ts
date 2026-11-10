@@ -22,7 +22,9 @@ export interface ThemePreset {
   config: ThemeConfig;
 }
 
-type DeepPartialConfig = { [S in Exclude<keyof ThemeConfig, "schemaVersion">]?: Partial<ThemeConfig[S]> };
+type DeepPartialConfig = {
+  [S in Exclude<keyof ThemeConfig, "schemaVersion">]?: Partial<ThemeConfig[S]>;
+};
 
 const MINIMAL: ThemeConfig = {
   schemaVersion: 2,
@@ -80,15 +82,23 @@ const MINIMAL: ThemeConfig = {
     density: "comfortable",
     header: "classic",
   },
-  effects: { entrance: "none", hoverTransitions: true, backgroundEffect: "none", decoration: "none" },
+  effects: {
+    entrance: "none",
+    hoverTransitions: true,
+    backgroundEffect: "none",
+    decoration: "none",
+  },
 };
 
-function derive(overrides: DeepPartialConfig & { background?: ThemeConfig["background"] }): ThemeConfig {
+function derive(
+  overrides: DeepPartialConfig & { background?: ThemeConfig["background"] },
+): ThemeConfig {
   return {
     schemaVersion: 2,
     colors: { ...MINIMAL.colors, ...overrides.colors },
     typography: { ...MINIMAL.typography, ...overrides.typography },
-    background: (overrides.background as ThemeConfig["background"] | undefined) ?? MINIMAL.background,
+    background:
+      (overrides.background) ?? MINIMAL.background,
     buttons: { ...MINIMAL.buttons, ...overrides.buttons },
     cards: { ...MINIMAL.cards, ...overrides.cards },
     layout: { ...MINIMAL.layout, ...overrides.layout },
@@ -237,7 +247,12 @@ export const THEME_PRESETS: readonly ThemePreset[] = [
         button: "#ffffff",
         buttonText: "#0f1733",
       },
-      typography: { headingFont: "manrope", bodyFont: "inter", headingWeight: 500, headingLetterSpacing: -0.01 },
+      typography: {
+        headingFont: "manrope",
+        bodyFont: "inter",
+        headingWeight: 500,
+        headingLetterSpacing: -0.01,
+      },
       background: { type: "gradient", kind: "radial", from: "#3a3f9e", to: "#0b1027", angle: 180 },
       buttons: { variant: "soft", radius: 16, borderWidth: 1, hover: "grow" },
       cards: { style: "glass", radius: 20, borderWidth: 1 },
@@ -337,7 +352,14 @@ export const THEME_PRESETS: readonly ThemePreset[] = [
         bodyWeight: 500,
       },
       background: { type: "pattern", pattern: "diagonal", color: "#ff7a1a", opacity: 6, scale: 14 },
-      buttons: { radius: 2, size: "lg", shadow: "hard", hover: "lift", textAlign: "start", iconPlacement: "end" },
+      buttons: {
+        radius: 2,
+        size: "lg",
+        shadow: "hard",
+        hover: "lift",
+        textAlign: "start",
+        iconPlacement: "end",
+      },
       cards: { style: "outlined", radius: 2, borderWidth: 2, hover: "lift" },
       layout: { header: "cover", avatarShape: "square", avatarSize: 104 },
       effects: { backgroundEffect: "vignette" },
@@ -371,7 +393,14 @@ export const THEME_PRESETS: readonly ThemePreset[] = [
         headingLetterSpacing: -0.03,
         lineHeight: 1.6,
       },
-      buttons: { variant: "ghost", radius: 0, borderWidth: 1, textAlign: "start", iconPlacement: "end", hover: "tint" },
+      buttons: {
+        variant: "ghost",
+        radius: 0,
+        borderWidth: 1,
+        textAlign: "start",
+        iconPlacement: "end",
+        hover: "tint",
+      },
       cards: { style: "flat", radius: 0, borderWidth: 0, layout: "inline", padding: "sm" },
       layout: {
         contentWidth: "wide",

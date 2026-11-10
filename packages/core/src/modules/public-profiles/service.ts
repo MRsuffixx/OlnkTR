@@ -121,7 +121,7 @@ export function createPublicProfileService(deps: CoreDeps & { themes: ThemeServi
       }
 
       const [theme, resolution] = await Promise.all([
-        deps.themes.resolveConfig(profile),
+        deps.themes.resolveProfileTheme(profile),
         deps.entitlements.resolve(profileOwner(profile)),
       ]);
 

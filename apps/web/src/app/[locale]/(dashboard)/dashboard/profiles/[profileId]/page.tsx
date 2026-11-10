@@ -2,8 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@olnktr/ui";
 import { getServerApi, requireSession } from "~/lib/server";
-import { LinkManager } from "~/modules/profiles/link-manager";
-import { PublishToggle } from "~/modules/profiles/publish-toggle";
+import { Link } from "~/i18n/navigation";
 
 export default async function ProfilePage({
   params,
@@ -37,7 +36,12 @@ export default async function ProfilePage({
             {t("publicUrl")}: {publicPath}
           </a>
         </div>
-        <PublishToggle profileId={profile.id} published={profile.status === "published"} />
+        <Link
+          href={`/studio/${profile.id}`}
+          className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+        >
+          {t("openStudio")}
+        </Link>
       </div>
       <Card>
         <CardHeader>
@@ -45,23 +49,17 @@ export default async function ProfilePage({
         </CardHeader>
         <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {[
-            [t("views"), analytics.totals["profile.view"].count],
-            [t("visitors"), analytics.totals["profile.view"].uniqueVisitors],
-            [t("clicks"), analytics.totals["link.click"].count],
-          ].map(([label, value]) => (
-            <div key={String(label)} className="grid gap-1">
+            ["views", t("views"), analytics.totals["profile.view"].count],
+            ["visitors", t("visitors"), analytics.totals["profile.view"].uniqueVisitors],
+            ["clicks", t("clicks"), analytics.totals["link.click"].count],
+          ].map(([key, label, value]) => (
+            <div key={String(key)} className="grid gap-1">
               <span className="text-sm text-muted-foreground">{label}</span>
-              <span className="text-2xl font-semibold">{numbers.format(Number(value))}</span>
+              <span className="text-2xl font-semibold" data-testid={`analytics-${String(key)}`}>
+                {numbers.format(Number(value))}
+              </span>
             </div>
           ))}
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("links")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <LinkManager profileId={profile.id} />
         </CardContent>
       </Card>
     </div>

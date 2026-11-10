@@ -8,6 +8,13 @@
       "when": 1794298244662,
       "tag": "0000_initial_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794351535627,
+      "tag": "0001_studio_drafts_and_theme_v2",
+      "breakpoints": true
     }
   ]
 }

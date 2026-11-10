@@ -18,6 +18,8 @@ export const linkMetadataSchema = z
       .optional(),
     thumbnailMediaId: uuidSchema.optional(),
     openInNewTab: z.boolean().optional(),
+    /** false = the public page links directly instead of through /go (no click analytics). */
+    trackClicks: z.boolean().optional(),
   })
   .strict();
 

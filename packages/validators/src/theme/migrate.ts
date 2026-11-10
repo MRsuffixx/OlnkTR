@@ -12,14 +12,16 @@ import {
  * with; reads upgrade them step by step to the current version. Never edit a
  * shipped migration — add the next one.
  */
-const V1_FONTS: Record<ThemeConfigV1["typography"]["fontFamily"], ThemeConfig["typography"]["bodyFont"]> =
-  {
-    system: "system",
-    sans: "inter",
-    serif: "newsreader",
-    mono: "jetbrains-mono",
-    rounded: "manrope",
-  };
+const V1_FONTS: Record<
+  ThemeConfigV1["typography"]["fontFamily"],
+  ThemeConfig["typography"]["bodyFont"]
+> = {
+  system: "system",
+  sans: "inter",
+  serif: "newsreader",
+  mono: "jetbrains-mono",
+  rounded: "manrope",
+};
 
 const V1_RADIUS = { square: 0, rounded: 12, pill: 999 } as const;
 const V1_WIDTH = { sm: "narrow", md: "regular", lg: "wide" } as const;
@@ -91,7 +93,12 @@ export function migrateThemeV1ToV2(v1: ThemeConfigV1): ThemeConfig {
       density: "comfortable",
       header: "classic",
     },
-    effects: { entrance: "none", hoverTransitions: true, backgroundEffect: "none", decoration: "none" },
+    effects: {
+      entrance: "none",
+      hoverTransitions: true,
+      backgroundEffect: "none",
+      decoration: "none",
+    },
   };
 }
 
@@ -111,10 +118,10 @@ export function parseThemeOverrides(value: unknown): ThemeOverrides {
   const strict = themeOverridesSchema.safeParse(value);
   if (strict.success) return strict.data;
   if (!value || typeof value !== "object") return {};
-  const result: Record<string, unknown> = {};
-  for (const [key, section] of Object.entries(value)) {
+  const result: ThemeOverrides = {};
+  for (const [key, section] of Object.entries(value as Record<string, unknown>)) {
     const parsed = themeOverridesSchema.safeParse({ [key]: section });
     if (parsed.success) Object.assign(result, parsed.data);
   }
-  return result as ThemeOverrides;
+  return result;
 }

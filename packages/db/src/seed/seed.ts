@@ -1,11 +1,24 @@
-import { sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import type { Database } from "../client";
 import { systemSettings } from "../schema/admin";
 import { planPrices, plans } from "../schema/billing";
 import { themes, themeVersions } from "../schema/themes";
-import { SEED_PLANS, SEED_SETTINGS, SEED_THEMES } from "./data";
+import { LEGACY_THEME_KEYS, SEED_PLANS, SEED_SETTINGS, SEED_THEMES } from "./data";
 
-/** Idempotent: inserts missing catalogue rows, never overwrites existing ones. */
+function stableStringify(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+  if (value && typeof value === "object")
+    return `{${Object.keys(value)
+      .sort()
+      .map(
+        (key) =>
+          `${JSON.stringify(key)}:${stableStringify((value as Record<string, unknown>)[key])}`,
+      )
+      .join(",")}}`;
+  return JSON.stringify(value);
+}
+
+/** Idempotent: inserts missing plans/settings (never overwrites them) and syncs system themes. */
 export async function seed(db: Database) {
   return db.transaction(async (tx) => {
     let plansCreated = 0;
@@ -35,25 +48,62 @@ export async function seed(db: Database) {
       }
     }
 
+    // System themes are owned by code: new presets are inserted, changed
+    // presets get a new immutable version (pinned profiles keep theirs) and
+    // catalogue metadata follows the code.
+    let themesUpdated = 0;
     for (const theme of SEED_THEMES) {
-      const [inserted] = await tx
-        .insert(themes)
-        .values({
-          key: theme.key,
-          name: theme.name,
-          description: theme.description,
-          isPremium: theme.isPremium,
-          visibility: "public",
-          latestVersion: 1,
-        })
-        .onConflictDoNothing({ target: themes.key })
-        .returning({ id: themes.id });
-      if (!inserted) continue;
-      themesCreated++;
+      const metadata = {
+        name: theme.name,
+        description: theme.description,
+        isPremium: theme.isPremium,
+        category: theme.category,
+        author: theme.author,
+        visibility: "public",
+        status: "active",
+      };
+      const [existing] = await tx
+        .select()
+        .from(themes)
+        .where(eq(themes.key, theme.key))
+        .for("update");
+      if (!existing) {
+        const [inserted] = await tx
+          .insert(themes)
+          .values({ key: theme.key, ...metadata, latestVersion: 1 })
+          .returning({ id: themes.id });
+        await tx
+          .insert(themeVersions)
+          .values({ themeId: inserted!.id, version: 1, config: theme.config });
+        themesCreated++;
+        continue;
+      }
+      const [latest] = await tx
+        .select({ config: themeVersions.config })
+        .from(themeVersions)
+        .where(
+          and(
+            eq(themeVersions.themeId, existing.id),
+            eq(themeVersions.version, existing.latestVersion),
+          ),
+        );
+      const changed = stableStringify(latest?.config) !== stableStringify(theme.config);
+      const version = changed ? existing.latestVersion + 1 : existing.latestVersion;
+      if (changed) {
+        await tx
+          .insert(themeVersions)
+          .values({ themeId: existing.id, version, config: theme.config });
+        themesUpdated++;
+      }
       await tx
-        .insert(themeVersions)
-        .values({ themeId: inserted.id, version: 1, config: theme.config });
+        .update(themes)
+        .set({ ...metadata, latestVersion: version })
+        .where(eq(themes.id, existing.id));
     }
+    await tx
+      .update(themes)
+      .set({ status: "archived" })
+      .where(inArray(themes.key, [...LEGACY_THEME_KEYS]));
 
     for (const [key, value] of Object.entries(SEED_SETTINGS)) {
       await tx
@@ -62,6 +112,6 @@ export async function seed(db: Database) {
         .onConflictDoNothing();
     }
 
-    return { plansCreated, themesCreated };
+    return { plansCreated, themesCreated, themesUpdated };
   });
 }

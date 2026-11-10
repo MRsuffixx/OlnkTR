@@ -6,7 +6,9 @@
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
-    "./cn": "./src/cn.ts"
+    "./cn": "./src/cn.ts",
+    "./lib/*": "./src/lib/*.ts",
+    "./components/*": "./src/components/*.tsx"
   },
   "scripts": {
     "lint": "eslint .",
@@ -16,8 +18,10 @@
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "1.1.1",
     "lucide-react": "^1.71.0",
     "radix-ui": "^1.8.1",
+    "sonner": "2.0.8",
     "tailwind-merge": "^3.7.0"
   },
   "peerDependencies": {

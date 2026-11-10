@@ -10,21 +10,75 @@ import {
 } from "./index";
 
 describe("block registry", () => {
-  it("contains all initial block types", () => {
+  it("contains every built-in block type, grouped", () => {
     expect(blockRegistry.types().sort()).toEqual(
       [
+        "button",
+        "contact",
+        "countdown",
+        "discord",
         "divider",
+        "faq",
+        "gallery",
+        "github",
         "heading",
         "image",
         "link",
+        "location",
+        "newsletter",
+        "product",
         "social_links",
+        "social_profile",
+        "soundcloud",
         "spacer",
         "spotify",
         "text",
+        "twitch",
         "video",
         "youtube",
       ].sort(),
     );
+    const groups = new Set(blockRegistry.list().map((definition) => definition.group));
+    expect([...groups].sort()).toEqual(["business", "community", "essential", "media"]);
+  });
+
+  it("migrates stored v1 text, image and social_links configs to their current versions", () => {
+    expect(blockRegistry.parseStored("text", 1, { text: "Hi", align: "left" })).toEqual({
+      version: 2,
+      config: { text: "Hi", align: "left", size: "md", weight: "regular", tone: "default" },
+    });
+    const image = blockRegistry.parseStored("image", 1, {
+      mediaId: "8d7f3c52-1a0e-4c55-9a51-111111111111",
+      alt: "",
+      aspect: "wide",
+    });
+    expect(image).toMatchObject({ version: 2, config: { aspect: "wide", fit: "cover" } });
+    expect(blockRegistry.parseStored("social_links", 1, { items: [] })).toMatchObject({
+      version: 2,
+      config: { display: "icons", iconStyle: "plain" },
+    });
+  });
+
+  it("rejects unsafe or malformed embed and contact configs", () => {
+    expect(
+      blockRegistry.safeParseInput("soundcloud", { url: "https://evil.example/x/y" }).success,
+    ).toBe(false);
+    expect(
+      blockRegistry.safeParseInput("soundcloud", { url: "https://soundcloud.com/artist/track" })
+        .success,
+    ).toBe(true);
+    expect(blockRegistry.safeParseInput("twitch", { channel: "bad channel!" }).success).toBe(false);
+    expect(blockRegistry.safeParseInput("contact", {}).success).toBe(false);
+    expect(blockRegistry.safeParseInput("contact", { email: "a@b.co" }).success).toBe(true);
+    expect(
+      blockRegistry.safeParseInput("button", { label: "Go", url: "javascript:alert(1)" }).success,
+    ).toBe(false);
+    expect(
+      blockRegistry.safeParseInput("countdown", {
+        title: "Launch",
+        targetAt: "2027-01-01T00:00:00Z",
+      }).success,
+    ).toBe(true);
   });
 
   it("validates input against the current schema and applies defaults", () => {
@@ -49,7 +103,8 @@ describe("block registry", () => {
     const v2 = defineBlock({
       type: "callout",
       version: 2,
-      category: "content",
+      group: "essential",
+      tier: "basic",
       schema: z.object({ body: z.string(), tone: z.enum(["info", "warn"]) }),
       defaultConfig: { body: "", tone: "info" as const },
       migrations: { 1: (config) => ({ body: (config as { text: string }).text, tone: "info" }) },
@@ -67,7 +122,8 @@ describe("block registry", () => {
       defineBlock({
         type: "broken",
         version: 2,
-        category: "content",
+        group: "essential",
+        tier: "basic",
         schema: z.object({}),
         defaultConfig: {},
       }),

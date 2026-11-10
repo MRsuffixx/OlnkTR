@@ -34,11 +34,15 @@ export const publicHttpUrlSchema = z
   .trim()
   .max(2048)
   .pipe(z.url({ protocol: /^https?$/, hostname: z.regexes.domain }))
+  // Refinements also run after a failed pipe, so they must tolerate unparsable input.
   .refine((value) => {
-    const url = new URL(value);
-    return !url.username && !url.password;
+    const url = URL.parse(value);
+    return !url || (!url.username && !url.password);
   }, "URLs must not contain credentials")
-  .refine((value) => !isPrivateHostname(new URL(value).hostname), "URL host is not allowed");
+  .refine((value) => {
+    const url = URL.parse(value);
+    return !url || !isPrivateHostname(url.hostname);
+  }, "URL host is not allowed");
 
 /** Plain, single-line text without control characters. Rendering escapes it. */
 export const plainText = (max: number, min = 0) =>

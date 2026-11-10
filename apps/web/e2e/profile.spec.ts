@@ -11,22 +11,30 @@ test.describe("profiles, links and analytics", () => {
     await page.getByRole("button", { name: "Create", exact: true }).click();
     await page.waitForURL(/\/dashboard\/profiles\//);
 
-    await page.locator("#link-title").fill("Example");
-    await page.locator("#link-url").fill("https://example.com/");
-    await page.getByRole("button", { name: "Add link" }).click();
-    await expect(page.getByTestId("link-list")).toContainText("Example");
+    // Links are edited in the studio as a draft; nothing is public until it is published.
+    const profileId = page.url().split("/").pop()!;
+    await page.goto(`/studio/${profileId}`);
+    await page.getByTestId("add-link").click();
+    await page.getByTestId("inspector").getByLabel("Title", { exact: true }).fill("Example");
+    await page
+      .getByTestId("inspector")
+      .getByLabel("URL", { exact: true })
+      .fill("https://example.com/");
+    await expect(page.getByTestId("save-status").first()).toHaveAttribute("data-status", "saved", {
+      timeout: 15_000,
+    });
 
     // Unpublished profiles are not public.
     const hidden = await context.request.get(`/${username}`);
     expect(hidden.status()).toBe(404);
 
-    await page.getByRole("button", { name: "Publish" }).click();
-    await expect(page.getByRole("button", { name: "Unpublish" })).toBeVisible();
+    await page.getByTestId("publish-button").click();
+    await expect(page.getByTestId("publish-button")).toHaveText(/Published/, { timeout: 20_000 });
 
     const visitor = await context.browser()!.newPage();
     await visitor.goto(`/${username}`);
     await expect(visitor.getByTestId("public-profile")).toContainText("E2E Profile");
-    const link = visitor.getByTestId("profile-link");
+    const link = visitor.getByTestId("public-profile").getByRole("link", { name: "Example" });
     await expect(link).toHaveAttribute("href", /^\/go\//);
 
     const redirect = await visitor.request.get((await link.getAttribute("href"))!, {
@@ -36,9 +44,10 @@ test.describe("profiles, links and analytics", () => {
     expect(redirect.headers()["location"]).toBe("https://example.com/");
 
     // The worker aggregates the view and click asynchronously.
+    await page.goto(`/dashboard/profiles/${profileId}`);
     await expect(async () => {
       await page.reload();
-      await expect(page.getByTestId("link-list")).toContainText("1 click");
+      await expect(page.getByTestId("analytics-clicks")).toHaveText("1");
     }).toPass({ timeout: 30_000 });
   });
 

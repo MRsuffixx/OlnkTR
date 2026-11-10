@@ -11,7 +11,8 @@ UUID primary keys, `timestamptz` timestamps. 36 tables in the initial migration.
 | Profiles               | `profiles`                                                                                                                                                      |
 | Links                  | `links`, `link_categories`                                                                                                                                      |
 | Blocks                 | `blocks`                                                                                                                                                        |
-| Themes                 | `themes`, `theme_versions`                                                                                                                                      |
+| Themes                 | `themes`, `theme_versions`, `theme_favorites`                                                                                                                   |
+| Studio drafts          | `profile_drafts` (one draft document per profile; revision, published revision, live fingerprint)                                                               |
 | Media                  | `media_files`                                                                                                                                                   |
 | Billing                | `plans`, `plan_prices`, `billing_customers`, `subscriptions`, `subscription_events`, `checkout_sessions`, `payments`, `billing_events`, `entitlement_overrides` |
 | Analytics              | `analytics_events`, `analytics_daily_stats`, `analytics_daily_dimensions`, `analytics_daily_visitors`, `analytics_monthly_stats`                                |
@@ -43,7 +44,7 @@ role, theme status) are `text` validated in code so new values need no migration
 ## JSONB
 
 `blocks.config` (versioned by `schema_version`, validated by the block registry),
-`theme_versions.config` (theme schema v1), `plans.entitlements` / `entitlement_overrides.entitlements`
+`theme_versions.config` (theme schema v1/v2, migrated on read), `profiles.theme_overrides`, `blocks.appearance`, `profile_drafts.document` (editor document v1), `plans.entitlements` / `entitlement_overrides.entitlements`
 (entitlement catalogue schema), `links.metadata`, `billing_events.payload` (normalized events),
 `audit_logs.metadata` (sanitized).
 

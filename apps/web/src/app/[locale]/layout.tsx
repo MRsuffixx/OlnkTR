@@ -6,6 +6,7 @@ import { setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 import { routing } from "~/i18n/routing";
 import { TRPCReactProvider } from "~/lib/trpc/client";
+import { fontVariables } from "~/styles/fonts";
 import "~/styles/globals.css";
 
 export const metadata: Metadata = {
@@ -27,7 +28,7 @@ export default async function LocaleLayout({
   // Reading the nonce opts every page into dynamic rendering, which the nonce-based CSP requires.
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <body className="min-h-screen antialiased" data-nonce-present={nonce ? "true" : "false"}>
         <NextIntlClientProvider>
           <TRPCReactProvider locale={locale}>{children}</TRPCReactProvider>

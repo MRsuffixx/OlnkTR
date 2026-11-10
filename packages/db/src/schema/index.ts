@@ -4,6 +4,7 @@ export * from "./api-keys";
 export * from "./auth";
 export * from "./billing";
 export * from "./blocks";
+export * from "./drafts";
 export * from "./links";
 export * from "./media";
 export * from "./organizations";

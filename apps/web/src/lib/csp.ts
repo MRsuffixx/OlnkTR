@@ -1,7 +1,8 @@
 /**
  * Content Security Policy for HTML pages. Scripts are allowed only with the
  * per-request nonce ('strict-dynamic' lets Next.js load its chunks). Embeds are
- * limited to the YouTube (no-cookie) and Spotify players used by blocks.
+ * limited to the fixed provider players used by blocks (YouTube no-cookie,
+ * Spotify, SoundCloud, Twitch and the click-to-load Google Maps embed).
  */
 export function buildContentSecurityPolicy(options: {
   nonce: string;
@@ -18,7 +19,7 @@ export function buildContentSecurityPolicy(options: {
     "font-src 'self' data:",
     `connect-src 'self'${storage}${options.isDev ? " ws:" : ""}`,
     "media-src 'self' https:",
-    "frame-src https://www.youtube-nocookie.com https://open.spotify.com",
+    "frame-src https://www.youtube-nocookie.com https://open.spotify.com https://w.soundcloud.com https://player.twitch.tv https://www.google.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

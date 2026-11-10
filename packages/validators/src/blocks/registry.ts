@@ -5,21 +5,36 @@ import type { z } from "zod";
  *
  * Every block type is described by a `BlockDefinition`: a stable type
  * identifier, the current config version, a Zod schema for that version, a
- * default config, and optional migrations from older versions. Block rows store
- * `(type, schemaVersion, config JSONB)`; reading a row runs any pending
- * migrations and validates the result, so old rows never break new code.
+ * default config, its catalogue group, its plan tier, and migrations from older
+ * versions. Block rows store `(type, schemaVersion, config JSONB)`; reading a
+ * row runs pending migrations and validates the result, so old rows never
+ * break new code.
  *
- * Adding a new block type = adding one definition file and registering it in
- * `./index.ts`. Existing block types are untouched.
+ * Adding a block type = one definition here + one renderer + one editor
+ * descriptor in the web app. Existing block types are untouched.
  */
-export type BlockCategory = "content" | "media" | "embed" | "layout";
+export const BLOCK_GROUPS = ["essential", "media", "community", "business"] as const;
+export type BlockGroup = (typeof BLOCK_GROUPS)[number];
+
+/**
+ * `basic` types are in the default `blocks.available_types` entitlement (Free
+ * plan); `premium` types must be granted by the plan. Plans remain the source
+ * of truth — the tier only seeds the default.
+ */
+export type BlockTier = "basic" | "premium";
 
 export interface BlockDefinition<TSchema extends z.ZodType = z.ZodType> {
   readonly type: string;
   readonly version: number;
-  readonly category: BlockCategory;
+  readonly group: BlockGroup;
+  readonly tier: BlockTier;
   readonly schema: TSchema;
-  readonly defaultConfig: z.output<TSchema>;
+  /**
+   * Starting config for a new block. It may be intentionally incomplete (no
+   * image chosen yet, empty URL…); drafts store it as-is and publishing
+   * validates it against `schema`.
+   */
+  readonly defaultConfig: Readonly<Record<string, unknown>>;
   /**
    * Migrations keyed by the version they upgrade *from*. `migrations[1]`
    * turns a v1 config into a v2 config, and so on up to `version`.
@@ -77,6 +92,16 @@ export class BlockRegistry {
   parseInput(type: string, config: unknown): { version: number; config: unknown } {
     const definition = this.require(type);
     return { version: definition.version, config: definition.schema.parse(config) };
+  }
+
+  /** Non-throwing variant of `parseInput` returning Zod issues. */
+  safeParseInput(type: string, config: unknown) {
+    const definition = this.get(type);
+    if (!definition) return { success: false as const, issues: [] as z.core.$ZodIssue[] };
+    const result = definition.schema.safeParse(config);
+    return result.success
+      ? { success: true as const, version: definition.version, config: result.data }
+      : { success: false as const, issues: result.error.issues };
   }
 
   /**

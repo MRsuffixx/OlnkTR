@@ -6,6 +6,7 @@ import { createApiKeyService } from "./modules/api-keys/index";
 import { createAuditService } from "./modules/audit/index";
 import { createBillingFacade } from "./modules/billing/index";
 import { createBlockService } from "./modules/blocks/index";
+import { createEditorService } from "./modules/editor/index";
 import { createLinkService } from "./modules/links/index";
 import { createMediaService, storageUsageBytes } from "./modules/media/index";
 import { countSeats, createOrganizationService } from "./modules/organizations/index";
@@ -20,6 +21,8 @@ export type { CoreConfig, CoreDeps } from "./shared/deps";
 export * from "./modules/access/index";
 export { sanitizeAuditMetadata, type AuditEntry } from "./modules/audit/index";
 export { toBlockView, type BlockView } from "./modules/blocks/index";
+export type { PublishBlocker } from "./modules/editor/index";
+export type { ThemeListItem } from "./modules/themes/index";
 export { hashApiKey, type AuthenticatedApiKey } from "./modules/api-keys/index";
 export { hashInvitationToken } from "./modules/organizations/index";
 export type { ImageProcessor } from "./modules/media/index";
@@ -51,6 +54,7 @@ export function createCore(deps: CoreDeps) {
   const media = createMediaService(shared);
   const apiKeys = createApiKeyService(shared);
   const publicProfiles = createPublicProfileService({ ...shared, themes });
+  const editor = createEditorService({ ...shared, themes });
   const billing = createBillingFacade(shared);
   const analytics = createProfileAnalyticsService(shared);
   const admin = createAdminService({ ...shared, users, platform });
@@ -88,6 +92,7 @@ export function createCore(deps: CoreDeps) {
     media,
     apiKeys,
     publicProfiles,
+    editor,
     billing,
     analytics,
     admin,

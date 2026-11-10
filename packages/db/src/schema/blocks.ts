@@ -1,4 +1,5 @@
 import { boolean, index, integer, jsonb, pgTable, text, uuid } from "drizzle-orm/pg-core";
+import type { BlockAppearance } from "@olnktr/validators/theme";
 import { primaryId, timestamps } from "./_helpers";
 import { links } from "./links";
 import { profiles } from "./profiles";
@@ -19,6 +20,8 @@ export const blocks = pgTable(
     config: jsonb().$type<Record<string, unknown>>().notNull(),
     position: integer().notNull(),
     isVisible: boolean().notNull().default(true),
+    /** Per-block appearance overrides (layer 3 of the theme inheritance model). */
+    appearance: jsonb().$type<BlockAppearance>(),
     /** Set only for blocks of type "link"; the link aggregate owns these blocks. */
     linkId: uuid()
       .unique()
