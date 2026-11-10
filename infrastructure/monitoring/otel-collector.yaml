@@ -1,0 +1,31 @@
+# OpenTelemetry Collector for OlnkTR.
+# The web app and worker export traces via OTLP/HTTP when
+# OTEL_EXPORTER_OTLP_ENDPOINT is set (e.g. http://otel-collector:4318).
+# Replace/extend the `debug` exporter with your backend (Tempo, Jaeger,
+# Honeycomb, Grafana Cloud, Datadog, ...).
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 256
+  batch: {}
+
+exporters:
+  debug:
+    verbosity: basic
+  # otlphttp/backend:
+  #   endpoint: https://otlp.example.com
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [debug]

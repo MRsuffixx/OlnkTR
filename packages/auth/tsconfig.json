@@ -1,0 +1,5 @@
+{
+  "extends": "@olnktr/config/tsconfig/library.json",
+  "compilerOptions": { "lib": ["DOM", "ES2023"] },
+  "include": ["src", "test", "vitest.config.ts", "vitest.int.config.ts"]
+}

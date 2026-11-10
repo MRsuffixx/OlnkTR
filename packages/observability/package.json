@@ -1,0 +1,32 @@
+{
+  "name": "@olnktr/observability",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run"
+  },
+  "dependencies": {
+    "@olnktr/types": "workspace:*",
+    "@opentelemetry/api": "^1.10.0",
+    "pino": "^10.4.0"
+  },
+  "optionalDependencies": {
+    "@opentelemetry/exporter-trace-otlp-http": "^0.301.1",
+    "@opentelemetry/resources": "^3.1.1",
+    "@opentelemetry/sdk-node": "^0.301.1",
+    "@sentry/node": "^11.11.0"
+  },
+  "devDependencies": {
+    "@olnktr/config": "workspace:*",
+    "@types/node": "^24.19.2",
+    "eslint": "^10.14.0",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.12"
+  }
+}

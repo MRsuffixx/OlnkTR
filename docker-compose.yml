@@ -1,0 +1,212 @@
+# OlnkTR — local development environment.
+#
+#   docker compose up -d --wait postgres redis minio minio-init mailpit   # infrastructure only
+#   docker compose --profile app up -d --build                             # + web, worker, migrations
+#
+# All published ports bind to 127.0.0.1 only. Values come from `.env` (see .env.example).
+name: olnktr
+
+x-db-env: &db-env
+  APP_DB_NAME: ${POSTGRES_DB:-olnktr}
+  APP_TEST_DB_NAME: ${POSTGRES_TEST_DB:-olnktr_test}
+  APP_DB_USER: ${POSTGRES_APP_USER:-olnktr_app}
+  APP_DB_PASSWORD: ${POSTGRES_APP_PASSWORD:-olnktr_app_dev_password}
+  APP_DB_MIGRATOR_USER: ${POSTGRES_MIGRATOR_USER:-olnktr_migrator}
+  APP_DB_MIGRATOR_PASSWORD: ${POSTGRES_MIGRATOR_PASSWORD:-olnktr_migrator_dev_password}
+
+x-app-env: &app-env
+  NODE_ENV: production
+  # Production build, development deployment (plain HTTP on localhost, dev billing allowed).
+  APP_ENV: development
+  APP_URL: ${APP_URL:-http://localhost:3100}
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  # Set TRUST_PROXY=true only behind a proxy that overwrites the client-IP header
+  # (the end-to-end suite sets it to exercise per-IP rate limiting).
+  TRUST_PROXY: ${TRUST_PROXY:-false}
+  CLIENT_IP_HEADER: ${CLIENT_IP_HEADER:-x-forwarded-for}
+  AUTH_RATE_LIMIT_ENABLED: ${AUTH_RATE_LIMIT_ENABLED:-true}
+  DATABASE_URL: postgres://${POSTGRES_APP_USER:-olnktr_app}:${POSTGRES_APP_PASSWORD:-olnktr_app_dev_password}@postgres:5432/${POSTGRES_DB:-olnktr}
+  DATABASE_MIGRATION_URL: postgres://${POSTGRES_MIGRATOR_USER:-olnktr_migrator}:${POSTGRES_MIGRATOR_PASSWORD:-olnktr_migrator_dev_password}@postgres:5432/${POSTGRES_DB:-olnktr}
+  REDIS_URL: redis://redis:6379
+  AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET is required (see .env.example)}
+  AUTH_REQUIRE_EMAIL_VERIFICATION: ${AUTH_REQUIRE_EMAIL_VERIFICATION:-true}
+  SMTP_HOST: mailpit
+  SMTP_PORT: "1025"
+  EMAIL_FROM: ${EMAIL_FROM:-OlnkTR <no-reply@olnk.tr>}
+  S3_ENDPOINT: http://minio:9000
+  S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_ENDPOINT:-http://localhost:19000}
+  S3_BUCKET: ${S3_BUCKET:-olnktr-media}
+  S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-olnktr-app}
+  S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-olnktr-app-dev-secret}
+  BILLING_PROVIDERS: ${BILLING_PROVIDERS:-}
+  BILLING_DEFAULT_PROVIDER: ${BILLING_DEFAULT_PROVIDER:-}
+  DEV_BILLING_WEBHOOK_SECRET: ${DEV_BILLING_WEBHOOK_SECRET:-}
+  STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+  STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+  PAYTR_MERCHANT_ID: ${PAYTR_MERCHANT_ID:-}
+  PAYTR_MERCHANT_KEY: ${PAYTR_MERCHANT_KEY:-}
+  PAYTR_MERCHANT_SALT: ${PAYTR_MERCHANT_SALT:-}
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      <<: *db-env
+      POSTGRES_USER: ${POSTGRES_SUPERUSER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_SUPERUSER_PASSWORD:-postgres_dev_password}
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./infrastructure/docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-54329}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    stop_grace_period: 30s
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    # BullMQ requires `noeviction`; AOF gives durability for queued jobs.
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redis-data:/data
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-63799}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    # Official MinIO images are no longer published; Chainguard builds MinIO from upstream source.
+    image: cgr.dev/chainguard/minio@sha256:fb893e36fc369d41e92f678b17ec27378fa5bf0576aeef7ac15460c13629ab5a
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-olnktr-minio-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-olnktr-minio-dev-password}
+      MINIO_API_CORS_ALLOW_ORIGIN: ${APP_URL:-http://localhost:3100}
+    volumes:
+      - minio-data:/data
+    ports:
+      - "127.0.0.1:${MINIO_API_PORT:-19000}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_PORT:-19001}:9001"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - MC_HOST_local=http://$${MINIO_ROOT_USER}:$${MINIO_ROOT_PASSWORD}@localhost:9000 mc ready local
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  minio-init:
+    image: cgr.dev/chainguard/minio@sha256:fb893e36fc369d41e92f678b17ec27378fa5bf0576aeef7ac15460c13629ab5a
+    entrypoint: ["bash", "/init.sh"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-olnktr-minio-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-olnktr-minio-dev-password}
+      S3_BUCKET: ${S3_BUCKET:-olnktr-media}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:-olnktr-app}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:-olnktr-app-dev-secret}
+      HOME: /tmp
+    volumes:
+      - ./infrastructure/docker/minio/init.sh:/init.sh:ro
+    depends_on:
+      minio:
+        condition: service_healthy
+    restart: "no"
+
+  mailpit:
+    image: axllent/mailpit:v1.33
+    restart: unless-stopped
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "true"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "true"
+      MP_MAX_MESSAGES: "5000"
+    ports:
+      - "127.0.0.1:${MAILPIT_UI_PORT:-18025}:8025"
+      - "127.0.0.1:${MAILPIT_SMTP_PORT:-11025}:1025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  migrate:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: infrastructure/docker/worker.Dockerfile
+    image: olnktr-worker:dev
+    command: ["node", "dist/migrate.js", "--seed"]
+    environment: *app-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  web:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: infrastructure/docker/web.Dockerfile
+    image: olnktr-web:dev
+    restart: unless-stopped
+    environment: *app-env
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3100}:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      mailpit:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  worker:
+    profiles: ["app"]
+    image: olnktr-worker:dev
+    restart: unless-stopped
+    command: ["node", "dist/index.js"]
+    environment: *app-env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3101/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+    stop_grace_period: 40s
+
+volumes:
+  postgres-data:
+  redis-data:
+  minio-data:

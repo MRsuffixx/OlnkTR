@@ -1,0 +1,39 @@
+{
+  "name": "olnktr",
+  "private": true,
+  "description": "OlnkTR \u2014 open-source, extensible Link-in-Bio SaaS platform",
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=24.11.0 <25"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:unit": "turbo run test:unit",
+    "test:integration": "turbo run test:integration --concurrency=1",
+    "test:e2e": "pnpm --filter @olnktr/web test:e2e",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "pnpm --filter @olnktr/db db:generate",
+    "db:migrate": "pnpm --filter @olnktr/db db:migrate",
+    "db:seed": "pnpm --filter @olnktr/db db:seed",
+    "db:studio": "pnpm --filter @olnktr/db db:studio",
+    "db:test:prepare": "pnpm --filter @olnktr/db db:test:prepare",
+    "infra:up": "docker compose up -d --wait postgres redis minio mailpit && docker compose up minio-init",
+    "infra:down": "docker compose down",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:unit",
+    "clean": "turbo run clean && rm -rf node_modules .turbo",
+    "setup:env": "./scripts/setup-env.sh"
+  },
+  "devDependencies": {
+    "@olnktr/config": "workspace:*",
+    "prettier": "3.9.10",
+    "turbo": "2.11.10",
+    "typescript": "~6.0.3"
+  }
+}

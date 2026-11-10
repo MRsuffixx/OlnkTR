@@ -1,0 +1,29 @@
+{
+  "name": "@olnktr/jobs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run",
+    "test:integration": "vitest run --config vitest.int.config.ts"
+  },
+  "dependencies": {
+    "@olnktr/types": "workspace:*",
+    "@olnktr/validators": "workspace:*",
+    "bullmq": "^5.81.5",
+    "ioredis": "^5.11.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@olnktr/config": "workspace:*",
+    "@types/node": "^24.19.2",
+    "eslint": "^10.14.0",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.12"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "@olnktr/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./next": "./src/next.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run --passWithNoTests",
+    "test:integration": "vitest run --config vitest.int.config.ts"
+  },
+  "dependencies": {
+    "@olnktr/config": "workspace:*",
+    "@olnktr/db": "workspace:*",
+    "@olnktr/types": "workspace:*",
+    "@olnktr/validators": "workspace:*",
+    "better-auth": "^1.7.19",
+    "@olnktr/core": "workspace:*",
+    "@olnktr/jobs": "workspace:*",
+    "@olnktr/observability": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "eslint": "^10.14.0",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.12",
+    "@olnktr/billing": "workspace:*",
+    "@olnktr/storage": "workspace:*",
+    "pino": "^10.4.0"
+  }
+}

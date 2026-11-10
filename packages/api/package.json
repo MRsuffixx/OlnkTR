@@ -1,0 +1,44 @@
+{
+  "name": "@olnktr/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./container": "./src/container.ts",
+    "./trpc": "./src/trpc/index.ts",
+    "./rest": "./src/rest/index.ts",
+    "./http": "./src/http/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run",
+    "test:integration": "vitest run --config vitest.int.config.ts"
+  },
+  "dependencies": {
+    "@olnktr/analytics": "workspace:*",
+    "@olnktr/auth": "workspace:*",
+    "@olnktr/billing": "workspace:*",
+    "@olnktr/config": "workspace:*",
+    "@olnktr/core": "workspace:*",
+    "@olnktr/db": "workspace:*",
+    "@olnktr/email": "workspace:*",
+    "@olnktr/jobs": "workspace:*",
+    "@olnktr/observability": "workspace:*",
+    "@olnktr/storage": "workspace:*",
+    "@olnktr/types": "workspace:*",
+    "@olnktr/validators": "workspace:*",
+    "@trpc/server": "^11.26.0",
+    "ioredis": "^5.11.1",
+    "superjson": "^2.2.6",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "eslint": "^10.14.0",
+    "pino": "^10.4.0",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.12"
+  }
+}

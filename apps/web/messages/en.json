@@ -1,0 +1,168 @@
+{
+  "common": {
+    "appName": "OlnkTR",
+    "loading": "Loading…",
+    "save": "Save",
+    "saved": "Saved",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "create": "Create",
+    "back": "Back",
+    "signOut": "Sign out",
+    "language": "Language",
+    "poweredBy": "Made with OlnkTR"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "billing": "Billing",
+    "settings": "Settings",
+    "home": "Home"
+  },
+  "marketing": {
+    "title": "One link for everything you share",
+    "subtitle": "OlnkTR is an open-source link-in-bio platform for creators, teams and businesses.",
+    "getStarted": "Get started free",
+    "signIn": "Sign in"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "login": {
+      "title": "Welcome back",
+      "description": "Sign in to manage your profiles.",
+      "submit": "Sign in",
+      "noAccount": "No account yet?",
+      "register": "Create one",
+      "forgot": "Forgot your password?",
+      "verifyFirst": "Please verify your email address first. We sent you a new link.",
+      "invalid": "Invalid email or password.",
+      "suspended": "This account has been suspended."
+    },
+    "register": {
+      "title": "Create your account",
+      "description": "Start with a free profile in seconds.",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "login": "Sign in",
+      "success": "Check your inbox to verify your email address.",
+      "disabled": "Registration is currently disabled."
+    },
+    "forgot": {
+      "title": "Reset your password",
+      "description": "We will email you a link to choose a new password.",
+      "submit": "Send reset link",
+      "sent": "If an account exists for this email, a reset link is on its way."
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "submit": "Update password",
+      "success": "Your password has been updated. You can now sign in.",
+      "invalidToken": "This reset link is invalid or has expired."
+    },
+    "verify": {
+      "title": "Verify your email",
+      "description": "We sent a verification link to your inbox. Open it to activate your account."
+    },
+    "twoFactor": {
+      "title": "Two-factor authentication",
+      "description": "Enter the 6-digit code from your authenticator app.",
+      "code": "Code",
+      "submit": "Verify",
+      "invalid": "Invalid code."
+    }
+  },
+  "dashboard": {
+    "title": "Your profiles",
+    "empty": "You have no profiles yet. Create your first one below.",
+    "createTitle": "Create a profile",
+    "username": "Username",
+    "displayName": "Display name",
+    "usernameAvailable": "Available",
+    "usernameTaken": "Already taken",
+    "manage": "Manage",
+    "view": "View",
+    "draft": "Draft",
+    "published": "Published",
+    "plan": "Plan: {plan}"
+  },
+  "profile": {
+    "links": "Links",
+    "noLinks": "No links yet.",
+    "addLink": "Add link",
+    "linkTitle": "Title",
+    "linkUrl": "URL",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "publicUrl": "Public URL",
+    "analytics": "Last 30 days",
+    "views": "Profile views",
+    "clicks": "Link clicks",
+    "visitors": "Unique visitors",
+    "clickCount": "{count, plural, =0 {No clicks} one {# click} other {# clicks}}",
+    "active": "Active",
+    "inactive": "Hidden"
+  },
+  "billing": {
+    "title": "Billing",
+    "currentPlan": "Current plan",
+    "status": "Status",
+    "renews": "Current period ends {date}",
+    "plans": "Plans",
+    "perMonth": "{price} / month",
+    "free": "Free",
+    "choose": "Choose plan",
+    "current": "Current plan",
+    "trial": "{days}-day free trial",
+    "cancel": "Cancel subscription",
+    "canceled": "Your subscription will end at the end of the current period.",
+    "checkoutSuccess": "Payment received. Your plan will be activated as soon as the payment provider confirms it.",
+    "checkoutCanceled": "Checkout was canceled or the payment failed.",
+    "payments": "Payment history",
+    "noPayments": "No payments yet."
+  },
+  "settings": {
+    "title": "Settings",
+    "preferences": "Preferences",
+    "dangerZone": "Danger zone",
+    "deleteAccount": "Delete account",
+    "deleteDescription": "Your account will be scheduled for permanent deletion after a grace period.",
+    "deletionScheduled": "Your account is scheduled for deletion on {date}.",
+    "cancelDeletion": "Keep my account"
+  },
+  "invitations": {
+    "title": "Organization invitation",
+    "accept": "Accept invitation",
+    "accepted": "You have joined the organization.",
+    "missingToken": "This invitation link is incomplete."
+  },
+  "public": {
+    "notFound": "This profile does not exist or is not public."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "back": "Go home"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "ENTITLEMENT_REQUIRED": "Your plan does not include this feature. Upgrade to continue.",
+    "QUOTA_EXCEEDED": "You have reached your plan limit. Upgrade to add more.",
+    "CONFLICT": "This value is already in use.",
+    "RATE_LIMITED": "Too many requests. Please wait a moment.",
+    "NOT_FOUND": "Not found.",
+    "FORBIDDEN": "You do not have permission to do this.",
+    "UNAUTHORIZED": "Please sign in again."
+  },
+  "validation": {
+    "required": "This field is required.",
+    "email": "Enter a valid email address.",
+    "passwordLength": "Use 10 to 128 characters.",
+    "url": "Enter a valid http(s) URL.",
+    "username": {
+      "too_short": "At least 3 characters.",
+      "too_long": "At most 30 characters.",
+      "invalid_characters": "Use lowercase letters, numbers, dots, dashes or underscores.",
+      "reserved": "This username is reserved."
+    }
+  }
+}

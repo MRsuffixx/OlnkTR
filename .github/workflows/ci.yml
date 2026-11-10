@@ -1,0 +1,162 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "24.22.2"
+  TURBO_TELEMETRY_DISABLED: "1"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  quality:
+    name: Format, lint, typecheck, unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test:unit
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      # Fails on high/critical advisories in production dependencies.
+      - run: pnpm audit --prod --audit-level=high
+
+  integration:
+    name: Integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Start infrastructure
+        run: |
+          ./scripts/setup-env.sh
+          docker compose up -d --wait postgres redis minio mailpit
+          docker compose up minio-init
+      - run: pnpm db:test:prepare
+      - run: pnpm test:integration
+      - name: Infrastructure logs
+        if: failure()
+        run: docker compose logs --tail 200
+
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+  e2e:
+    name: End-to-end tests
+    needs: [quality]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Production build, development deployment; per-test client IPs exercise rate limits.
+      APP_ENV: development
+      TRUST_PROXY: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Start infrastructure
+        run: |
+          ./scripts/setup-env.sh
+          docker compose up -d --wait postgres redis minio mailpit
+          docker compose up minio-init
+      - run: pnpm db:migrate && pnpm db:seed
+      - run: pnpm build
+      - name: Start web and worker
+        run: |
+          (cd apps/web && nohup pnpm start > ../../web.log 2>&1 &)
+          (cd apps/worker && set -a && . ../../.env && set +a && nohup node dist/index.js > ../../worker.log 2>&1 &)
+          for i in $(seq 1 60); do curl -sf http://localhost:3100/api/health/ready && break; sleep 2; done
+      - run: pnpm --filter @olnktr/web exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+        env:
+          CI: "true"
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+            web.log
+            worker.log
+          retention-days: 7
+
+  docker:
+    name: Docker image build
+    needs: [quality]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        image: [web, worker]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infrastructure/docker/${{ matrix.image }}.Dockerfile
+          push: false
+          tags: olnktr-${{ matrix.image }}:ci
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+      - name: Validate Compose files
+        if: matrix.image == 'web'
+        run: |
+          ./scripts/setup-env.sh
+          docker compose config -q
+          cp .env.production.example .env.production
+          sed -i -e 's/^\(POSTGRES_[A-Z_]*PASSWORD\)=$/\1=x/' -e 's/^REDIS_PASSWORD=$/REDIS_PASSWORD=x/' \
+            -e 's/^AUTH_SECRET=$/AUTH_SECRET=x/' -e 's/^SMTP_HOST=$/SMTP_HOST=x/' \
+            -e 's/^MINIO_ROOT_USER=$/MINIO_ROOT_USER=x/' -e 's/^MINIO_ROOT_PASSWORD=$/MINIO_ROOT_PASSWORD=x/' \
+            -e 's/^S3_ACCESS_KEY_ID=$/S3_ACCESS_KEY_ID=x/' -e 's/^S3_SECRET_ACCESS_KEY=$/S3_SECRET_ACCESS_KEY=x/' .env.production
+          docker compose -f docker-compose.prod.yml --env-file .env.production config -q

@@ -1,0 +1,168 @@
+{
+  "common": {
+    "appName": "OlnkTR",
+    "loading": "Yükleniyor…",
+    "save": "Kaydet",
+    "saved": "Kaydedildi",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "create": "Oluştur",
+    "back": "Geri",
+    "signOut": "Çıkış yap",
+    "language": "Dil",
+    "poweredBy": "OlnkTR ile oluşturuldu"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "billing": "Faturalandırma",
+    "settings": "Ayarlar",
+    "home": "Ana sayfa"
+  },
+  "marketing": {
+    "title": "Paylaştığın her şey için tek bağlantı",
+    "subtitle": "OlnkTR; içerik üreticileri, ekipler ve işletmeler için açık kaynak bir link-in-bio platformudur.",
+    "getStarted": "Ücretsiz başla",
+    "signIn": "Giriş yap"
+  },
+  "auth": {
+    "email": "E-posta",
+    "password": "Şifre",
+    "name": "Ad",
+    "login": {
+      "title": "Tekrar hoş geldin",
+      "description": "Profillerini yönetmek için giriş yap.",
+      "submit": "Giriş yap",
+      "noAccount": "Hesabın yok mu?",
+      "register": "Hemen oluştur",
+      "forgot": "Şifreni mi unuttun?",
+      "verifyFirst": "Lütfen önce e-posta adresini doğrula. Sana yeni bir bağlantı gönderdik.",
+      "invalid": "E-posta veya şifre hatalı.",
+      "suspended": "Bu hesap askıya alınmış."
+    },
+    "register": {
+      "title": "Hesabını oluştur",
+      "description": "Saniyeler içinde ücretsiz bir profille başla.",
+      "submit": "Hesap oluştur",
+      "haveAccount": "Zaten hesabın var mı?",
+      "login": "Giriş yap",
+      "success": "E-posta adresini doğrulamak için gelen kutunu kontrol et.",
+      "disabled": "Kayıt şu anda kapalı."
+    },
+    "forgot": {
+      "title": "Şifreni sıfırla",
+      "description": "Yeni bir şifre belirlemen için sana bir bağlantı göndereceğiz.",
+      "submit": "Sıfırlama bağlantısı gönder",
+      "sent": "Bu e-posta ile bir hesap varsa sıfırlama bağlantısı gönderildi."
+    },
+    "reset": {
+      "title": "Yeni şifre belirle",
+      "submit": "Şifreyi güncelle",
+      "success": "Şifren güncellendi. Artık giriş yapabilirsin.",
+      "invalidToken": "Bu sıfırlama bağlantısı geçersiz veya süresi dolmuş."
+    },
+    "verify": {
+      "title": "E-postanı doğrula",
+      "description": "Gelen kutuna bir doğrulama bağlantısı gönderdik. Hesabını etkinleştirmek için bağlantıyı aç."
+    },
+    "twoFactor": {
+      "title": "İki adımlı doğrulama",
+      "description": "Doğrulama uygulamandaki 6 haneli kodu gir.",
+      "code": "Kod",
+      "submit": "Doğrula",
+      "invalid": "Geçersiz kod."
+    }
+  },
+  "dashboard": {
+    "title": "Profillerin",
+    "empty": "Henüz bir profilin yok. İlkini aşağıdan oluştur.",
+    "createTitle": "Profil oluştur",
+    "username": "Kullanıcı adı",
+    "displayName": "Görünen ad",
+    "usernameAvailable": "Kullanılabilir",
+    "usernameTaken": "Kullanımda",
+    "manage": "Yönet",
+    "view": "Görüntüle",
+    "draft": "Taslak",
+    "published": "Yayında",
+    "plan": "Plan: {plan}"
+  },
+  "profile": {
+    "links": "Bağlantılar",
+    "noLinks": "Henüz bağlantı yok.",
+    "addLink": "Bağlantı ekle",
+    "linkTitle": "Başlık",
+    "linkUrl": "URL",
+    "publish": "Yayınla",
+    "unpublish": "Yayından kaldır",
+    "publicUrl": "Herkese açık URL",
+    "analytics": "Son 30 gün",
+    "views": "Profil görüntülenmesi",
+    "clicks": "Bağlantı tıklaması",
+    "visitors": "Tekil ziyaretçi",
+    "clickCount": "{count, plural, =0 {Tıklama yok} other {# tıklama}}",
+    "active": "Aktif",
+    "inactive": "Gizli"
+  },
+  "billing": {
+    "title": "Faturalandırma",
+    "currentPlan": "Mevcut plan",
+    "status": "Durum",
+    "renews": "Mevcut dönem {date} tarihinde bitiyor",
+    "plans": "Planlar",
+    "perMonth": "{price} / ay",
+    "free": "Ücretsiz",
+    "choose": "Planı seç",
+    "current": "Mevcut plan",
+    "trial": "{days} gün ücretsiz deneme",
+    "cancel": "Aboneliği iptal et",
+    "canceled": "Aboneliğin mevcut dönemin sonunda sona erecek.",
+    "checkoutSuccess": "Ödeme alındı. Ödeme sağlayıcısı onayladığında planın etkinleşecek.",
+    "checkoutCanceled": "Ödeme iptal edildi veya başarısız oldu.",
+    "payments": "Ödeme geçmişi",
+    "noPayments": "Henüz ödeme yok."
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "preferences": "Tercihler",
+    "dangerZone": "Tehlikeli bölge",
+    "deleteAccount": "Hesabı sil",
+    "deleteDescription": "Hesabın, bir bekleme süresinin ardından kalıcı olarak silinmek üzere planlanır.",
+    "deletionScheduled": "Hesabın {date} tarihinde silinecek.",
+    "cancelDeletion": "Hesabımı koru"
+  },
+  "invitations": {
+    "title": "Organizasyon daveti",
+    "accept": "Daveti kabul et",
+    "accepted": "Organizasyona katıldın.",
+    "missingToken": "Bu davet bağlantısı eksik."
+  },
+  "public": {
+    "notFound": "Bu profil mevcut değil veya herkese açık değil."
+  },
+  "notFound": {
+    "title": "Sayfa bulunamadı",
+    "back": "Ana sayfaya dön"
+  },
+  "errors": {
+    "generic": "Bir şeyler ters gitti. Lütfen tekrar dene.",
+    "ENTITLEMENT_REQUIRED": "Planın bu özelliği içermiyor. Devam etmek için yükselt.",
+    "QUOTA_EXCEEDED": "Plan limitine ulaştın. Daha fazlası için yükselt.",
+    "CONFLICT": "Bu değer zaten kullanımda.",
+    "RATE_LIMITED": "Çok fazla istek. Lütfen biraz bekle.",
+    "NOT_FOUND": "Bulunamadı.",
+    "FORBIDDEN": "Bu işlem için yetkin yok.",
+    "UNAUTHORIZED": "Lütfen tekrar giriş yap."
+  },
+  "validation": {
+    "required": "Bu alan zorunludur.",
+    "email": "Geçerli bir e-posta adresi gir.",
+    "passwordLength": "10 ile 128 karakter arasında olmalı.",
+    "url": "Geçerli bir http(s) URL'si gir.",
+    "username": {
+      "too_short": "En az 3 karakter.",
+      "too_long": "En fazla 30 karakter.",
+      "invalid_characters": "Küçük harf, rakam, nokta, tire veya alt çizgi kullan.",
+      "reserved": "Bu kullanıcı adı ayrılmış."
+    }
+  }
+}

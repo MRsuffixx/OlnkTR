@@ -1,0 +1,18 @@
+# OlnkTR edge proxy — automatic HTTPS (Let's Encrypt) for the app and media hosts.
+{
+	email {$ACME_EMAIL}
+}
+
+{$APP_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy web:3000 {
+		# Overwrite (never append) the client IP header the app trusts (TRUST_PROXY=true).
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Real-IP {remote_host}
+	}
+}
+
+# Public endpoint for presigned media URLs (S3_PUBLIC_ENDPOINT=https://{$MEDIA_DOMAIN}).
+{$MEDIA_DOMAIN} {
+	reverse_proxy minio:9000
+}
