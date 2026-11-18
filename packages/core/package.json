@@ -29,7 +29,7 @@
     "@types/node": "^24.19.2",
     "eslint": "^10.14.0",
     "pino": "^10.4.0",
-    "typescript": "~6.0.3",
+    "typescript": "~7.0.2",
     "vitest": "^4.1.12"
   }
 }
