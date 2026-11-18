@@ -15,11 +15,11 @@
   "dependencies": {
     "@olnktr/config": "workspace:*",
     "@olnktr/jobs": "workspace:*",
-    "nodemailer": "^10.4.0"
+    "nodemailer": "^10.5.0"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
-    "eslint": "^10.14.0",
+    "eslint": "^10.15.0",
     "typescript": "~6.0.3",
     "vitest": "^4.1.12"
   }
