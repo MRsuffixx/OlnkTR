@@ -30,7 +30,7 @@
     "@olnktr/types": "workspace:*",
     "@olnktr/validators": "workspace:*",
     "@trpc/server": "^11.26.0",
-    "ioredis": "^5.11.1",
+    "ioredis": "^6.0.0",
     "superjson": "^2.2.6",
     "zod": "^4.6.7"
   },
