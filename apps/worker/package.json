@@ -23,7 +23,7 @@
     "@olnktr/observability": "workspace:*",
     "@olnktr/storage": "workspace:*",
     "@olnktr/types": "workspace:*",
-    "bullmq": "^5.81.5",
+    "bullmq": "^6.7.6",
     "drizzle-orm": "^0.45.4",
     "ioredis": "^5.11.1",
     "postgres": "^3.4.9"
