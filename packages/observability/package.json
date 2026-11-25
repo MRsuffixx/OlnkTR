@@ -17,15 +17,15 @@
     "pino": "^10.4.0"
   },
   "optionalDependencies": {
-    "@opentelemetry/exporter-trace-otlp-http": "^0.301.1",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.301.2",
     "@opentelemetry/resources": "^3.1.1",
-    "@opentelemetry/sdk-node": "^0.301.1",
-    "@sentry/node": "^11.11.0"
+    "@opentelemetry/sdk-node": "^0.301.2",
+    "@sentry/node": "^11.16.0"
   },
   "devDependencies": {
     "@olnktr/config": "workspace:*",
     "@types/node": "^24.19.2",
-    "eslint": "^10.14.0",
+    "eslint": "^10.15.0",
     "typescript": "~6.0.3",
     "vitest": "^4.1.12"
   }
