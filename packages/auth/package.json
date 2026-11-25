@@ -19,14 +19,14 @@
     "@olnktr/db": "workspace:*",
     "@olnktr/types": "workspace:*",
     "@olnktr/validators": "workspace:*",
-    "better-auth": "^1.7.19",
+    "better-auth": "^1.7.27",
     "@olnktr/core": "workspace:*",
     "@olnktr/jobs": "workspace:*",
     "@olnktr/observability": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
-    "eslint": "^10.14.0",
+    "eslint": "^10.15.0",
     "typescript": "~6.0.3",
     "vitest": "^4.1.12",
     "@olnktr/billing": "workspace:*",
